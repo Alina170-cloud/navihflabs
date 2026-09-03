@@ -361,6 +361,9 @@
     transition:opacity .22s var(--ease) .02s, transform .22s var(--ease) .02s;
   }
   .nav-group.open .nav-sub{ opacity:1; transform:translateY(0); }
+  .nav-group.no-anim > .nav-sub-wrapper,
+  .nav-group.no-anim .nav-sub,
+  .nav-group.no-anim .chev{ transition:none !important; }
 
   /* Shared accent segment that slides between pages as the active one changes */
   .rail-indicator{
@@ -477,6 +480,216 @@
   }
   .tabs-group.is-hidden{ display:none; }
 
+  /* ---- screenC (Списки / Журнал проверок) specific bits ---- */
+  .page-heading{
+    font-size:22px;
+    font-weight:700;
+    color:var(--text-page);
+    margin-bottom:14px;
+  }
+  .local-tabs{
+    display:flex;
+    align-items:center;
+    gap:26px;
+    border-bottom:1px solid var(--border);
+    margin:0 -18px 18px;
+    padding:0 18px;
+  }
+  .local-tabs .tab{ padding:0 0 12px; }
+
+  .seg-toggle{
+    display:flex;
+    background:#fff;
+    border:1px solid #e5e5e6;
+    border-radius:4px;
+    padding:4px;
+    gap:2px;
+  }
+  .seg-toggle-item{
+    height:24px;
+    display:flex;
+    align-items:center;
+    padding:0 14px;
+    font-size:14px;
+    font-weight:500;
+    color:#36393e;
+    background:#f8f8f8;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .seg-toggle-item.active{ background:var(--accent); color:#fff; }
+
+  .checkbox-field{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--text-page);
+    cursor:pointer;
+    user-select:none;
+  }
+  .checkbox-field input{ position:absolute; opacity:0; width:0; height:0; }
+  .checkbox-box{
+    width:18px;height:18px;
+    border-radius:4px;
+    border:1px solid #8f9092;
+    background:#fff;
+    flex-shrink:0;
+    position:relative;
+    transition:background .15s var(--ease), border-color .15s var(--ease);
+  }
+  .checkbox-field input:checked + .checkbox-box{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .checkbox-field input:checked + .checkbox-box::after{
+    content:"";
+    position:absolute;
+    left:5px; top:1px;
+    width:5px; height:9px;
+    border:solid #fff;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+
+  .status-chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:13px;
+    font-weight:600;
+    background:#f1f1f1;
+    color:#6b6b6b;
+  }
+  .status-chip.green{ background:#e6f7ee; color:#1a9c5f; }
+  .status-chip.red{ background:#fceaec; color:#d91528; }
+  .status-chip.orange{ background:#fff4e0; color:#b8720a; }
+
+  /* ---- screenD (entity detail / проверки) ---- */
+  .entity-layout{ display:flex; gap:24px; align-items:flex-start; }
+  .header-back-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:100%;
+    color:var(--accent);
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .header-back-btn:hover{ text-decoration:underline; }
+  .entity-side{ width:150px; flex-shrink:0; padding-top:2px; font-size:13px; color:var(--text-page); display:flex; flex-direction:column; gap:6px; }
+  .entity-link{ color:var(--blue); text-decoration:none; border-bottom:1px dashed currentColor; }
+  .entity-link:hover{ text-decoration:none; }
+  .entity-main{ flex:1; min-width:0; }
+  .entity-header{ display:flex; align-items:center; gap:14px; }
+  .entity-avatar{ width:40px; height:40px; border-radius:50%; overflow:hidden; flex-shrink:0; }
+  .entity-name-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .entity-name{ font-size:22px; font-weight:700; color:var(--text-page); }
+  .risk-badge{ font-size:13px; font-weight:600; color:#b8720a; background:#fff0d9; padding:4px 10px; border-radius:999px; }
+  .entity-tabs{ display:flex; align-items:center; gap:20px; margin-top:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+  .entity-tab-link{ font-size:14px; color:var(--blue); cursor:pointer; }
+  .entity-tab-link.active{ color:#4a5a1e; background:#eef2d9; padding:5px 12px; border-radius:4px; font-weight:600; }
+  .entity-tab-link.disabled{ color:var(--text-faint); cursor:default; }
+  .entity-refresh{ color:var(--text-faint); display:flex; cursor:pointer; }
+  .entity-refresh.disabled{ opacity:.5; cursor:default; }
+  .status-link{ color:var(--blue); font-size:13.5px; }
+  .kus-view.is-hidden{ display:none; }
+  .status-text{ font-size:12px; font-weight:700; letter-spacing:.2px; }
+  .status-text.blue{ color:var(--blue); }
+  .status-text.red{ color:#d91528; }
+  .status-text.green{ color:#1a9c5f; }
+  #tbodyDetections td:nth-child(1),
+  #tbodyDetections td:nth-child(3){ cursor:pointer; }
+  #tbodyDetections td:nth-child(1):hover,
+  #tbodyDetections td:nth-child(3):hover{ color:var(--blue); text-decoration:underline; }
+
+  .timeline-card{ margin-top:24px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px 24px; }
+  .timeline-year{ display:flex; align-items:center; gap:10px; color:var(--text-faint); font-size:13px; margin-bottom:12px; }
+  .timeline-year-line{ flex:1; height:1px; background:var(--border); }
+  .timeline-group{ position:relative; margin-left:120px; padding-left:20px; border-left:1px solid var(--border); }
+  .timeline-row{ display:flex; align-items:flex-start; position:relative; min-height:30px; }
+  .timeline-time{ position:absolute; left:-140px; top:0; width:120px; text-align:right; font-size:13px; color:var(--text-faint); white-space:nowrap; }
+  .timeline-dot{ position:absolute; left:-25px; top:6px; width:7px; height:7px; border-radius:50%; background:var(--text-faint); }
+  .timeline-dot.active{ background:var(--accent); width:9px; height:9px; left:-26px; }
+  .timeline-item{ display:flex; align-items:center; gap:8px; padding:5px 0; color:var(--text-faint); font-size:14px; }
+  .timeline-item .ti-icon{ flex-shrink:0; color:var(--text-faint); }
+  .timeline-item.active{ color:var(--accent); font-weight:600; }
+  .timeline-item.active .ti-icon{ color:var(--accent); }
+  .ti-status{ font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-icon-bg); padding:3px 8px; border-radius:4px; margin-left:4px; }
+  .ti-author{ display:flex; align-items:center; gap:4px; color:var(--text-faint); font-weight:400; font-size:13px; margin-left:4px; }
+  .expand-btn{
+    all:unset; box-sizing:border-box; display:inline-flex; align-items:center; gap:6px;
+    margin-top:18px; padding:8px 16px; border:1px solid var(--border); border-radius:4px;
+    color:var(--text-faint); font-size:13.5px; cursor:pointer;
+  }
+  .expand-btn:hover{ background:var(--page-hover); }
+
+  /* ---- screenE (КУС detection review / compare) ---- */
+  .review-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .review-nav{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--text-faint);
+    font-size:12px;
+    font-weight:600;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:6px 10px;
+  }
+  .review-comment{
+    all:unset;
+    box-sizing:border-box;
+    display:block;
+    width:100%;
+    min-height:70px;
+    margin-top:16px;
+    padding:12px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--text-page);
+    resize:vertical;
+  }
+  .review-comment::placeholder{ color:var(--text-faint); }
+  .review-actions{ display:flex; gap:24px; margin-top:16px; }
+  .review-action{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .review-btn{
+    all:unset; box-sizing:border-box; cursor:pointer;
+    padding:9px 22px; border-radius:6px; font-size:14px; font-weight:600; color:#fff;
+  }
+  .review-btn.reject{ background:#1a9c5f; }
+  .review-btn.confirm{ background:#c0392b; }
+  .review-btn.postpone{ background:#3a3f47; }
+  .review-hotkey{ font-size:11px; color:var(--text-faint); }
+
+  .compare-panel{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    margin-top:28px;
+    border-top:1px solid var(--border);
+    padding-top:18px;
+  }
+  .compare-col{ padding:0 24px; }
+  .compare-col:first-child{ border-right:1px solid var(--border); }
+  .compare-col-header{ display:flex; align-items:center; gap:8px; color:var(--text-faint); margin-bottom:8px; font-weight:600; }
+  .compare-col-header a{ color:var(--blue); text-decoration:none; font-size:15px; }
+  .compare-al{ color:var(--text-page); font-size:15px; font-weight:700; }
+  .compare-field{ padding:12px 0; border-top:1px solid var(--border-soft); }
+  .compare-field:first-of-type{ border-top:none; }
+  .compare-label{ font-size:12px; color:var(--text-faint); margin-bottom:4px; }
+  .compare-date{ color:var(--text-faint); }
+  .compare-value{ font-size:15px; font-weight:600; color:var(--text-page); }
+  .compare-value.hl{ background:#fdf1c8; display:inline; padding:2px 4px; border-radius:3px; }
+
   .toolbar-row1{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
   .row1-right{ display:flex; align-items:center; gap:12px; }
   .v-divider{ width:1px; height:20px; background:var(--border); flex-shrink:0; }
@@ -529,6 +742,9 @@
   td{ padding:12px; border-bottom:1px solid var(--border-soft); color:#36393e; font-weight:500; white-space:nowrap; }
   tr:last-child td{ border-bottom:none; }
   tr:hover td{ background:#fafbfc; }
+  #tbody td:first-child{ cursor:pointer; }
+  #tbody td:first-child:hover{ color:var(--blue); text-decoration:underline; }
+  #tbodyLists tr{ cursor:pointer; }
 
   .footer{ display:flex; gap:18px; padding:8px 18px; font-size:12px; color:#76787c; border-top:1px solid var(--border); background:#fafafa; }
 </style>
@@ -583,6 +799,19 @@
       <div class="tabs-group is-hidden" id="tabsB">
         <div class="tab active">Активные</div>
         <div class="tab">Архив</div>
+      </div>
+      <div class="tabs-group is-hidden" id="tabsC"></div>
+      <div class="tabs-group is-hidden" id="tabsD">
+        <div class="header-back-btn" id="entityBackBanner">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          <span id="entityBackLabel">К списку сущностей</span>
+        </div>
+      </div>
+      <div class="tabs-group is-hidden" id="tabsE">
+        <div class="header-back-btn" id="kusReviewBackBanner">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          <span>Назад к списку выявлений</span>
+        </div>
       </div>
       <div class="topbar-spacer"></div>
       <div class="header-actions">
@@ -730,6 +959,255 @@
           </thead>
           <tbody id="tbodyMask"></tbody>
         </table></div>
+      </div>
+
+      <!-- Screen C: Списки — Журнал проверок (КУС) -->
+      <div class="screen is-hidden" id="screenC">
+        <div class="local-tabs">
+          <div class="tab active" data-view="journal">Журнал проверок</div>
+          <div class="tab" data-view="detections">Выявления</div>
+        </div>
+
+        <!-- Journal view (Журнал проверок) -->
+        <div class="kus-view" id="kusViewJournal">
+          <div class="toolbar-row1">
+            <div class="seg-toggle">
+              <div class="seg-toggle-item active">ФЛ</div>
+              <div class="seg-toggle-item">ЮЛ</div>
+            </div>
+            <div class="row1-right">
+              <label class="checkbox-field">
+                <input type="checkbox" id="onlyDetectedCheckbox">
+                <span class="checkbox-box"></span>
+                Только выявленные
+              </label>
+            </div>
+          </div>
+
+          <div class="table-wrap"><table>
+            <thead>
+              <tr>
+                <th>ID сверки</th><th>Перечень</th><th>Дата перечня</th><th>Дата сверки</th>
+                <th>Сверено записей перечня</th><th>Сверено карточек ФЛ</th><th>Новых выявлений</th>
+                <th>Требует проверки</th><th>Подтверждено</th><th>Отклонено</th><th>Отложено</th><th>Исключено</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyLists"></tbody>
+          </table></div>
+        </div>
+
+        <!-- Detections view (Выявления) -->
+        <div class="kus-view is-hidden" id="kusViewDetections">
+          <div class="toolbar-row1">
+            <div class="seg-toggle">
+              <div class="seg-toggle-item active">ФЛ</div>
+              <div class="seg-toggle-item">ЮЛ</div>
+            </div>
+            <div class="row1-right">
+              <div class="search" style="width:320px">
+                <span>ФИО или HID контрагента</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              </div>
+              <div class="search" style="width:180px">
+                <span>ID сверки</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              </div>
+              <label class="checkbox-field">
+                <input type="checkbox" id="onlyActualCheckbox">
+                <span class="checkbox-box"></span>
+                Только актуальные
+              </label>
+            </div>
+          </div>
+
+          <div class="table-wrap"><table>
+            <thead>
+              <tr>
+                <th>HID выявления</th><th>HID контрагента</th><th>ФИО</th><th>Дата рождения</th>
+                <th>Перечень</th><th>Дата перечня</th><th>Дата сверки</th><th>Правило</th>
+                <th>Вес правила</th><th>Статус</th><th>Комментарий</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDetections"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- Screen D: Entity detail (opened by clicking a ФИО in Сущности, or from another product) -->
+      <div class="screen is-hidden" id="screenD">
+        <div class="entity-layout">
+          <div class="entity-side">
+            <div class="entity-side-row">HID <a href="#" class="entity-link">1 126 233</a></div>
+            <div class="entity-side-row">AL:<a href="#" class="entity-link">2603031010</a></div>
+          </div>
+          <div class="entity-main">
+            <div class="entity-header">
+              <div class="entity-avatar">
+                <svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="20" fill="#2f8f7e"/><circle cx="20" cy="16" r="6.5" fill="#f0d9c0"/><path d="M8 34c1.5-8 6.5-12 12-12s10.5 4 12 12" fill="#f0d9c0"/></svg>
+              </div>
+              <div class="entity-name-row">
+                <span class="entity-name" id="entityName">Мищенко Елена Владимировна</span>
+                <span class="risk-badge">средний риск</span>
+              </div>
+            </div>
+            <div class="entity-tabs">
+              <span class="entity-tab-link">атрибутика</span>
+              <span class="entity-tab-link">история</span>
+              <span class="entity-tab-link">исходные</span>
+              <span class="entity-tab-link">связи</span>
+              <span class="entity-tab-link active">проверки</span>
+              <span class="entity-refresh"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16M3 21v-5h5"/></svg></span>
+              <span class="entity-tab-link disabled">нет похожих</span>
+              <span class="entity-refresh disabled"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16M3 21v-5h5"/></svg></span>
+            </div>
+
+            <div class="table-wrap" style="margin-top:16px">
+              <table>
+                <thead>
+                  <tr><th>Фигурант списка</th><th>Перечень</th><th>Правило поиска</th><th>Найден</th><th>Статус</th><th>Комментарий</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Мудаев Аслан Арбиевич</td>
+                    <td>Росфинмониторинг / Террористы</td>
+                    <td>11: ИНН</td>
+                    <td>03.03.2026</td>
+                    <td><span class="status-link">Требует проверки</span></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="timeline-card">
+              <div class="timeline-year"><span>2026</span><span class="timeline-year-line"></span></div>
+
+              <div class="timeline-group">
+                <div class="timeline-row">
+                  <div class="timeline-time">10 апр. 16:14:28</div>
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Отказники ЦБ</div>
+                </div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Список ЕФРСБ</div></div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Росфинмониторинг / Межведомственная комиссия</div></div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Санкционный список ООН</div></div>
+                <div class="timeline-row">
+                  <div class="timeline-time"></div>
+                  <div class="timeline-dot active"></div>
+                  <div class="timeline-item active">
+                    <svg class="ti-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9.3"/><path d="M9.5 9.3a2.6 2.6 0 114.6 1.6c-.8.6-1.4 1.1-1.4 2.2" /><circle cx="12.2" cy="16.4" r=".2" fill="currentColor" stroke="none"/></svg>
+                    Росфинмониторинг / Террористы
+                    <span class="ti-status">ТРЕБУЕТ ПРОВЕРКИ</span>
+                    <span class="ti-author"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.4-4 4.2-6 7.5-6s6.1 2 7.5 6"/></svg>HFLabs-CDI</span>
+                  </div>
+                </div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Распространение оружия массового уничтожения</div></div>
+              </div>
+
+              <div class="timeline-group">
+                <div class="timeline-row">
+                  <div class="timeline-time">03 мар. 10:11:16</div>
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Отказники ЦБ</div>
+                </div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Список ЕФРСБ</div></div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Росфинмониторинг / Межведомственная комиссия</div></div>
+                <div class="timeline-row"><div class="timeline-time"></div><div class="timeline-dot"></div><div class="timeline-item"><svg class="ti-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="2"/><circle cx="18" cy="6" r="3"/></svg>Санкционный список ООН</div></div>
+              </div>
+
+              <button class="expand-btn">Развернуть <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screen E: КУС detection review (opened by clicking HID выявления in Выявления) -->
+      <div class="screen is-hidden" id="screenE">
+        <div class="review-header">
+          <span class="entity-name" id="reviewName">Мищенко Елена Владимировна</span>
+          <span class="risk-badge">Средний риск</span>
+          <div class="review-nav">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            ALT
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID выявления</th><th>HID контрагента</th><th>Перечень</th><th>Дата перечня</th><th>Дата сверки</th><th>Правило поиска</th><th>Вес правила</th><th>Статус</th><th>Комментарий</th></tr>
+            </thead>
+            <tbody id="reviewRow"></tbody>
+          </table>
+        </div>
+
+        <textarea class="review-comment" placeholder="Текст комментария"></textarea>
+
+        <div class="review-actions">
+          <div class="review-action">
+            <button class="review-btn reject">Отклонить</button>
+            <span class="review-hotkey">ALT+N</span>
+          </div>
+          <div class="review-action">
+            <button class="review-btn confirm">Подтвердить</button>
+            <span class="review-hotkey">ALT+Y</span>
+          </div>
+          <div class="review-action">
+            <button class="review-btn postpone">Отложить</button>
+            <span class="review-hotkey">ALT+L</span>
+          </div>
+        </div>
+
+        <div class="compare-panel">
+          <div class="compare-col">
+            <div class="compare-col-header">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c1-4 3-6 6-6s5 2 6 6"/><path d="M15 9h6M15 12h6M15 15h4"/></svg>
+              <a href="#" class="entity-link" id="reviewLeftHid">1126233</a>
+              <span class="compare-al">AL:<a href="#" class="entity-link">2603031010</a></span>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">ФИО</div>
+              <div class="compare-value hl" id="reviewLeftName">Мищенко • Елена • Владимировна</div>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label"></div>
+              <div class="compare-value"></div>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">Дата рождения</div>
+              <div class="compare-value" id="reviewLeftDob">18.04.1993</div>
+            </div>
+          </div>
+
+          <div class="compare-col">
+            <div class="compare-col-header">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c1-4 3-6 6-6s5 2 6 6"/><path d="M18 8v4M18 15h.01" stroke-linecap="round"/></svg>
+              <a href="#" class="entity-link">917031</a>
+              <span class="compare-al">TERRORIST:104840</span>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">ФИО • ФИО <span class="compare-date">23.05.2023</span></div>
+              <div class="compare-value hl">Мудаев • Аслан • Арбиевич</div>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">ФИО • ФИО <span class="compare-date">23.05.2023</span></div>
+              <div class="compare-value">Мудаев • Анзор • Арбиевич</div>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">Дата рождения <span class="compare-date">23.05.2023</span></div>
+              <div class="compare-value">1983</div>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">Дата рождения <span class="compare-date">23.05.2023</span></div>
+              <div class="compare-value">16.10.1983</div>
+            </div>
+            <div class="compare-field">
+              <div class="compare-label">Адрес • Фактический <span class="compare-date">23.05.2023</span></div>
+              <div class="compare-value">366522, Россия, Респ Чеченская, р-н Урус-Мартановский, г Урус-Мартан, ул Ахмаева, д. 78</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1012,10 +1490,17 @@ domainMenuCard.addEventListener('click', (e)=>{
   closeDomainMenu();
 });
 
-document.querySelectorAll('.tabs-group .tab').forEach(tab=>{
+document.querySelectorAll('.tabs-group .tab, .local-tabs .tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     tab.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     tab.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.seg-toggle-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    item.parentElement.querySelectorAll('.seg-toggle-item').forEach(t=>t.classList.remove('active'));
+    item.classList.add('active');
   });
 });
 
@@ -1025,7 +1510,8 @@ function setScreen(targetId){
   if(current.id === targetId) return;
   const currentTabs = document.querySelector('.tabs-group:not(.is-hidden)');
   const other = document.getElementById(targetId);
-  const otherTabs = targetId === 'screenA' ? document.getElementById('tabsA') : document.getElementById('tabsB');
+  const tabsIdMap = { screenA:'tabsA', screenB:'tabsB', screenC:'tabsC', screenD:'tabsD', screenE:'tabsE' };
+  const otherTabs = document.getElementById(tabsIdMap[targetId]);
 
   current.classList.add('is-hidden');
   other.classList.remove('is-hidden');
@@ -1066,7 +1552,14 @@ nav.addEventListener('click', (e)=>{
     pageEl.closest('.nav-group').classList.add('active-product');
 
     updateRailIndicators(true);
-    swapScreen();
+
+    const groupKey = pageEl.closest('.nav-group').dataset.key;
+    const pageName = pageEl.dataset.page;
+    if(groupKey === 'kus' && pageName === 'Списки'){
+      setScreen('screenC');
+    } else {
+      swapScreen();
+    }
   }
 });
 
@@ -1092,6 +1585,12 @@ const rows = [
 const tbody = document.getElementById('tbody');
 tbody.innerHTML = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
 
+tbody.addEventListener('click', (e)=>{
+  const cell = e.target.closest('td:first-child');
+  if(!cell) return;
+  openEntityDetail(cell.textContent);
+});
+
 const maskRows = [
   ['123','test_task_oracle','my first target connection1222','','admin_performer'],
   ['123321','pgDemo','Oracle','','admin_performer'],
@@ -1106,6 +1605,194 @@ const maskRows = [
 ];
 const tbodyMask = document.getElementById('tbodyMask');
 tbodyMask.innerHTML = maskRows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+
+const listsRows = [
+  ['74024','Росфинмониторинг / Террористы','18.07.2021','19.05.2026 13:17:15','895','1'],
+  ['74026','Росфинмониторинг / Межведомственная комиссия','22.09.2021','19.05.2026 13:17:15','895','1'],
+  ['74028','Отказники ЦБ','14.12.2020','19.05.2026 13:17:15','895','1'],
+  ['74025','Распространение оружия массового уничтожения','13.05.2020','19.05.2026 13:17:15','895','1'],
+  ['74027','Санкционный список ООН','05.11.2021','19.05.2026 13:17:15','895','1'],
+  ['74029','Список ЕФРСБ','23.01.2026','19.05.2026 13:17:15','895','1'],
+  ['73024','Росфинмониторинг / Террористы','18.07.2021','10.04.2026 16:14:28','895','5770'],
+  ['73025','Распространение оружия массового уничтожения','13.05.2020','10.04.2026 16:14:28','895','5770'],
+  ['73026','Росфинмониторинг / Межведомственная комиссия','22.09.2021','10.04.2026 16:14:28','895','5770'],
+  ['73027','Санкционный список ООН','05.11.2021','10.04.2026 16:14:28','895','5770'],
+  ['73028','Отказники ЦБ','14.12.2020','10.04.2026 16:14:28','895','5770'],
+  ['73029','Список ЕФРСБ','23.01.2026','10.04.2026 16:14:28','895','5770'],
+];
+const tbodyLists = document.getElementById('tbodyLists');
+tbodyLists.innerHTML = listsRows.map(r=>{
+  const plainCells = r.map(c=>`<td>${c}</td>`).join('');
+  return `<tr>${plainCells}
+    <td><span class="status-chip">0</span></td>
+    <td><span class="status-chip">0</span></td>
+    <td><span class="status-chip green">0</span></td>
+    <td><span class="status-chip red">0</span></td>
+    <td><span class="status-chip orange">0</span></td>
+    <td><span class="status-chip">0</span></td>
+  </tr>`;
+}).join('');
+
+/* ---------------- CROSS-PRODUCT ENTITY NAVIGATION (Вариант А) ----------------
+   Opening an entity card from within Единый клиент (Сущности) is a same-product
+   drill-down — the sidebar is already correct, no banner needed.
+   Opening it from ANY other product (e.g. КУС → Списки) is a real product
+   switch: the sidebar honestly updates to show Единый клиент / Сущности as
+   active, exactly as if the person had navigated there normally. We only
+   remember where we came from to power a single, explicit "back" link —
+   not a breadcrumb trail that would have to describe two products at once. */
+let cameFrom = null;
+
+function openEntityDetail(name){
+  document.getElementById('entityName').textContent = name;
+
+  const activeGroupEl = document.querySelector('.nav-group.active-product');
+  const activeProductKey = activeGroupEl ? activeGroupEl.dataset.key : null;
+  const activeProductTitle = activeGroupEl ? activeGroupEl.querySelector('.label').textContent : '';
+
+  if(activeProductKey && activeProductKey !== 'client'){
+    cameFrom = {
+      domainKey: currentDomainKey,
+      productKey: activeProductKey,
+      screenId: document.querySelector('.screen:not(.is-hidden)').id,
+      label: `Назад к результатам сверки в ${activeProductTitle}`
+    };
+    document.getElementById('entityBackLabel').textContent = cameFrom.label;
+
+    // Remember which product groups were already expanded (e.g. КУС), so the
+    // switch to Единый клиент doesn't visually collapse them — only the
+    // accent "active product" state moves, the open/closed state of other
+    // products stays exactly as the person left it.
+    const openKeysBefore = Array.from(document.querySelectorAll('.nav-group.open')).map(el=>el.dataset.key);
+
+    renderNav(currentDomainKey, 'client'); // honest switch: nav now really shows Единый клиент as active
+
+    openKeysBefore.forEach(key=>{
+      if(key === 'client') return;
+      const groupEl = nav.querySelector(`.nav-group[data-key="${key}"]`);
+      if(!groupEl || groupEl.classList.contains('open')) return;
+      groupEl.classList.add('no-anim', 'open');
+      const btn = groupEl.querySelector('.nav-product');
+      if(btn) btn.setAttribute('aria-expanded', 'true');
+      void groupEl.offsetWidth; // force reflow so the "no transition" state is applied
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{ groupEl.classList.remove('no-anim'); });
+      });
+    });
+  } else {
+    // Same-product drill-down (opened straight from Сущности) still needs an
+    // explicit, discoverable way back — relying on "click the already-active
+    // sidebar item again" isn't obvious. One consistent header slot, two labels.
+    cameFrom = {
+      domainKey: currentDomainKey,
+      productKey: 'client',
+      screenId: 'screenA',
+      label: 'К списку сущностей'
+    };
+    document.getElementById('entityBackLabel').textContent = cameFrom.label;
+  }
+
+  setScreen('screenD');
+}
+
+document.getElementById('entityBackBanner').addEventListener('click', ()=>{
+  if(!cameFrom) return;
+  renderNav(cameFrom.domainKey, cameFrom.productKey);
+  setScreen(cameFrom.screenId);
+  cameFrom = null;
+});
+
+// Demo: clicking a row in КУС → Списки also opens an entity card, simulating
+// the cross-product scenario (in the real product this would come from a
+// "Выявления" drill-down listing the matched people for that check).
+tbodyLists.addEventListener('click', (e)=>{
+  if(!e.target.closest('td')) return;
+  openEntityDetail('Мищенко Елена Владимировна');
+});
+
+/* ---------------- КУС / Списки: Журнал проверок vs Выявления ---------------- */
+document.querySelectorAll('#screenC .local-tabs .tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    const view = tab.dataset.view;
+    document.getElementById('kusViewJournal').classList.toggle('is-hidden', view !== 'journal');
+    document.getElementById('kusViewDetections').classList.toggle('is-hidden', view !== 'detections');
+  });
+});
+
+const detectionRows = [
+  ['35024','1126233','Мищенко Елена Владимировна','18.04.1993','Росфинмониторинг / Террористы','18.07.2021','03.03.2026 10:11:17','11: ИНН','690','ТРЕБУЕТ ПРОВЕРКИ','blue',''],
+  ['34024','1124340','Гасанов Теймур Карам оглы','02.05.1963','Список ЕФРСБ','23.01.2026','10.02.2026 16:38:58','5: ФИО и ДР','850','ПОДТВЕРЖДЕНО','red',''],
+  ['33025','1123387','Самак Муханнад Абдурахман','','Росфинмониторинг / Террористы','18.07.2021','28.01.2026 15:44:42','26: СНИЛС, ДР не противоречит','693','ТРЕБУЕТ ПРОВЕРКИ','blue',''],
+  ['33024','1123373','Снилсовый Черный Атата','','Росфинмониторинг / Террористы','18.07.2021','28.01.2026 12:36:12','26: СНИЛС, ДР не противоречит','693','ТРЕБУЕТ ПРОВЕРКИ','blue',''],
+  ['32025','1114435','Солод Светлана Владимировна','28.08.1961','Отказники ЦБ','14.12.2020','13.11.2025 21:41:33','4: ФИО и ИНН','960','ТРЕБУЕТ ПРОВЕРКИ','blue',''],
+  ['32024','1114233','Пильникова Ольга Евгеньевна','14.01.1974','Отказники ЦБ','14.12.2020','13.11.2025 15:10:13','1: ФИО, ДР и документ','1000','ОТКЛОНЕНО','green','test123На стендах посмотреть какие экраны являются основными в продукте -> поискать эти экраны в Фигме -> если не нашлись -> собрать экраны или заменить встречающиеся скрины в макетах на новые компоненты'],
+  ['31024','1099255','Пильникова Ольга Евгеньевна','14.01.1974','Отказники ЦБ','14.12.2020','12.08.2025 14:29:53','5: ФИО и ДР','850','ПОДТВЕРЖДЕНО','red',''],
+  ['30026','1095357','Филатов Сергей Александрович','19.07.1954','Отказники ЦБ','14.12.2020','01.07.2025 17:55:18','5: ФИО и ДР','850','ПОДТВЕРЖДЕНО','red',''],
+  ['30025','1095276','Магамедов Исмаил Хусяинович','','Росфинмониторинг / Террористы','18.07.2021','01.07.2025 17:55:18','26: СНИЛС, ДР не противоречит','693','ТРЕБУЕТ ПРОВЕРКИ','blue',''],
+  ['30024','1081308','Аршаханова','17.09.1989','Росфинмониторинг / Террористы','18.07.2021','01.07.2025','10: ФИО 80-99 и ИНН','890','ТРЕБУЕТ ПРОВЕРКИ','blue',''],
+];
+const tbodyDetections = document.getElementById('tbodyDetections');
+tbodyDetections.innerHTML = detectionRows.map(r=>{
+  const [hidDetect, hidCounterparty, fio, dob, perechen, datePerechen, dateSverki, rule, weight, status, statusColor, comment] = r;
+  return `<tr>
+    <td>${hidDetect}</td>
+    <td>${hidCounterparty}</td>
+    <td>${fio}</td>
+    <td>${dob}</td>
+    <td>${perechen}</td>
+    <td>${datePerechen}</td>
+    <td>${dateSverki}</td>
+    <td>${rule}</td>
+    <td>${weight}</td>
+    <td><span class="status-text ${statusColor}">${status}</span></td>
+    <td>${comment}</td>
+  </tr>`;
+}).join('');
+
+tbodyDetections.addEventListener('click', (e)=>{
+  const row = e.target.closest('tr');
+  if(!row) return;
+  const cellIdx = Array.from(row.children).indexOf(e.target.closest('td'));
+  if(cellIdx !== 0 && cellIdx !== 2) return; // only HID выявления or ФИО cells are interactive
+
+  if(cellIdx === 2){
+    openEntityDetail(row.children[2].textContent);
+    return;
+  }
+
+  // HID выявления — opens the КУС review/compare screen, staying inside КУС.
+  openKusReview({
+    id: row.children[0].textContent,
+    hid: row.children[1].textContent,
+    fio: row.children[2].textContent,
+    list: row.children[4].textContent,
+    listDate: row.children[5].textContent,
+    checkDate: row.children[6].textContent,
+    rule: row.children[7].textContent,
+    weight: row.children[8].textContent,
+    status: row.querySelector('.status-text') ? row.querySelector('.status-text').outerHTML : '',
+    dob: row.children[3].textContent,
+  });
+});
+
+/* ---------------- КУС review/compare screen (screenE) ---------------- */
+function openKusReview(d){
+  document.getElementById('reviewName').textContent = d.fio;
+  document.getElementById('reviewRow').innerHTML = `<tr>
+    <td>${d.id}</td><td>${d.hid}</td><td>${d.list}</td><td>${d.listDate}</td>
+    <td>${d.checkDate}</td><td>${d.rule}</td><td>${d.weight}</td>
+    <td>${d.status}</td><td></td>
+  </tr>`;
+  document.getElementById('reviewLeftHid').textContent = d.hid;
+  document.getElementById('reviewLeftName').textContent = d.fio.split(' ').join(' • ');
+  document.getElementById('reviewLeftDob').textContent = d.dob || '—';
+
+  setScreen('screenE');
+}
+
+document.getElementById('kusReviewBackBanner').addEventListener('click', ()=>{
+  setScreen('screenC'); // returns to whichever КУС view (Журнал/Выявления) was showing before
+});
 </script>
 
 </body>
