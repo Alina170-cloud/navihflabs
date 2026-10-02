@@ -27,6 +27,22 @@
     --bg: #ffffff;
     --sidebar-bg: #ffffff;
     --ease: cubic-bezier(.4,0,.2,1);
+
+    /* ---- Active-menu levels ----
+       L1 = global navigation (sidebar): dark ink on a teal-tinted fill.
+       L2 = menu inside a product page: dark ink on a grey fill. */
+    --l1-fill: #eff7f8;   /* same tint as the active product row */
+    --l1-text: var(--accent);
+    --l1-product: var(--accent);   /* active product: label, icon, chevron */
+    --l1-product-fill: #eff7f8;    /* active product row: lighter tint than the page */
+    --l1-product-chip: #fff;
+    --l2-fill: #eef0f2;
+    --l2-ink: #1b1e24;
+    /* One shared, soft transition for both levels: fill, text and marker
+       cross-fade together so nothing lags behind. */
+    --menu-fade: .34s cubic-bezier(.25,.1,.25,1);
+    /* Page content eases in a touch slower than the menu highlight. */
+    --page-fade: .42s cubic-bezier(.22,.61,.36,1);
   }
   *{box-sizing:border-box;}
   html,body{
@@ -125,8 +141,10 @@
   .domain-item{
     display:flex;
     align-items:center;
-    gap:8px;
-    padding:8px 12px;
+    gap:6px;
+    margin:1px 6px;
+    padding:3px 8px 3px 3px;
+    border-radius:6px;
     cursor:pointer;
     text-decoration:none;
     font-weight:600;
@@ -134,16 +152,23 @@
     line-height:18px;
     letter-spacing:.2px;
     color:var(--text-primary);
-    background:#fff;
+    background:transparent;
     transition:background .15s var(--ease);
   }
   .domain-item:hover{ background:#f6f7f8; }
-  .domain-item.active{ color:var(--accent); }
+  /* Active product — same treatment as the active product row in the sidebar:
+     denser grey fill, bolder label, icon on a white outlined chip. */
+  .domain-item.active{ background:var(--l1-product-fill); color:var(--l1-product); font-weight:700; }
   .domain-item .domain-icon{
-    width:24px;height:24px;
+    width:30px;height:30px;
+    border-radius:6px;
     flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
     color:inherit;
+  }
+  .domain-item.active .domain-icon{
+    background:var(--l1-product-chip);
+    box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08);
   }
   .domain-item .domain-icon svg{ width:22px;height:22px; }
   .domain-divider{ height:1px; background:var(--border-soft); width:100%; }
@@ -156,6 +181,48 @@
     text-transform:uppercase;
     letter-spacing:.5px;
   }
+
+  /* ---- Login screen (shown after «Выйти») ---- */
+  .login{
+    position:fixed; inset:0; z-index:2000; overflow:auto;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:
+      radial-gradient(120% 70% at 50% -18%, rgba(217,21,40,.22) 0%, rgba(217,21,40,.08) 38%, rgba(217,21,40,0) 68%),   /* top glow: logo red (#d91528) */
+      radial-gradient(120% 70% at 50% 118%, rgba(14,125,143,.30) 0%, rgba(14,125,143,.11) 38%, rgba(14,125,143,0) 68%),   /* bottom glow: accent teal (#0e7d8f) */
+      #fcfdfd;
+  }
+  .login.is-hidden{ display:none; }
+  .login.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
+  /* Soft hand-off into the app: the form lifts and dissolves while the
+     app underneath settles into place. */
+  .login{ transition:opacity .55s cubic-bezier(.22,.61,.36,1); }
+  .login-card{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
+  .login.is-leaving{ opacity:0; pointer-events:none; }
+  .login.is-leaving .login-card{ transform:translateY(-10px) scale(.985); opacity:0; }
+  .app.is-arriving{ animation:appArrive .6s cubic-bezier(.22,.61,.36,1) both; }
+  @keyframes appArrive{ from{ opacity:.35; transform:scale(.992); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){
+    .login, .login-card{ transition:none; }
+    .app.is-arriving{ animation:none; }
+  }
+  .login-card{ width:400px; max-width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:6vh; }
+  .login-brand{ display:flex; align-items:center; gap:12px; }
+  .login-brand-name{ font-size:34px; font-weight:600; letter-spacing:-.5px; line-height:1; color:#1b1e24; }
+  .login-title{ margin-top:22px; font-size:18px; letter-spacing:.1px; color:#6b6f75; }
+  .login-form{ width:100%; margin-top:36px; display:flex; flex-direction:column; gap:16px; }
+  .login-input{ width:100%; height:37px; padding:0 8px; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #a7acb1; border-radius:3px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
+  .login-input::placeholder{ color:#7b8288; }
+  .login-input:focus{ border-color:#387c8c; box-shadow:0 0 0 2px rgba(56,124,140,.18); }
+  .login-submit{
+    all:unset; box-sizing:border-box; width:100%; height:44px; margin-top:4px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:#1b1e24; color:#fff; font-size:15px; font-weight:500; letter-spacing:.1px;
+    border-radius:4px; cursor:pointer; transition:background .15s var(--ease);
+  }
+  .login-submit:hover{ background:#2c3038; }
+  .login-submit:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px #1b1e24; }
+  .login-error{ display:none; width:100%; margin-top:16px; text-align:center; font-size:14px; line-height:19px; letter-spacing:.1px; color:#d6232f; }
+  .login.has-error .login-error{ display:block; }
 
   /* ---- User account dropdown (roles + logout) ---- */
   .user-menu-wrap{ position:relative; }
@@ -258,15 +325,6 @@
        accent-tinted icon chip, accent text, chevron up
      "active-product" class = Active; "open" class = expanded (chevron/pages) */
   .nav-group{ position:relative; }
-  .nav-group.open::before{
-    content:"";
-    position:absolute;
-    left:19px;
-    top:19px;
-    bottom:6px;
-    width:1px;
-    background:var(--border);
-  }
 
   .nav-product{
     all:unset;
@@ -284,13 +342,29 @@
     position:relative;
     z-index:1;
   }
-  .nav-group.open > .nav-product,
-  .nav-group.active-product > .nav-product{
-    background:var(--row-bg);
+  /* Only the active product keeps a fill; an open-but-inactive one stays flat. */
+  /* Product rows: hover and active fills bleed to both edges of the sidebar
+     (12px = the sidebar's side padding). */
+  .nav-product,
+  .nav-product:hover,
+  .nav-product:active{ background:transparent; }
+  .nav-product::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0;
+    left:-4px; right:-4px;   /* 8px short of each sidebar edge */
+    border-radius:6px;
+    background:var(--row-hover);
+    opacity:0;
+    z-index:-1;
+    transition:opacity .18s var(--ease), background .18s var(--ease);
   }
+  .nav-product:hover::before{ opacity:1; }
+  .nav-product:active::before{ opacity:1; background:#e5e9ec; }
+  .nav-group.active-product > .nav-product::before,
+  .nav-group.active-product > .nav-product:hover::before,
+  .nav-group.active-product > .nav-product:active::before{ opacity:1; background:var(--l1-product-fill); }
   .nav-group.active-product.open > .nav-product{ cursor:default; }
-  .nav-product:hover{ background:var(--row-hover); }
-  .nav-product:active{ background:#e5e9ec; }
 
   .nav-product .icon-chip{
     width:34px;height:34px;
@@ -301,10 +375,11 @@
     transition:background .18s var(--ease);
   }
   .nav-group.active-product > .nav-product .icon-chip{
-    background:var(--accent-icon-bg);
+    background:var(--l1-product-chip);
+    box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08);
   }
   .nav-product .icon-chip svg{ width:24px;height:24px; color:var(--text-primary); transition:color .18s var(--ease); }
-  .nav-group.active-product > .nav-product .icon-chip svg{ color:var(--accent); }
+  .nav-group.active-product > .nav-product .icon-chip svg{ color:var(--l1-product); }
 
   .nav-product .label-row{
     flex:1;
@@ -314,33 +389,40 @@
     min-width:0;
   }
   .nav-product .label{
-    font-weight:600;
+    font-weight:500;
     font-size:14px;
     line-height:18px;
     letter-spacing:.2px;
-    color:var(--text-primary);
-    white-space:nowrap;
+    color:var(--text-page);
+    /* Long names wrap onto a second line inside the same 38px row;
+       anything longer than two lines is cut with an ellipsis. */
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
     overflow:hidden;
-    text-overflow:ellipsis;
     transition:color .18s var(--ease);
   }
-  .nav-group.active-product > .nav-product .label{ color:var(--accent); }
+  .nav-group.active-product > .nav-product .label{ color:var(--l1-product); font-weight:500; }
 
   .nav-product .chev{
     width:18px;height:18px;
     flex-shrink:0;
     color:var(--text-soft);
-    opacity:.5;
+    opacity:0; /* hidden at rest, shown only on hover / keyboard focus */
     transition:transform .3s var(--ease), color .18s var(--ease), opacity .18s var(--ease);
     transform:rotate(180deg); /* closed = pointing down */
   }
+  .nav-product:hover .chev,
+  .nav-product:focus-visible .chev{ opacity:.6; }
   .nav-group.open > .nav-product .chev{
     transform:rotate(0deg); /* open = pointing up */
     color:var(--text-primary);
   }
   .nav-group.active-product > .nav-product .chev{
-    color:var(--accent);
+    color:var(--l1-product);
   }
+  .nav-group.active-product > .nav-product:hover .chev,
+  .nav-group.active-product > .nav-product:focus-visible .chev{ opacity:1; }
 
   /* ---- Collapsible pages region (auto-height animation) ---- */
   .nav-sub-wrapper{
@@ -349,7 +431,9 @@
     transition:grid-template-rows .32s var(--ease);
   }
   .nav-group.open > .nav-sub-wrapper{ grid-template-rows:1fr; }
-  .nav-sub-inner{ overflow:hidden; min-height:0; }
+  /* The clip box is widened by the sidebar padding (12px each side) so the
+     active page's fill can bleed to both edges of the sidebar. */
+  .nav-sub-inner{ overflow:hidden; min-height:0; margin:0 -12px; padding:0 12px; }
   .nav-sub{
     display:flex;
     flex-direction:column;
@@ -365,24 +449,45 @@
   .nav-group.no-anim .nav-sub,
   .nav-group.no-anim .chev{ transition:none !important; }
 
-  /* Shared accent segment that slides between pages as the active one changes */
+  /* Shared highlight pill that flies into whichever page becomes active —
+     it snaps to the right row instantly, then sweeps in from the right
+     edge, landing with a slight overshoot. */
   .rail-indicator{
     position:absolute;
-    left:19px;
-    width:1px;
+    left:0;
+    right:0;
+    width:auto;
     height:32px;
-    background:var(--accent);
+    border-radius:4px;
+    background:var(--l1-fill);
+    display:none; /* replaced by the per-row cross-fade */
     opacity:0;
-    z-index:2;
+    z-index:0;
     pointer-events:none;
-    transition:top .3s cubic-bezier(.4,0,.2,1), opacity .2s var(--ease);
+    transform-origin:right center;
+    transform:translateX(0) scaleX(1);
+    transition:transform .36s cubic-bezier(.22,1.4,.36,1), opacity .2s var(--ease);
+  }
+  /* Static accent tick marking the active row — jumps straight to place,
+     no transition of its own, so it never squishes or slides with the pill. */
+  .rail-tick{
+    position:absolute;
+    left:19px;
+    width:2px;
+    height:24px;
+    border-radius:2px;
+    background:var(--accent);
+    display:none; /* replaced by .nav-page::before */
+    opacity:0;
+    z-index:0;
+    pointer-events:none;
   }
 
   .nav-page{
     display:flex;
     align-items:center;
     height:32px;
-    padding:4px 8px 4px 42px;
+    padding:4px 8px 4px 11px; /* text starts at the left edge of the product icons */
     border-radius:4px;
     cursor:pointer;
     text-decoration:none;
@@ -393,8 +498,35 @@
     color:var(--text-page);
     position:relative;
     z-index:1;
-    transition:background .15s var(--ease), color .15s var(--ease);
+    transition:background var(--menu-fade), color var(--menu-fade);
   }
+  /* Active marker: a bar on the very left edge of the fill, full height. */
+  .nav-page::before{
+    content:"";
+    position:absolute;
+    left:-4px; top:0; bottom:0;
+    width:4px;
+    border-radius:4px 0 0 4px;
+    background:var(--l1-text);
+    opacity:0;
+    transition:opacity var(--menu-fade);
+  }
+  .nav-page.active::before{ opacity:1; }
+  /* Fill behind the hovered / active page. */
+  .nav-page::after{
+    content:"";
+    position:absolute;
+    top:0; bottom:0;
+    left:-4px; right:-4px;   /* 8px short of each sidebar edge */
+    border-radius:4px;
+    background:var(--page-hover);
+    opacity:0;
+    z-index:-1;
+    transition:opacity var(--menu-fade), background var(--menu-fade);
+  }
+  .nav-page:hover::after{ opacity:1; }
+  .nav-page.active::after,
+  .nav-page.active:hover::after{ opacity:1; background:var(--l1-fill); }
   .nav-page-text{
     overflow:hidden;
     text-overflow:ellipsis;
@@ -402,25 +534,12 @@
     flex:1;
     min-width:0;
   }
-  .nav-page:hover{ background:var(--page-hover); }
+  .nav-page:hover{ background:transparent; }
   .nav-page.active{
-    background:var(--accent-icon-bg);
-    color:var(--accent);
-    font-weight:600;
+    background:transparent;
+    color:var(--l1-text);
   }
-  .nav-page::after{
-    content:"";
-    position:absolute;
-    left:19px;
-    top:0;
-    bottom:0;
-    width:1px;
-    background:#b9bec4;
-    opacity:0;
-    transition:opacity .15s var(--ease);
-  }
-  .nav-page:hover::after{ opacity:1; }
-  .nav-page.active:hover::after{ opacity:0; }
+  .nav-page.active:hover{ background:transparent; }
   .badge-counter{
     flex-shrink:0;
     margin-left:4px;
@@ -439,7 +558,25 @@
   }
 
   /* ============ MAIN (context only) ============ */
-  .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; position:relative; }
+
+  /* ---- Loading skeleton: covers everything except the sidebar for a few
+     seconds after signing in. ---- */
+  .skeleton{ position:absolute; inset:0; z-index:50; display:flex; flex-direction:column; background:#fafafa; transition:opacity .45s cubic-bezier(.22,.61,.36,1); }
+  .skeleton.is-hidden{ display:none; }
+  .skeleton.is-leaving{ opacity:0; pointer-events:none; }
+  .sk{ border-radius:4px; background:linear-gradient(100deg, #eceef1 30%, #f6f7f9 50%, #eceef1 70%); background-size:300% 100%; animation:skShimmer 1.5s linear infinite; }
+  @keyframes skShimmer{ from{ background-position:100% 0; } to{ background-position:-50% 0; } }
+  .sk-top{ height:42px; flex-shrink:0; display:flex; align-items:center; gap:26px; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
+  .sk-top .sk{ height:12px; }
+  .sk-top-spacer{ flex:1; }
+  .sk-body{ flex:1; min-height:0; overflow:hidden; padding:18px; display:flex; flex-direction:column; gap:14px; }
+  .sk-row{ display:flex; align-items:center; gap:10px; }
+  .sk-table{ flex:1; min-height:0; overflow:hidden; background:#fff; border:1px solid var(--border); border-radius:8px; }
+  .sk-tr{ display:grid; grid-template-columns:2.2fr 1fr 1.2fr 1.4fr 1.6fr; gap:28px; align-items:center; height:41px; padding:0 14px; border-top:1px solid var(--border-soft); }
+  .sk-tr:first-child{ border-top:none; background:#fafafa; height:42px; }
+  .sk-tr .sk{ height:11px; }
+  @media (prefers-reduced-motion: reduce){ .sk{ animation:none; } .skeleton{ transition:none; } }
   .topbar{
     display:flex; align-items:center; padding:0 18px;
     border-bottom:1px solid var(--border); height:42px; gap:26px; flex-shrink:0;
@@ -448,14 +585,61 @@
   .tab:hover{ color:var(--text-page); }
   .tab.active{ color:var(--accent); font-weight:600; border-bottom-color:var(--accent); }
   .topbar-spacer{ flex:1; }
-  .header-actions{ display:flex; align-items:center; gap:12px; }
+  .header-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
   .header-divider{ width:1px; height:24px; background:#e5e5e6; flex-shrink:0; }
   .user-chip{ display:flex; align-items:center; gap:8px; color:var(--text-soft); font-size:14px; cursor:pointer; }
   .user-chip svg{ width:20px; height:20px; }
-  .help-icon{ color:var(--text-faint); cursor:pointer; }
+  .help-icon{ color:var(--text-faint); cursor:pointer; display:flex; border-radius:50%; transition:color .15s var(--ease); }
+  .help-icon:hover, .help-icon[aria-expanded="true"]{ color:var(--text-page); }
+
+  /* ---- Support drawer (opened by the «?» button) ---- */
+  /* The drawer pushes the page: the app column narrows by the drawer's width
+     instead of being covered. */
+  .app{ transition:margin-right .38s cubic-bezier(.22,.61,.36,1); }
+  body.support-open .app{ margin-right:400px; }
+  @media (max-width:900px){ body.support-open .app{ margin-right:0; } }
+  .support{ position:fixed; top:0; right:0; bottom:0; z-index:1501; width:400px; max-width:100vw; display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--border); box-shadow:-6px 0 18px rgba(10,13,18,.06), -1px 0 3px rgba(10,13,18,.04); transform:translateX(calc(100% + 24px)); visibility:hidden; transition:transform .38s cubic-bezier(.22,.61,.36,1), visibility 0s linear .38s; }
+  body.support-open .support{ transform:none; visibility:visible; transition:transform .38s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+  .support-head{ position:relative; padding:22px 24px 18px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .support-close{ all:unset; position:absolute; top:14px; right:14px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:6px; color:var(--text-soft); cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); }
+  .support-close:hover{ background:var(--page-hover); color:var(--text-page); }
+  .support-close:focus-visible, .support-btn:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--accent); }
+  .support-title{ font-size:18px; font-weight:700; letter-spacing:.1px; color:var(--text-page); margin:0 36px 14px 0; }
+  .support-meta{ display:flex; flex-direction:column; gap:8px; font-size:14px; letter-spacing:.2px; }
+  .support-meta div{ color:var(--text-page); }
+  .support-meta span{ color:var(--text-faint); margin-left:6px; }
+  .support-meta a{ color:var(--accent); margin-left:6px; text-decoration:none; cursor:pointer; }
+  .support-meta a:hover{ text-decoration:underline; }
+  .support-body{ flex:1; min-height:0; overflow-y:auto; padding:18px 24px 20px; display:flex; flex-direction:column; gap:14px; }
+  .support-input, .support-textarea{ width:100%; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #cfd4d9; border-radius:4px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
+  .support-input{ height:38px; padding:0 12px; flex-shrink:0; }
+  .support-textarea{ flex:1; min-height:180px; padding:10px 12px; line-height:20px; resize:none; }
+  .support-input::placeholder, .support-textarea::placeholder{ color:var(--text-faint); }
+  .support-input:focus, .support-textarea:focus{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(14,125,143,.16); }
+  .support-input.is-invalid{ border-color:#e08a8f; }
+  .support-shots-title{ font-size:14px; font-weight:700; color:var(--text-page); margin-top:6px; }
+  .support-shots{ display:grid; grid-template-columns:1fr 1fr; gap:12px; flex-shrink:0; }
+  .support-shot, .support-shot-add{ position:relative; height:92px; border-radius:6px; border:1px dashed #b7c9ce; overflow:hidden; }
+  .support-shot{ background:#fafafa; }
+  .support-shot svg{ display:block; width:100%; height:100%; }
+  .support-shot-del{ all:unset; position:absolute; top:5px; right:5px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(27,30,36,.72); color:#fff; cursor:pointer; opacity:0; transition:opacity .15s var(--ease); }
+  .support-shot:hover .support-shot-del, .support-shot-del:focus-visible{ opacity:1; }
+  .support-shot-add{ all:unset; box-sizing:border-box; height:92px; border-radius:6px; border:1px dashed #7fb4bd; display:flex; align-items:center; justify-content:center; gap:8px; color:var(--accent); font-size:14px; font-weight:500; cursor:pointer; transition:background .15s var(--ease); }
+  .support-shot-add:hover{ background:#f3f9fa; }
+  .support-foot{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px 24px 20px; border-top:1px solid var(--border); flex-shrink:0; }
+  .support-btn{ all:unset; box-sizing:border-box; height:40px; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:14px; font-weight:600; letter-spacing:.2px; cursor:pointer; transition:background .15s var(--ease), border-color .15s var(--ease); }
+  .support-btn.ghost{ border:1px solid #cfd4d9; color:var(--text-page); background:#fff; }
+  .support-btn.ghost:hover{ background:var(--page-hover); }
+  .support-btn.primary{ background:var(--accent); color:#fff; }
+  .support-btn.primary:hover{ background:#0b6b7b; }
+  .support-done{ display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; color:var(--text-soft); font-size:14px; line-height:20px; }
+  .support-done b{ font-size:16px; color:var(--text-page); }
+  .support.is-sent .support-body, .support.is-sent .support-foot{ display:none; }
+  .support.is-sent .support-done{ display:flex; }
+  @media (prefers-reduced-motion: reduce){ .support, .app{ transition:none !important; } }
   .help-icon svg{ width:20px; height:20px; }
 
-  .content{ padding:18px 18px 0; overflow-y:auto; flex:1; display:grid; background:#fafafa; }
+  .content{ padding:18px 18px 0; overflow:auto; flex:1; display:grid; background:#fafafa; }
 
   /* ---- Screen swap: instant replace, with the simplest possible fade-in ---- */
   .screen{
@@ -465,19 +649,32 @@
     display:none;
   }
   .screen.is-entering{
-    animation:screenFadeIn .15s ease-out;
+    animation:screenFadeIn var(--page-fade) both;
   }
   @keyframes screenFadeIn{
-    from{ opacity:0; }
-    to{ opacity:1; }
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:none; }
   }
-
+  /* Header tabs / back button fade in together with the page. */
+  .tabs-group.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
+  @keyframes tabsFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){
+    .screen.is-entering, .tabs-group.is-entering{ animation:none; }
+  }
   .tabs-group{
     display:flex;
     align-items:center;
     gap:26px;
     height:100%;
+    /* When the column narrows (support drawer open, small window) the tabs
+       scroll sideways instead of pushing the user menu and «?» off-screen. */
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
   }
+  .tabs-group::-webkit-scrollbar{ display:none; }
+  .tabs-group > *{ flex-shrink:0; white-space:nowrap; }
   .tabs-group.is-hidden{ display:none; }
 
   /* ---- screenC (Списки / Журнал проверок) specific bits ---- */
@@ -569,33 +766,132 @@
   .status-chip.orange{ background:#fff4e0; color:#b8720a; }
 
   /* ---- screenD (entity detail / проверки) ---- */
-  .entity-layout{ display:flex; gap:24px; align-items:flex-start; }
   .header-back-btn{
     display:flex;
     align-items:center;
     gap:8px;
     height:100%;
-    color:var(--accent);
+    color:var(--text-soft);
     font-size:14px;
-    font-weight:600;
+    font-weight:500;
     cursor:pointer;
+    transition:color .15s var(--ease);
   }
-  .header-back-btn:hover{ text-decoration:underline; }
-  .entity-side{ width:150px; flex-shrink:0; padding-top:2px; font-size:13px; color:var(--text-page); display:flex; flex-direction:column; gap:6px; }
+  .header-back-btn:hover{ color:var(--text-page); }
+  .entity-name{ font-size:22px; font-weight:700; color:var(--text-page); }
+  .entity-tab-panel.is-hidden{ display:none; }
+  /* still used by the КУС review screen */
   .entity-link{ color:var(--blue); text-decoration:none; border-bottom:1px dashed currentColor; }
   .entity-link:hover{ text-decoration:none; }
-  .entity-main{ flex:1; min-width:0; }
-  .entity-header{ display:flex; align-items:center; gap:14px; }
-  .entity-avatar{ width:40px; height:40px; border-radius:50%; overflow:hidden; flex-shrink:0; }
-  .entity-name-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .entity-name{ font-size:22px; font-weight:700; color:var(--text-page); }
   .risk-badge{ font-size:13px; font-weight:600; color:#b8720a; background:#fff0d9; padding:4px 10px; border-radius:999px; }
-  .entity-tabs{ display:flex; align-items:center; gap:20px; margin-top:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
-  .entity-tab-link{ font-size:14px; color:var(--blue); cursor:pointer; }
-  .entity-tab-link.active{ color:#4a5a1e; background:#eef2d9; padding:5px 12px; border-radius:4px; font-weight:600; }
-  .entity-tab-link.disabled{ color:var(--text-faint); cursor:default; }
-  .entity-refresh{ color:var(--text-faint); display:flex; cursor:pointer; }
-  .entity-refresh.disabled{ opacity:.5; cursor:default; }
+
+  /* ---- Entity card: header ---- */
+  .ec-card-surface, .ec-head, .ec-menu-card, .attr-card, .attr-side{
+    background:#fff; border:1px solid var(--border); border-radius:6px;
+    box-shadow:0 1px 2px rgba(10,13,18,.04);
+  }
+  .ec-head{ display:flex; align-items:center; gap:14px; padding:14px 18px; }
+  .ec-avatar{ width:48px; height:48px; border-radius:50%; overflow:hidden; flex-shrink:0; }
+  .ec-head-main{ min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .ec-head .entity-name{ font-size:16px; font-weight:600; letter-spacing:.1px; }
+  .ec-meta{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; font-size:14px; color:var(--text-page); }
+  .ec-id{ display:inline-flex; align-items:center; gap:6px; background:#f5f6f8; border-radius:4px; padding:2px 6px; font-weight:500; letter-spacing:.2px; }
+  .ec-id-key{ color:var(--text-soft); font-weight:400; }
+  .ec-copy{ color:var(--text-faint); cursor:pointer; margin-left:2px; }
+  .ec-copy:hover{ color:var(--text-page); }
+  .ec-meta-sep{ width:1px; height:18px; background:var(--border); }
+  .ec-date{ color:var(--text-soft); }
+  .ec-quality{ color:#1a9c5f; border:1px solid #7fcfa8; border-radius:5px; padding:1px 7px; font-weight:500; background:#fff; }
+
+  /* ---- Entity card: sections ---- */
+  .ec-tabs{ display:inline-flex; margin-top:14px; border-bottom:1px solid #cfd4d9; }
+  .ec-tab{ padding:10px 22px 11px; font-size:14px; font-weight:500; letter-spacing:.2px; color:var(--text-page); cursor:pointer; margin-bottom:-1px; border-bottom:2px solid transparent; transition:color var(--menu-fade), border-color var(--menu-fade); }
+  .ec-tab:hover{ color:var(--accent); }
+  .ec-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+
+  .ec-body{ display:grid; grid-template-columns:232px minmax(0,1fr); gap:20px; margin-top:20px; align-items:start; padding-bottom:24px; }
+  .ec-center{ min-width:0; }
+  .ec-attr-grid{ display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:20px; align-items:start; }
+  .ec-empty{ color:var(--text-faint); text-align:center; padding:40px 20px; }
+
+  /* L2 — menu inside the product page: carries the accent colour, while the
+     global navigation stays neutral. */
+  .ec-menu{ display:flex; flex-direction:column; gap:6px; position:sticky; top:0; }
+  .ec-menu-card{ padding:8px; display:flex; flex-direction:column; gap:2px; }
+  .entity-attr-nav-item{ position:relative; display:flex; align-items:center; gap:8px; height:34px; padding:0 8px 0 12px; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.2px; color:var(--text-page); cursor:pointer; transition:background var(--menu-fade), color var(--menu-fade); }
+  .entity-attr-nav-item .ec-ico{ color:var(--text-soft); flex-shrink:0; transition:color var(--menu-fade); }
+  .entity-attr-nav-item:hover{ background:#f5f6f8; }
+  .entity-attr-nav-item.disabled{ color:#b3b9bf; cursor:default; }
+  .entity-attr-nav-item.disabled:hover{ background:none; }
+  .entity-attr-nav-item.active{ background:var(--l2-fill); color:var(--l2-ink); font-weight:600; }
+  .entity-attr-nav-item.active .ec-ico{ color:var(--l2-ink); }
+  /* Active marker on the very left edge of the fill, same as in the sidebar. */
+  .entity-attr-nav-item::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:4px 0 0 4px; background:var(--l2-ink); opacity:0; transition:opacity var(--menu-fade); }
+  .entity-attr-nav-item.active::before{ opacity:1; }
+  .ec-refresh{ margin-left:auto; display:flex; color:var(--text-faint); cursor:pointer; }
+  .ec-refresh:hover{ color:var(--text-page); }
+
+  /* Anchors to the sections of Атрибутика (not a selection — they scroll). */
+  .ec-sub{ display:flex; flex-direction:column; gap:2px; margin-top:2px; }
+  .ec-sub-item{ display:flex; align-items:center; gap:7px; height:34px; padding:0 8px 0 12px; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.2px; color:var(--text-page); cursor:pointer; transition:background .15s var(--ease); }
+  .ec-sub-item:hover{ background:#f5f6f8; }
+  .ec-sub-item.disabled{ color:#a9afb6; font-weight:400; cursor:default; }
+  .ec-sub-item.disabled:hover{ background:none; }
+  .ec-menu-divider{ height:1px; background:var(--border); margin:8px 8px; }
+  .ec-similar{ display:flex; align-items:center; height:34px; padding:0 8px 0 6px; }
+  .ec-similar-chip{ background:#f5f6f8; border-radius:4px; padding:2px 8px; font-size:14px; font-weight:500; color:var(--text-page); }
+
+  .attr-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .attr-dot.green{ background:#2fa873; }
+  .attr-dot.orange{ background:#f0a52b; }
+  .attr-dot.blue{ background:var(--blue); }
+  .attr-dot-pair{ display:flex; gap:0; flex-shrink:0; }
+  .attr-dot-pair .attr-dot + .attr-dot{ margin-left:-1px; }
+
+  /* ---- Атрибутика: cards ---- */
+  .attr-main{ display:flex; flex-direction:column; gap:12px; min-width:0; }
+  .attr-card{ padding:16px 24px 18px; scroll-margin-top:12px; }
+  .attr-card-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; min-height:26px; }
+  .attr-card-title{ font-size:16px; font-weight:600; letter-spacing:.1px; color:var(--text-page); }
+  .attr-card-add{ width:34px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:#f2f4f6; color:var(--text-page); cursor:pointer; flex-shrink:0; }
+  .attr-card-add:hover{ background:#e7eaed; }
+  .attr-card-add svg{ width:15px; height:15px; }
+
+  .attr-row{ display:grid; grid-template-columns:minmax(200px,36%) minmax(0,1fr); column-gap:16px; align-items:center; min-height:34px; padding:4px 0; }
+  .attr-label{ position:relative; padding-left:22px; font-size:14px; letter-spacing:.2px; color:var(--text-soft); }
+  .attr-label > .attr-dot, .attr-label > .attr-dot-pair{ position:absolute; left:6px; top:50%; transform:translateY(-50%); }
+  .attr-label > .attr-dot-pair{ left:-2px; }
+  .attr-label .attr-source{ color:var(--text-soft); }
+  .attr-card.no-dots .attr-label{ padding-left:0; }
+  .attr-value{ font-size:14px; letter-spacing:.2px; color:var(--text-page); font-weight:500; display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
+  .attr-value-empty{ color:var(--text-faint); font-weight:400; }
+
+  .attr-history{ position:relative; display:inline-flex; }
+  .attr-history-chip{ display:inline-flex; align-items:center; gap:6px; background:#f2f4f6; border-radius:4px; padding:2px 8px; font-size:14px; color:var(--text-page); font-weight:400; cursor:pointer; user-select:none; }
+  .attr-history-chip:hover, .attr-history.open .attr-history-chip{ background:#e9ecef; }
+  .attr-history-caret{ transition:transform .2s var(--ease); }
+  .attr-history.open .attr-history-caret{ transform:rotate(180deg); }
+  .attr-history-count{ background:var(--red); color:#fff; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .attr-history-pop{ position:absolute; top:calc(100% + 4px); left:0; z-index:20; min-width:340px; display:none; flex-direction:column; gap:10px; padding:10px 14px; background:#fff; border:1px solid var(--border); border-radius:6px; box-shadow:0 6px 18px rgba(10,13,18,.10), 0 1px 3px rgba(10,13,18,.06); }
+  .attr-history.open .attr-history-pop{ display:flex; }
+  .attr-history-row{ display:flex; align-items:center; justify-content:space-between; gap:24px; font-weight:500; }
+  .attr-history-meta{ display:block; font-size:12.5px; font-weight:400; color:var(--text-soft); }
+  .attr-history-del{ color:var(--red); display:flex; cursor:pointer; padding:4px; border-radius:4px; }
+  .attr-history-del:hover{ background:#fdecec; }
+
+  .attr-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; padding-top:18px; border-top:1px solid var(--border); }
+  .attr-tag-add{ display:inline-flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:5px; padding:2px 8px; font-size:14px; letter-spacing:.2px; color:var(--text-page); cursor:pointer; }
+  .attr-tag-add:hover{ background:#f5f6f8; }
+  .attr-tag-add svg{ width:13px; height:13px; color:var(--text-soft); }
+
+  .attr-side{ display:flex; flex-direction:column; gap:8px; padding:16px 16px 18px; }
+  .attr-side-title{ font-size:14px; font-weight:600; color:var(--text-page); margin-bottom:4px; }
+  .attr-side-row{ align-self:flex-start; background:#f5f6f8; border-radius:4px; padding:2px 8px; font-size:14px; letter-spacing:.2px; color:var(--text-soft); }
+  .attr-side-row b{ color:var(--text-page); font-weight:500; margin-left:4px; }
+
+  @media (max-width:1320px){
+    .ec-attr-grid{ grid-template-columns:minmax(0,1fr); }
+  }
   .status-link{ color:var(--blue); font-size:13.5px; }
   .kus-view.is-hidden{ display:none; }
   .status-text{ font-size:12px; font-weight:700; letter-spacing:.2px; }
@@ -612,7 +908,7 @@
   .timeline-year-line{ flex:1; height:1px; background:var(--border); }
   .timeline-group{ position:relative; margin-left:120px; padding-left:20px; border-left:1px solid var(--border); }
   .timeline-row{ display:flex; align-items:flex-start; position:relative; min-height:30px; }
-  .timeline-time{ position:absolute; left:-140px; top:0; width:120px; text-align:right; font-size:13px; color:var(--text-faint); white-space:nowrap; }
+  .timeline-time{ position:absolute; left:-152px; top:0; width:120px; text-align:right; font-size:13px; color:var(--text-faint); white-space:nowrap; }
   .timeline-dot{ position:absolute; left:-25px; top:6px; width:7px; height:7px; border-radius:50%; background:var(--text-faint); }
   .timeline-dot.active{ background:var(--accent); width:9px; height:9px; left:-26px; }
   .timeline-item{ display:flex; align-items:center; gap:8px; padding:5px 0; color:var(--text-faint); font-size:14px; }
@@ -746,10 +1042,40 @@
   #tbody td:first-child:hover{ color:var(--blue); text-decoration:underline; }
   #tbodyLists tr{ cursor:pointer; }
 
+  #tbodyGroups tr{ cursor:pointer; }
+  #tbodyGroups tr.is-current td{ background:var(--accent-icon-bg); }
+  #tbodyGroups tr.is-current:hover td{ background:var(--accent-icon-bg); }
+  .group-desc{ color:#36393e; }
+  .group-desc-sub{ display:block; font-size:12px; font-weight:400; color:var(--text-faint); margin-top:2px; }
+  .progress-cell{ display:flex; align-items:center; gap:10px; }
+  .progress-bar{ flex:1; height:6px; border-radius:100px; background:#ececec; overflow:hidden; }
+  .progress-fill{ height:100%; border-radius:100px; background:var(--accent); }
+  .progress-pct{ font-size:13px; color:#36393e; font-weight:600; width:34px; text-align:right; flex-shrink:0; }
+
   .footer{ display:flex; gap:18px; padding:8px 18px; font-size:12px; color:#76787c; border-top:1px solid var(--border); background:#fafafa; }
 </style>
 </head>
 <body>
+
+<!-- Login screen: the prototype starts here; «Войти» opens the app, «Выйти» returns to it. -->
+<div class="login" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <svg width="35" height="38" viewBox="0 0 27 28" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="24.0135" height="26" stroke="#D91528" stroke-width="2"/>
+        <path d="M18.2064 20.4544H16.3821V14.8068H9.82815V20.4544H8.00391V7.66719H9.82815V13.4409H16.3821V7.66719H18.2064V20.4544Z" fill="#D91528"/>
+      </svg>
+      <span class="login-brand-name">HFLabs</span>
+    </div>
+    <div class="login-title">Вход в систему</div>
+    <div class="login-form" id="loginForm">
+      <input class="login-input" id="loginUser" type="text" placeholder="Имя пользователя" aria-label="Имя пользователя" autocomplete="off">
+      <input class="login-input" id="loginPass" type="password" placeholder="Пароль" aria-label="Пароль" autocomplete="off">
+      <button class="login-submit" id="loginSubmit" type="button">Войти</button>
+    </div>
+    <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
+  </div>
+</div>
 
 <div class="app">
   <!-- ========== SIDEBAR ========== -->
@@ -785,10 +1111,46 @@
 
   <!-- ========== MAIN ========== -->
   <main class="main">
+    <!-- Loading skeleton shown over the header and content after sign-in -->
+    <div class="skeleton is-hidden" id="mainSkeleton" aria-hidden="true">
+      <div class="sk-top">
+        <span class="sk" style="width:34px"></span><span class="sk" style="width:104px"></span><span class="sk" style="width:36px"></span><span class="sk" style="width:76px"></span><span class="sk" style="width:58px"></span><span class="sk" style="width:84px"></span>
+        <span class="sk-top-spacer"></span>
+        <span class="sk" style="width:18px;height:18px;border-radius:50%"></span><span class="sk" style="width:120px"></span>
+      </div>
+      <div class="sk-body">
+        <div class="sk-row">
+          <span class="sk" style="width:372px;height:36px"></span><span class="sk" style="width:330px;height:36px"></span>
+          <span class="sk-top-spacer"></span>
+          <span class="sk" style="width:116px;height:36px"></span><span class="sk" style="width:140px;height:36px"></span>
+        </div>
+        <div class="sk-row">
+          <span class="sk" style="width:34px;height:32px"></span><span class="sk" style="width:34px;height:32px"></span><span class="sk" style="width:34px;height:32px"></span>
+          <span class="sk" style="width:250px;height:32px"></span><span class="sk" style="width:300px;height:32px"></span><span class="sk" style="width:220px;height:32px"></span>
+        </div>
+        <div class="sk-table">
+        <div class="sk-tr"><span class="sk" style="width:22%"></span><span class="sk" style="width:26%"></span><span class="sk" style="width:30%"></span><span class="sk" style="width:34%"></span><span class="sk" style="width:38%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:62%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:70%"></span><span class="sk" style="width:58%"></span><span class="sk" style="width:64%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:78%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:52%"></span><span class="sk" style="width:66%"></span><span class="sk" style="width:80%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:56%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:60%"></span><span class="sk" style="width:74%"></span><span class="sk" style="width:58%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:70%"></span><span class="sk" style="width:40%"></span><span class="sk" style="width:76%"></span><span class="sk" style="width:50%"></span><span class="sk" style="width:72%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:84%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:46%"></span><span class="sk" style="width:62%"></span><span class="sk" style="width:54%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:60%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:68%"></span><span class="sk" style="width:56%"></span><span class="sk" style="width:76%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:74%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:58%"></span><span class="sk" style="width:70%"></span><span class="sk" style="width:60%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:52%"></span><span class="sk" style="width:40%"></span><span class="sk" style="width:64%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:68%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:80%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:50%"></span><span class="sk" style="width:72%"></span><span class="sk" style="width:56%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:66%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:72%"></span><span class="sk" style="width:60%"></span><span class="sk" style="width:82%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:58%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:56%"></span><span class="sk" style="width:66%"></span><span class="sk" style="width:62%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:76%"></span><span class="sk" style="width:40%"></span><span class="sk" style="width:62%"></span><span class="sk" style="width:54%"></span><span class="sk" style="width:70%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:64%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:74%"></span><span class="sk" style="width:58%"></span><span class="sk" style="width:52%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:72%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:68%"></span><span class="sk" style="width:66%"></span></div>
+        </div>
+      </div>
+    </div>
     <div class="topbar">
       <div class="tabs-group" id="tabsA">
         <div class="tab active">ФЛ</div>
-        <div class="tab">Обезличные ФЛ</div>
+        <div class="tab">Обезличенные ФЛ</div>
         <div class="tab">ЮЛ</div>
         <div class="tab">Договоры</div>
         <div class="tab">ЕГРЮЛ</div>
@@ -802,16 +1164,22 @@
       </div>
       <div class="tabs-group is-hidden" id="tabsC"></div>
       <div class="tabs-group is-hidden" id="tabsD">
-        <div class="header-back-btn" id="entityBackBanner">
+        <div class="header-back-btn" id="entityBack">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
-          <span id="entityBackLabel">К списку сущностей</span>
+          <span id="entityBackLabel">Сущности</span>
         </div>
       </div>
       <div class="tabs-group is-hidden" id="tabsE">
         <div class="header-back-btn" id="kusReviewBackBanner">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
-          <span>Назад к списку выявлений</span>
+          <span>Выявления</span>
         </div>
+      </div>
+      <div class="tabs-group is-hidden" id="tabsF">
+        <div class="tab active">ФЛ</div>
+        <div class="tab">Обезличенные ФЛ</div>
+        <div class="tab">ЮЛ</div>
+        <div class="tab">Договоры</div>
       </div>
       <div class="topbar-spacer"></div>
       <div class="header-actions">
@@ -840,7 +1208,7 @@
           </div>
         </div>
         <div class="header-divider"></div>
-        <div class="help-icon">
+        <div class="help-icon" id="supportBtn" role="button" tabindex="0" title="Написать в поддержку" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9.2"/><path d="M9.4 9.3a2.6 2.6 0 1 1 3.7 2.4c-.9.5-1.4 1-1.4 2" /><circle cx="12" cy="16.7" r=".2" fill="currentColor" stroke-width="1.2"/></svg>
         </div>
       </div>
@@ -1035,33 +1403,184 @@
 
       <!-- Screen D: Entity detail (opened by clicking a ФИО in Сущности, or from another product) -->
       <div class="screen is-hidden" id="screenD">
-        <div class="entity-layout">
-          <div class="entity-side">
-            <div class="entity-side-row">HID <a href="#" class="entity-link">1 126 233</a></div>
-            <div class="entity-side-row">AL:<a href="#" class="entity-link">2603031010</a></div>
+        <!-- Entity card header -->
+        <div class="ec-head">
+          <div class="ec-avatar">
+            <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="24" fill="#efe6da"/><path d="M12 30c-2-14 4-22 12-22s14 8 12 22c-2 3-22 3-24 0z" fill="#3a2f2a"/><ellipse cx="24" cy="22" rx="7.5" ry="8.5" fill="#f3d9c3"/><path d="M16.5 20c2-5 6-6.5 7.5-6.5s5.5 1.5 7.5 6.5c-3-.5-6-2.5-7.5-4.5-1.5 2-4.5 4-7.5 4.5z" fill="#3a2f2a"/><path d="M11 48c1-9 6-13 13-13s12 4 13 13z" fill="#6f8f6a"/><path d="M20.5 31h7v5a3.5 3.5 0 01-7 0z" fill="#f3d9c3"/></svg>
           </div>
-          <div class="entity-main">
-            <div class="entity-header">
-              <div class="entity-avatar">
-                <svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="20" fill="#2f8f7e"/><circle cx="20" cy="16" r="6.5" fill="#f0d9c0"/><path d="M8 34c1.5-8 6.5-12 12-12s10.5 4 12 12" fill="#f0d9c0"/></svg>
-              </div>
-              <div class="entity-name-row">
-                <span class="entity-name" id="entityName">Мищенко Елена Владимировна</span>
-                <span class="risk-badge">средний риск</span>
+          <div class="ec-head-main">
+            <div class="entity-name" id="entityName">Аксенова Валентина Валерьевна</div>
+            <div class="ec-meta">
+              <span class="ec-id"><span class="ec-id-key">HID:</span> 4934834390 <svg class="ec-copy" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></span>
+              <span class="ec-id"><span class="ec-id-key">AL:</span> 49fddf34834390 <svg class="ec-copy" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></span>
+              <span class="ec-meta-sep"></span>
+              <span class="ec-date">23.06.2026</span>
+              <span class="ec-quality">Среднее качество данных</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card sections -->
+        <div class="ec-tabs">
+          <div class="ec-tab active">Персональные данные</div>
+          <div class="ec-tab">Согласия</div>
+          <div class="ec-tab">Связи</div>
+          <div class="ec-tab">Коммуникации</div>
+        </div>
+
+        <div class="ec-body">
+          <!-- L2: menu inside the product page -->
+          <aside class="ec-menu">
+            <div class="ec-menu-card">
+              <div class="entity-attr-nav-item" data-tab="atributika"><svg class="ec-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Атрибутика</div>
+              <div class="ec-sub">
+                <div class="ec-sub-item" data-section="ecSecMain">Основное<span class="attr-dot green"></span></div>
+                <div class="ec-sub-item" data-section="ecSecDocs">1 документ<span class="attr-dot green"></span></div>
+                <div class="ec-sub-item" data-section="ecSecAddr">1 Адрес<span class="attr-dot-pair"><span class="attr-dot green"></span><span class="attr-dot orange"></span></span></div>
+                <div class="ec-sub-item" data-section="ecSecPhones">2 телефона</div>
+                <div class="ec-sub-item disabled">Документы ТС</div>
+                <div class="ec-sub-item disabled">Аккаунты</div>
+                <div class="ec-sub-item" data-section="ecSecExtra">Доп. атрибуты<span class="attr-dot green"></span></div>
               </div>
             </div>
-            <div class="entity-tabs">
-              <span class="entity-tab-link">атрибутика</span>
-              <span class="entity-tab-link">история</span>
-              <span class="entity-tab-link">исходные</span>
-              <span class="entity-tab-link">связи</span>
-              <span class="entity-tab-link active">проверки</span>
-              <span class="entity-refresh"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16M3 21v-5h5"/></svg></span>
-              <span class="entity-tab-link disabled">нет похожих</span>
-              <span class="entity-refresh disabled"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16M3 21v-5h5"/></svg></span>
+            <div class="ec-menu-card">
+              <div class="entity-attr-nav-item" data-tab="istoriya"><svg class="ec-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>История</div>
+              <div class="entity-attr-nav-item" data-tab="ishodnye"><svg class="ec-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z"/></svg>Исходные</div>
+              <div class="entity-attr-nav-item" id="entityRelationsTab"><svg class="ec-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="7" r="2.2"/><circle cx="6" cy="17" r="2.2"/><circle cx="17" cy="12" r="2.2"/><path d="M8 8l7 3M8 16l7-3"/></svg>Связи</div>
+              <div class="entity-attr-nav-item" data-tab="proverki"><svg class="ec-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="12" height="12" rx="2"/><path d="M8 8V6a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-2M7.5 14l2 2 3.5-4"/></svg>Проверки<span class="ec-refresh" title="Обновить"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16M3 21v-5h5"/></svg></span></div>
+              <div class="ec-menu-divider"></div>
+              <div class="ec-similar"><span class="ec-similar-chip">Нет похожих</span><span class="ec-refresh" title="Обновить"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16M3 21v-5h5"/></svg></span></div>
+            </div>
+          </aside>
+
+          <div class="ec-center">
+            <!-- Атрибутика -->
+            <div class="entity-tab-panel is-hidden" id="entityTabAtributika">
+              <div class="ec-attr-grid">
+                <div class="attr-main">
+                  <div class="attr-card" id="ecSecMain">
+                    <div class="attr-card-header"><span class="attr-card-title">Основные данные</span></div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot green"></span>ФИО <span class="attr-source">• AL</span></span>
+                      <span class="attr-value"><span id="entityFioValue">Аксенова Валентина Валерьевна</span>
+                        <span class="attr-history" id="attrHistory">
+                          <span class="attr-history-chip" id="attrHistoryChip">Прошлые <svg class="attr-history-caret" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><span class="attr-history-count">2</span></span>
+                          <span class="attr-history-pop">
+                            <span class="attr-history-row"><span><span class="attr-history-meta">до 04.06.2026 • AL</span>Аксенова Валерия Валентиновна</span><span class="attr-history-del" title="Удалить"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3"/></svg></span></span>
+                            <span class="attr-history-row"><span><span class="attr-history-meta">до 01.06.2026 • AL</span>Аксенов Валерий Валентинович</span><span class="attr-history-del" title="Удалить"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3"/></svg></span></span>
+                          </span>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot green"></span>Предыдущее ФИО <span class="attr-source">• AL</span></span>
+                      <span class="attr-value attr-value-empty">—</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot green"></span>Дата рождения <span class="attr-source">• AL</span></span>
+                      <span class="attr-value">15.04.2000</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label">ИНН <span class="attr-source">• AL</span></span>
+                      <span class="attr-value attr-value-empty">—</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label">Статус проверки в ФНС</span>
+                      <span class="attr-value">Недостаточно данных</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label">СНИЛС <span class="attr-source">• AL</span></span>
+                      <span class="attr-value attr-value-empty">—</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot blue"></span>Место рождения <span class="attr-source">• admin_performer</span></span>
+                      <span class="attr-value">Россия, Тюменская обл, г. Тюмень</span>
+                    </div>
+                  </div>
+
+                  <div class="attr-card" id="ecSecDocs">
+                    <div class="attr-card-header">
+                      <span class="attr-card-title">Документы</span>
+                      <span class="attr-card-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot green"></span>Паспорт гражданина <span class="attr-source">• AL</span></span>
+                      <span class="attr-value">40 04 066289, отделение Санкт-Петербурга, 22.11.2002</span>
+                    </div>
+                  </div>
+
+                  <div class="attr-card" id="ecSecAddr">
+                    <div class="attr-card-header">
+                      <span class="attr-card-title">Адреса</span>
+                      <span class="attr-card-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot-pair"><span class="attr-dot orange"></span><span class="attr-dot green"></span></span>Иной <span class="attr-source">• AL</span></span>
+                      <span class="attr-value">Россия</span>
+                    </div>
+                  </div>
+
+                  <div class="attr-card" id="ecSecPhones">
+                    <div class="attr-card-header">
+                      <span class="attr-card-title">Телефоны</span>
+                      <span class="attr-card-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot green"></span>Мобильный <span class="attr-source">• AL</span></span>
+                      <span class="attr-value">7 911 932-49-44</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label"><span class="attr-dot blue"></span>Рабочий <span class="attr-source">• admin_performer</span></span>
+                      <span class="attr-value">7 499 111-49-41</span>
+                    </div>
+                  </div>
+
+                  <div class="attr-card no-dots" id="ecSecExtra">
+                    <div class="attr-card-header"><span class="attr-card-title">Дополнительные сведения</span></div>
+                    <div class="attr-row">
+                      <span class="attr-label">Отправка в ФНС отключена <span class="attr-source">• AL</span></span>
+                      <span class="attr-value">Нет</span>
+                    </div>
+                    <div class="attr-row">
+                      <span class="attr-label">Семейное положение <span class="attr-source">• admin_performer</span></span>
+                      <span class="attr-value">Женат / Замужем</span>
+                    </div>
+                    <div class="attr-tags">
+                      <span class="attr-tag-add">Количество иждивенцев <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Резидентство <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Основной доход <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Место работы <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Род занятий клиента <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Должность <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Дата начала работы <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Полученное образование <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Маркетинговая категория <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Источник первой коммуникации <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                      <span class="attr-tag-add">Отделение <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="attr-side">
+                  <div class="attr-side-title">Исходные идентификаторы:</div>
+                  <div class="attr-side-row"><span>AL:</span> <b>49fddf34834390</b></div>
+                  <div class="attr-side-row"><span>AL:</span> <b>49fddf34834392</b></div>
+                  <div class="attr-side-row"><span>AL:</span> <b>49fddf3483</b></div>
+                  <div class="attr-side-row"><span>AL:</span> <b>49fddf348</b></div>
+                  <div class="attr-side-row"><span>AL:</span> <b>49fddf34</b></div>
+                </div>
+              </div>
             </div>
 
-            <div class="table-wrap" style="margin-top:16px">
+            <!-- История / Исходные — заглушки, пока наполнение не задано -->
+            <div class="entity-tab-panel is-hidden" id="entityTabIstoriya">
+              <div class="attr-card ec-empty">Раздел «История» пока не наполнен</div>
+            </div>
+            <div class="entity-tab-panel is-hidden" id="entityTabIshodnye">
+              <div class="attr-card ec-empty">Раздел «Исходные» пока не наполнен</div>
+            </div>
+
+            <div class="entity-tab-panel" id="entityTabProverki">
+            <div class="table-wrap">
               <table>
                 <thead>
                   <tr><th>Фигурант списка</th><th>Перечень</th><th>Правило поиска</th><th>Найден</th><th>Статус</th><th>Комментарий</th></tr>
@@ -1116,6 +1635,7 @@
               </div>
 
               <button class="expand-btn">Развернуть <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+            </div>
             </div>
           </div>
         </div>
@@ -1209,18 +1729,89 @@
           </div>
         </div>
       </div>
+
+      <!-- Screen F: Группы дубликатов (Единый клиент) -->
+      <div class="screen is-hidden" id="screenF">
+        <div class="toolbar-row1">
+          <div class="seg">
+            <div class="seg-item">Не обработаны</div>
+            <div class="seg-item">Обработаны</div>
+            <div class="seg-item">Отложены</div>
+            <div class="seg-item active">Все</div>
+          </div>
+          <div class="row1-right">
+            <div class="search" style="width:280px">
+              <span>Поиск по группе</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-row2">
+          <div class="icon-btn is-neutral" title="Настройки">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.8"/><path d="M19.4 13a7.6 7.6 0 000-2l2-1.5-2-3.4-2.3.9a7.7 7.7 0 00-1.7-1l-.4-2.4H9.9l-.4 2.4a7.7 7.7 0 00-1.7 1l-2.3-.9-2 3.4L5.5 11a7.6 7.6 0 000 2l-2 1.5 2 3.4 2.3-.9c.5.4 1.1.8 1.7 1l.4 2.4h4.5l.4-2.4c.6-.2 1.2-.6 1.7-1l2.3.9 2-3.4-2-1.5z"/></svg>
+          </div>
+          <div class="icon-btn is-active" title="Фильтр">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+          </div>
+          <div class="count" id="groupsCount">#4&nbsp;&nbsp;↓65 из 65</div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <thead>
+            <tr>
+              <th>Описание</th>
+              <th class="th-sorted"># дубликатов <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 5v14M6 13l6 6 6-6"/></svg></th>
+              <th># контрагентов</th>
+              <th style="width:220px">% просмотренных</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyGroups"></tbody>
+        </table></div>
+      </div>
     </div>
 
     <div class="footer">
       <span>HFLabs License</span>
-      <span>Версия: vX.Y.Z</span>
-      <span>Ревизия: abcdefg12345</span>
-      <span>Бранч/Тег: feature/branch-name или release-tag</span>
-      <span>Время сборки: DD-MM-YYYY HH:MM:SS</span>
+      <span>Версия: v26.9.3</span>
+      <span>Ревизия: 4f9c2a71b3e8</span>
+      <span>Бранч/Тег: release/26.9</span>
+      <span>Время сборки: 28-09-2026 14:32:07</span>
     </div>
   </main>
 </div>
 
+
+<!-- Support drawer: opened by the «?» button in the header -->
+<aside class="support" id="supportDrawer" role="complementary" aria-labelledby="supportTitle" aria-hidden="true">
+  <div class="support-head">
+    <button class="support-close" id="supportClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 class="support-title" id="supportTitle">Написать в поддержку</h2>
+    <div class="support-meta">
+      <div>Кому:<span>support@example.com</span></div>
+      <div>Страница:<a id="supportPage">Сущности</a></div>
+      <div>Адрес ноды:<span>10.0.18.11</span></div>
+    </div>
+  </div>
+  <div class="support-body">
+    <input class="support-input" id="supportSubject" type="text" placeholder="Тема обращения" aria-label="Тема обращения" autocomplete="off">
+    <textarea class="support-textarea" id="supportText" placeholder="Описание проблемы" aria-label="Описание проблемы"></textarea>
+    <div class="support-shots-title">Прикрепленные скриншоты</div>
+    <div class="support-shots" id="supportShots">
+      <div class="support-shot"><svg viewBox="0 0 160 92" preserveAspectRatio="none" fill="none"><rect width="160" height="92" fill="#fff"/><rect width="28" height="92" fill="#f4f5f7"/><rect x="4" y="6" width="12" height="3" rx="1.5" fill="#c9ced4"/><rect x="4" y="16" width="20" height="3" rx="1.5" fill="#d9dde1"/><rect x="4" y="23" width="20" height="4" rx="1.5" fill="#b9dbe1"/><rect x="4" y="31" width="16" height="3" rx="1.5" fill="#d9dde1"/><rect x="4" y="38" width="18" height="3" rx="1.5" fill="#d9dde1"/><rect x="28" width="132" height="10" fill="#fafafa"/><rect x="34" y="4" width="14" height="2.5" rx="1" fill="#0e7d8f"/><rect x="52" y="4" width="18" height="2.5" rx="1" fill="#c9ced4"/><rect x="74" y="4" width="12" height="2.5" rx="1" fill="#c9ced4"/><rect x="34" y="15" width="48" height="6" rx="1.5" fill="#eef0f2"/><rect x="86" y="15" width="36" height="6" rx="1.5" fill="#eef0f2"/><rect x="134" y="15" width="20" height="6" rx="1.5" fill="#0e7d8f"/><rect x="34" y="27" width="120" height="59" rx="2" fill="#fff" stroke="#e6e9ec"/><path d="M34 35h120M34 43h120M34 51h120M34 59h120M34 67h120M34 75h120" stroke="#eef0f2"/><g fill="#d5d9de"><rect x="38" y="30" width="22" height="2.5" rx="1"/><rect x="80" y="30" width="12" height="2.5" rx="1"/><rect x="104" y="30" width="16" height="2.5" rx="1"/><rect x="38" y="38" width="34" height="2.5" rx="1"/><rect x="80" y="38" width="14" height="2.5" rx="1"/><rect x="104" y="38" width="20" height="2.5" rx="1"/><rect x="38" y="46" width="28" height="2.5" rx="1"/><rect x="80" y="46" width="14" height="2.5" rx="1"/><rect x="104" y="46" width="26" height="2.5" rx="1"/><rect x="38" y="54" width="36" height="2.5" rx="1"/><rect x="80" y="54" width="14" height="2.5" rx="1"/><rect x="104" y="54" width="18" height="2.5" rx="1"/><rect x="38" y="62" width="30" height="2.5" rx="1"/><rect x="80" y="62" width="14" height="2.5" rx="1"/><rect x="104" y="62" width="24" height="2.5" rx="1"/><rect x="38" y="70" width="32" height="2.5" rx="1"/><rect x="80" y="70" width="14" height="2.5" rx="1"/><rect x="104" y="70" width="20" height="2.5" rx="1"/></g></svg><button class="support-shot-del" aria-label="Удалить скриншот"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <button class="support-shot-add" id="supportShotAdd"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
+    </div>
+  </div>
+  <div class="support-done">
+    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#1a9c5f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 12.3l2.800 2.800L16 9.5"/></svg>
+    <b>Обращение отправлено</b>
+    Мы ответим на почту, указанную в вашем профиле.
+  </div>
+  <div class="support-foot">
+    <button class="support-btn ghost" id="supportCancel">Отмена</button>
+    <button class="support-btn primary" id="supportSend">Отправить</button>
+  </div>
+</aside>
 
 <script>
 /* ---------------- ICONS (approximating Figma's filled icon set) ---------------- */
@@ -1228,7 +1819,7 @@ const icons = {
   // monitor-filled
   admin: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.57181 21C8.90661 20.3598 10.41 20 12 20C13.59 20 15.0934 20.3598 16.4282 21M6.8 17H17.2C18.8802 17 19.7202 17 20.362 16.673C20.9265 16.3854 21.3854 15.9265 21.673 15.362C22 14.7202 22 13.8802 22 12.2V7.8C22 6.11984 22 5.27976 21.673 4.63803C21.3854 4.07354 20.9265 3.6146 20.362 3.32698C19.7202 3 18.8802 3 17.2 3H6.8C5.11984 3 4.27976 3 3.63803 3.32698C3.07354 3.6146 2.6146 4.07354 2.32698 4.63803C2 5.27976 2 6.11984 2 7.8V12.2C2 13.8802 2 14.7202 2.32698 15.362C2.6146 15.9265 3.07354 16.3854 3.63803 16.673C4.27976 17 5.11984 17 6.8 17Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   // user-graph — always accent-tinted per the Figma asset (Единый клиент is always the active product)
-  client: `<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.5001 13.125C7.7263 13.125 5.25956 14.4643 3.68911 16.5427C3.35111 16.9901 3.1821 17.2137 3.18763 17.516C3.1919 17.7495 3.33855 18.0442 3.52231 18.1884C3.76015 18.375 4.08975 18.375 4.74894 18.375H16.2513C16.9105 18.375 17.2401 18.375 17.4779 18.1884C17.6617 18.0442 17.8083 17.7495 17.8126 17.516C17.8181 17.2137 17.6491 16.9901 17.3111 16.5427C15.7407 14.4643 13.2739 13.125 10.5001 13.125Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5001 10.5C12.6747 10.5 14.4376 8.73712 14.4376 6.5625C14.4376 4.38788 12.6747 2.625 10.5001 2.625C8.32549 2.625 6.56261 4.38788 6.56261 6.5625C6.56261 8.73712 8.32549 10.5 10.5001 10.5Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.25" cy="17.25" r="6.75" fill="currentColor" fill-opacity=".08"/><path d="M16.5823 15.6543L15.8865 14.0879M19.8653 15.9616L18.3925 16.4525M20.0785 19.1723L18.1793 17.6949M16.1264 17.7623L14.1158 19.5502M18.4609 16.875C18.4609 17.6128 17.8628 18.2109 17.125 18.2109C16.3872 18.2109 15.7891 17.6128 15.7891 16.875C15.7891 16.1372 16.3872 15.5391 17.125 15.5391C17.8628 15.5391 18.4609 16.1372 18.4609 16.875ZM16.6797 12.8672C16.6797 13.605 16.0816 14.2031 15.3438 14.2031C14.6059 14.2031 14.0078 13.605 14.0078 12.8672C14.0078 12.1294 14.6059 11.5312 15.3438 11.5312C16.0816 11.5312 16.6797 12.1294 16.6797 12.8672ZM22.4688 15.5391C22.4688 16.2769 21.8706 16.875 21.1328 16.875C20.395 16.875 19.7969 16.2769 19.7969 15.5391C19.7969 14.8012 20.395 14.2031 21.1328 14.2031C21.8706 14.2031 22.4688 14.8012 22.4688 15.5391ZM22.4688 19.9922C22.4688 20.73 21.8706 21.3281 21.1328 21.3281C20.395 21.3281 19.7969 20.73 19.7969 19.9922C19.7969 19.2544 20.395 18.6562 21.1328 18.6562C21.8706 18.6562 22.4688 19.2544 22.4688 19.9922ZM14.4531 20.4375C14.4531 21.1753 13.855 21.7734 13.1172 21.7734C12.3794 21.7734 11.7812 21.1753 11.7812 20.4375C11.7812 19.6997 12.3794 19.1016 13.1172 19.1016C13.855 19.1016 14.4531 19.6997 14.4531 20.4375Z" stroke="currentColor" stroke-width="1.06875" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  client: `<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.5001 13.125C7.7263 13.125 5.25956 14.4643 3.68911 16.5427C3.35111 16.9901 3.1821 17.2137 3.18763 17.516C3.1919 17.7495 3.33855 18.0442 3.52231 18.1884C3.76015 18.375 4.08975 18.375 4.74894 18.375H16.2513C16.9105 18.375 17.2401 18.375 17.4779 18.1884C17.6617 18.0442 17.8083 17.7495 17.8126 17.516C17.8181 17.2137 17.6491 16.9901 17.3111 16.5427C15.7407 14.4643 13.2739 13.125 10.5001 13.125Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5001 10.5C12.6747 10.5 14.4376 8.73712 14.4376 6.5625C14.4376 4.38788 12.6747 2.625 10.5001 2.625C8.32549 2.625 6.56261 4.38788 6.56261 6.5625C6.56261 8.73712 8.32549 10.5 10.5001 10.5Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.25" cy="17.25" r="6.75" fill="#fff"/><path d="M16.5823 15.6543L15.8865 14.0879M19.8653 15.9616L18.3925 16.4525M20.0785 19.1723L18.1793 17.6949M16.1264 17.7623L14.1158 19.5502M18.4609 16.875C18.4609 17.6128 17.8628 18.2109 17.125 18.2109C16.3872 18.2109 15.7891 17.6128 15.7891 16.875C15.7891 16.1372 16.3872 15.5391 17.125 15.5391C17.8628 15.5391 18.4609 16.1372 18.4609 16.875ZM16.6797 12.8672C16.6797 13.605 16.0816 14.2031 15.3438 14.2031C14.6059 14.2031 14.0078 13.605 14.0078 12.8672C14.0078 12.1294 14.6059 11.5312 15.3438 11.5312C16.0816 11.5312 16.6797 12.1294 16.6797 12.8672ZM22.4688 15.5391C22.4688 16.2769 21.8706 16.875 21.1328 16.875C20.395 16.875 19.7969 16.2769 19.7969 15.5391C19.7969 14.8012 20.395 14.2031 21.1328 14.2031C21.8706 14.2031 22.4688 14.8012 22.4688 15.5391ZM22.4688 19.9922C22.4688 20.73 21.8706 21.3281 21.1328 21.3281C20.395 21.3281 19.7969 20.73 19.7969 19.9922C19.7969 19.2544 20.395 18.6562 21.1328 18.6562C21.8706 18.6562 22.4688 19.2544 22.4688 19.9922ZM14.4531 20.4375C14.4531 21.1753 13.855 21.7734 13.1172 21.7734C12.3794 21.7734 11.7812 21.1753 11.7812 20.4375C11.7812 19.6997 12.3794 19.1016 13.1172 19.1016C13.855 19.1016 14.4531 19.6997 14.4531 20.4375Z" stroke="currentColor" stroke-width="1.06875" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   // file-check-filled
   tsu: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 12.5V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12M14 11H8M10 15H8M16 7H8M14.5 19L16.5 21L21 16.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   // face-id
@@ -1256,44 +1847,37 @@ const domainConfigs = {
     headerTitle: 'Управление',
     groups: [
       { key:'vyshka', title:'Вышка', icon: icons.vyshka, open:true,
-        pages:['Обзор','Настройки','Журнал'], active:'Обзор',
-        counters:{'Настройки':'1'} },
+        pages:['Обзор','Настройки','Журнал'], active:'Обзор' },
     ]
   },
   client: {
     headerTitle: 'Клиент',
     groups: [
       { key:'admin', title:'Админка', icon: icons.admin, open:false,
-        pages:['Задачи','Триггеры','История','Ноды','Настройки','Аудит','SOAP'],
-        counters:{'Триггеры':'3'} },
+        pages:['Задачи','Триггеры','История','Ноды','Настройки','Аудит','SOAP'] },
       { key:'client', title:'Единый клиент', icon: icons.client, open:true,
         pages:['Сущности','Группы дубликатов','Конфликты','Отчеты'], active:'Сущности',
         counters:{'Конфликты':'12'} },
       { key:'tsu', title:'ЦУС', icon: icons.tsu, open:false,
-        pages:['Согласия','Партнеры','История'],
-        counters:{'Партнеры':'5'} },
+        pages:['Согласия','Партнеры','История'] },
       { key:'kus', title:'КУС', icon: icons.kus, open:false,
-        pages:['Списки','Операции','Анкеты','Журнал проверок','Отчеты'],
-        counters:{'Анкеты':'8'} },
+        pages:['Списки','Операции','Анкеты','Журнал проверок','Отчеты'] },
       { key:'mkombine', title:'МКомбайн', icon: icons.mkombine, open:false,
-        pages:['Дашборд','Кампании','Сегменты','Шаблоны','Отчетность'],
-        counters:{'Сегменты':'2'} },
+        pages:['Дашборд','Кампании','Сегменты','Шаблоны','Отчетность'] },
     ]
   },
   perekoder: {
     headerTitle: 'Данные',
     groups: [
       { key:'perekoder', title:'Перекодер', icon: icons.perekoder, open:true,
-        pages:['Обзор','Правила','История'], active:'Обзор',
-        counters:{'Правила':'4'} },
+        pages:['Обзор','Правила','История'], active:'Обзор' },
     ]
   },
   maskirovshik: {
     headerTitle: 'Данные',
     groups: [
       { key:'maskirovshik', title:'Маскировщик', icon: icons.maskirovshik, open:true,
-        pages:['Маскировки','Страница продукта','Источники','Ролевая модель'], active:'Маскировки',
-        counters:{'Источники':'7'} },
+        pages:['Маскировки','Страница продукта','Источники','Ролевая модель'], active:'Маскировки' },
     ]
   },
 };
@@ -1334,7 +1918,7 @@ function renderNav(domainKey, focusKey){
       </button>
       <div class="nav-sub-wrapper">
         <div class="nav-sub-inner">
-          <div class="nav-sub">${pagesHtml}<div class="rail-indicator"></div></div>
+          <div class="nav-sub">${pagesHtml}<div class="rail-indicator"></div><div class="rail-tick"></div></div>
         </div>
       </div>
     `;
@@ -1350,21 +1934,49 @@ function renderNav(domainKey, focusKey){
 function updateRailIndicators(animate){
   document.querySelectorAll('.nav-group').forEach(groupEl=>{
     const indicator = groupEl.querySelector('.rail-indicator');
+    const tick = groupEl.querySelector('.rail-tick');
     if(!indicator) return;
     const activePage = groupEl.querySelector('.nav-page.active');
     if(!activePage){
       indicator.style.opacity = 0;
+      if(tick) tick.style.opacity = 0;
       return;
     }
-    if(!animate){
-      indicator.style.transition = 'none';
+    const top = activePage.offsetTop + 'px';
+
+    // The tick has no transition of its own — it just jumps straight to the
+    // active row's position, every time, animated or not.
+    if(tick){
+      tick.style.top = (activePage.offsetTop + 4) + 'px';
+      tick.style.opacity = 1;
     }
-    indicator.style.top = activePage.offsetTop + 'px';
-    indicator.style.opacity = 1;
+
     if(!animate){
+      // Snap into place with no motion at all (first render / silent restore).
+      indicator.style.transition = 'none';
+      indicator.style.top = top;
+      indicator.style.transform = 'translateX(0) scaleX(1)';
+      indicator.style.opacity = 1;
       void indicator.offsetWidth; // force reflow before restoring the transition
       indicator.style.transition = '';
+      return;
     }
+
+    // Jump to the new row instantly (no vertical slide), then fly the
+    // highlight in from the right edge so each selection reads as a
+    // fresh, directional "landing" rather than a line crawling down the list.
+    indicator.style.transition = 'none';
+    indicator.style.top = top;
+    indicator.style.transform = 'translateX(14px) scaleX(.9)';
+    indicator.style.opacity = 0;
+    void indicator.offsetWidth; // force reflow so the jump above isn't animated
+    requestAnimationFrame(()=>{
+      indicator.style.transition = '';
+      requestAnimationFrame(()=>{
+        indicator.style.transform = 'translateX(0) scaleX(1)';
+        indicator.style.opacity = 1;
+      });
+    });
   });
 }
 
@@ -1430,9 +2042,78 @@ document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape') closeUserMenu();
 });
 
+/* ---------------- LOGIN SCREEN ---------------- */
+const loginScreen = document.getElementById('loginScreen');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
+
+function showLogin(){
+  loginUser.value = '';
+  loginPass.value = '';
+  clearTimeout(loginLeaveTimer);
+  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving');
+  loginScreen.classList.remove('is-entering');
+  void loginScreen.offsetWidth;
+  loginScreen.classList.add('is-entering');
+  loginUser.focus();
+}
+
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
   closeUserMenu();
-  // Demo-only: no real auth/session here, so this just closes the menu.
+  showLogin();
+});
+
+// The prototype opens on the login screen.
+loginUser.focus();
+
+// Demo auth: «Войти» with both fields filled in lets the person into the
+// app; with a field left empty it shows the authorisation error instead.
+// Wired to a plain click / Enter instead of a <form> submit: previews that
+// render the file in a sandboxed frame block form submission entirely.
+// Skeleton placeholder over the header + content (the sidebar stays live)
+// for `ms` milliseconds, then it fades away to reveal the real screen.
+const mainSkeleton = document.getElementById('mainSkeleton');
+let skeletonTimers = [];
+function showSkeleton(ms){
+  skeletonTimers.forEach(clearTimeout);
+  mainSkeleton.classList.remove('is-hidden', 'is-leaving');
+  skeletonTimers = [
+    setTimeout(()=> mainSkeleton.classList.add('is-leaving'), ms),
+    setTimeout(()=>{ mainSkeleton.classList.add('is-hidden'); mainSkeleton.classList.remove('is-leaving'); }, ms + 460),
+  ];
+}
+
+// Leaves the login screen with a soft cross-fade into the app.
+let loginLeaveTimer = null;
+function enterApp(){
+  const app = document.querySelector('.app');
+  loginScreen.classList.remove('has-error', 'is-entering');
+  loginScreen.classList.add('is-leaving');
+  app.classList.remove('is-arriving');
+  void app.offsetWidth;
+  app.classList.add('is-arriving');
+  showSkeleton(2600);
+  clearTimeout(loginLeaveTimer);
+  loginLeaveTimer = setTimeout(()=>{
+    loginScreen.classList.add('is-hidden');
+    loginScreen.classList.remove('is-leaving');
+    app.classList.remove('is-arriving');
+  }, 620);
+}
+
+function tryLogin(){
+  if(loginUser.value.trim() && loginPass.value.trim()){
+    enterApp();
+    return;
+  }
+  loginScreen.classList.add('has-error');
+  (loginUser.value.trim() ? loginPass : loginUser).focus();
+}
+document.getElementById('loginSubmit').addEventListener('click', tryLogin);
+[loginUser, loginPass].forEach(input=>{
+  input.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); tryLogin(); }
+  });
 });
 
 // Each domain deterministically shows one of the two content screens.
@@ -1510,7 +2191,7 @@ function setScreen(targetId){
   if(current.id === targetId) return;
   const currentTabs = document.querySelector('.tabs-group:not(.is-hidden)');
   const other = document.getElementById(targetId);
-  const tabsIdMap = { screenA:'tabsA', screenB:'tabsB', screenC:'tabsC', screenD:'tabsD', screenE:'tabsE' };
+  const tabsIdMap = { screenA:'tabsA', screenB:'tabsB', screenC:'tabsC', screenD:'tabsD', screenE:'tabsE', screenF:'tabsF' };
   const otherTabs = document.getElementById(tabsIdMap[targetId]);
 
   current.classList.add('is-hidden');
@@ -1519,8 +2200,10 @@ function setScreen(targetId){
   otherTabs.classList.remove('is-hidden');
 
   other.classList.remove('is-entering');
+  otherTabs.classList.remove('is-entering');
   void other.offsetWidth; // force reflow so the animation replays every time
   other.classList.add('is-entering');
+  otherTabs.classList.add('is-entering');
 
   document.querySelector('.content').scrollTop = 0;
 }
@@ -1557,6 +2240,8 @@ nav.addEventListener('click', (e)=>{
     const pageName = pageEl.dataset.page;
     if(groupKey === 'kus' && pageName === 'Списки'){
       setScreen('screenC');
+    } else if(groupKey === 'client' && pageName === 'Группы дубликатов'){
+      setScreen('screenF');
     } else {
       swapScreen();
     }
@@ -1643,21 +2328,136 @@ tbodyLists.innerHTML = listsRows.map(r=>{
    not a breadcrumb trail that would have to describe two products at once. */
 let cameFrom = null;
 
-function openEntityDetail(name){
+/* ---------------- Entity card "back" button ----------------
+   One explicit step back: an arrow plus the name of where the person came
+   from. That is either the page the card was opened from (Сущности, Группы
+   дубликатов, or another product such as КУС), or — after drilling into a
+   related entity via "связи" — the previous entity in the chain. */
+let breadcrumbStack = [];
+
+function renderEntityBack(){
+  const label = breadcrumbStack.length > 1
+    ? breadcrumbStack[breadcrumbStack.length - 2]
+    : (cameFrom ? cameFrom.label : 'Сущности');
+  document.getElementById('entityBackLabel').textContent = label;
+}
+
+document.getElementById('entityBack').addEventListener('click', ()=>{
+  // Drilled into a related entity — step back to the previous one.
+  if(breadcrumbStack.length > 1){
+    breadcrumbStack.pop();
+    setEntityName(breadcrumbStack[breadcrumbStack.length - 1]);
+    renderEntityBack();
+    return;
+  }
+
+  if(cameFrom){
+    renderNav(cameFrom.domainKey, cameFrom.productKey);
+    // Единый клиент has more than one page that can open an entity card
+    // (Сущности, Группы дубликатов…) — make sure the sidebar highlights
+    // whichever page we're actually returning to, not just the group default.
+    const screenToPage = { screenA:'Сущности', screenF:'Группы дубликатов' };
+    const pageLabel = screenToPage[cameFrom.screenId];
+    if(cameFrom.productKey === 'client' && pageLabel){
+      const groupEl = nav.querySelector('.nav-group[data-key="client"]');
+      if(groupEl){
+        groupEl.querySelectorAll('.nav-page.active').forEach(el=>el.classList.remove('active'));
+        const pageEl = Array.from(groupEl.querySelectorAll('.nav-page')).find(el=>el.dataset.page === pageLabel);
+        if(pageEl) pageEl.classList.add('active');
+        updateRailIndicators(false);
+      }
+    }
+    setScreen(cameFrom.screenId);
+    cameFrom = null;
+  } else {
+    setScreen('screenA');
+  }
+});
+
+// Entity card tabs (атрибутика / история / исходные / проверки) — "связи" stays
+// special (drills into a related entity instead of swapping panels).
+const entityTabPanels = {
+  atributika: document.getElementById('entityTabAtributika'),
+  istoriya: document.getElementById('entityTabIstoriya'),
+  ishodnye: document.getElementById('entityTabIshodnye'),
+  proverki: document.getElementById('entityTabProverki'),
+};
+function setEntityTab(key){
+  document.querySelectorAll('.ec-menu [data-tab]').forEach(el=>{
+    el.classList.toggle('active', el.dataset.tab === key);
+  });
+  Object.keys(entityTabPanels).forEach(k=>{
+    entityTabPanels[k].classList.toggle('is-hidden', k !== key);
+  });
+}
+document.querySelectorAll('.ec-menu [data-tab]').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    if(e.target.closest('.ec-refresh')) return;
+    setEntityTab(el.dataset.tab);
+  });
+});
+
+// Sections listed under «Атрибутика» are anchors: they open the Атрибутика
+// view (if another one is showing) and scroll to the matching card.
+document.querySelectorAll('.ec-sub-item[data-section]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    setEntityTab('atributika');
+    const target = document.getElementById(el.dataset.section);
+    if(target) target.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+});
+
+// «Прошлые» — past values of the field, in a small popover.
+(function(){
+  const wrap = document.getElementById('attrHistory');
+  document.getElementById('attrHistoryChip').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    wrap.classList.toggle('open');
+  });
+  document.addEventListener('click', (e)=>{
+    if(!wrap.contains(e.target)) wrap.classList.remove('open');
+  });
+})();
+
+// Card title and the ФИО field always show the same person.
+function setEntityName(name){
   document.getElementById('entityName').textContent = name;
+  document.getElementById('entityFioValue').textContent = name;
+}
+
+// Demo: clicking "связи" drills into a related entity; the back button then
+// points at the entity we came from.
+document.getElementById('entityRelationsTab').addEventListener('click', ()=>{
+  const relatedName = 'Иванов Иван Иванович';
+  breadcrumbStack.push(relatedName);
+  setEntityName(relatedName);
+  renderEntityBack();
+});
+
+function openEntityDetail(name){
+  setEntityName(name);
+  breadcrumbStack = [name];
 
   const activeGroupEl = document.querySelector('.nav-group.active-product');
   const activeProductKey = activeGroupEl ? activeGroupEl.dataset.key : null;
-  const activeProductTitle = activeGroupEl ? activeGroupEl.querySelector('.label').textContent : '';
+  // The back button is always named after the PAGE the person came from,
+  // never after the product (so it never reads "КУС", "ЦУС", …).
+  const originPageEl = activeGroupEl ? activeGroupEl.querySelector('.nav-page.active .nav-page-text') : null;
+  const originPageLabel = originPageEl ? originPageEl.textContent : 'Сущности';
 
   if(activeProductKey && activeProductKey !== 'client'){
     cameFrom = {
       domainKey: currentDomainKey,
       productKey: activeProductKey,
       screenId: document.querySelector('.screen:not(.is-hidden)').id,
-      label: `Назад к результатам сверки в ${activeProductTitle}`
+      label: originPageLabel
     };
-    document.getElementById('entityBackLabel').textContent = cameFrom.label;
+    // КУС → Списки has two views; name the back button after the one the
+    // person was actually looking at (Выявления / Журнал проверок).
+    if(cameFrom.screenId === 'screenC'){
+      const onDetections = !document.getElementById('kusViewDetections').classList.contains('is-hidden');
+      cameFrom.label = onDetections ? 'Выявления' : 'Журнал проверок';
+    }
 
     // Remember which product groups were already expanded (e.g. КУС), so the
     // switch to Единый клиент doesn't visually collapse them — only the
@@ -1680,27 +2480,35 @@ function openEntityDetail(name){
       });
     });
   } else {
-    // Same-product drill-down (opened straight from Сущности) still needs an
-    // explicit, discoverable way back — relying on "click the already-active
-    // sidebar item again" isn't obvious. One consistent header slot, two labels.
+    // Same-product drill-down (opened straight from a Единый клиент page, e.g.
+    // Сущности or Группы дубликатов) still needs an explicit, discoverable way
+    // back — relying on "click the already-active sidebar item again" isn't
+    // obvious. The header back button covers it, and reflects whichever
+    // page the entity card was actually opened from.
+    const activePageEl = activeGroupEl ? activeGroupEl.querySelector('.nav-page.active') : null;
+    const originScreen = document.querySelector('.screen:not(.is-hidden)').id;
     cameFrom = {
       domainKey: currentDomainKey,
       productKey: 'client',
-      screenId: 'screenA',
-      label: 'К списку сущностей'
+      screenId: originScreen === 'screenD' ? 'screenA' : originScreen,
+      label: activePageEl ? activePageEl.querySelector('.nav-page-text').textContent : 'Сущности'
     };
-    document.getElementById('entityBackLabel').textContent = cameFrom.label;
   }
 
+  // If the page we came from has top-level tabs in the header, the back
+  // button names the tab too: «Сущности. ФЛ».
+  const originTopTab = document.querySelector('.tabs-group:not(.is-hidden) .tab.active');
+  if(originTopTab) cameFrom.label += '. ' + originTopTab.textContent.trim();
+
+  // Opened from another product (КУС) the card lands on «Проверки»;
+  // from Единый клиент itself — on «Атрибутика».
+  setEntityTab(cameFrom && cameFrom.productKey !== 'client' ? 'proverki' : 'atributika');
+  document.getElementById('attrHistory').classList.remove('open');
+
+  renderEntityBack();
   setScreen('screenD');
 }
 
-document.getElementById('entityBackBanner').addEventListener('click', ()=>{
-  if(!cameFrom) return;
-  renderNav(cameFrom.domainKey, cameFrom.productKey);
-  setScreen(cameFrom.screenId);
-  cameFrom = null;
-});
 
 // Demo: clicking a row in КУС → Списки also opens an entity card, simulating
 // the cross-product scenario (in the real product this would come from a
@@ -1793,6 +2601,103 @@ function openKusReview(d){
 document.getElementById('kusReviewBackBanner').addEventListener('click', ()=>{
   setScreen('screenC'); // returns to whichever КУС view (Журнал/Выявления) was showing before
 });
+
+/* ---------------- Группы дубликатов (ЕК) ---------------- */
+const groupRows = [
+  { name:'Хазов Михаил Игоревич', sub:'3 карточки · совпадение по ФИО и дате рождения', dup:3, counterparties:2, pct:40, current:true },
+  { name:'Воронцова Алина Сергеевна', sub:'2 карточки · совпадение по ФИО и телефону', dup:2, counterparties:2, pct:100 },
+  { name:'Дегтярев Павел Олегович', sub:'4 карточки · совпадение по паспорту', dup:4, counterparties:3, pct:75 },
+  { name:'Симонян Анна Артуровна', sub:'2 карточки · совпадение по ФИО и адресу', dup:2, counterparties:1, pct:0 },
+  { name:'Ушаков Георгий Витальевич', sub:'3 карточки · совпадение по ФИО и дате рождения', dup:3, counterparties:3, pct:100 },
+  { name:'Клычева Диана Руслановна', sub:'2 карточки · совпадение по телефону', dup:2, counterparties:2, pct:50 },
+  { name:'Пестов Артём Денисович', sub:'5 карточек · совпадение по ФИО и паспорту', dup:5, counterparties:4, pct:20 },
+  { name:'Рашидова Камилла Ибрагимовна', sub:'2 карточки · совпадение по ФИО и адресу', dup:2, counterparties:1, pct:100 },
+];
+const tbodyGroups = document.getElementById('tbodyGroups');
+tbodyGroups.innerHTML = groupRows.map(g=>`<tr class="${g.current ? 'is-current' : ''}">
+    <td class="group-desc">${g.name}<span class="group-desc-sub">${g.sub}</span></td>
+    <td>${g.dup}</td>
+    <td>${g.counterparties}</td>
+    <td>
+      <div class="progress-cell">
+        <div class="progress-bar"><div class="progress-fill" style="width:${g.pct}%"></div></div>
+        <span class="progress-pct">${g.pct}%</span>
+      </div>
+    </td>
+  </tr>`).join('');
+
+tbodyGroups.addEventListener('click', (e)=>{
+  const row = e.target.closest('tr');
+  if(!row) return;
+  const idx = Array.from(tbodyGroups.children).indexOf(row);
+  const g = groupRows[idx];
+  if(g) openEntityDetail(g.name);
+});
+
+/* ---------------- SUPPORT DRAWER («?») ---------------- */
+(function(){
+  const btn = document.getElementById('supportBtn');
+  const drawer = document.getElementById('supportDrawer');
+  const subject = document.getElementById('supportSubject');
+  const text = document.getElementById('supportText');
+  const shots = document.getElementById('supportShots');
+  const addBtn = document.getElementById('supportShotAdd');
+  const shotTemplate = shots.querySelector('.support-shot').cloneNode(true);
+  let closeTimer = null;
+
+  // «Страница» = wherever the person is right now in the sidebar.
+  function currentPageName(){
+    const active = document.querySelector('.nav-page.active .nav-page-text');
+    return active ? active.textContent : 'Сущности';
+  }
+
+  function open(){
+    clearTimeout(closeTimer);
+    drawer.classList.remove('is-sent');
+    subject.classList.remove('is-invalid');
+    document.getElementById('supportPage').textContent = currentPageName();
+    document.body.classList.add('support-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    setTimeout(()=> subject.focus(), 60);
+  }
+  function close(){
+    document.body.classList.remove('support-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function reset(){
+    subject.value = ''; text.value = '';
+    shots.querySelectorAll('.support-shot').forEach(el=>el.remove());
+    shots.insertBefore(shotTemplate.cloneNode(true), addBtn);
+  }
+
+  btn.addEventListener('click', ()=> document.body.classList.contains('support-open') ? close() : open());
+  btn.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
+  document.getElementById('supportClose').addEventListener('click', close);
+  document.getElementById('supportCancel').addEventListener('click', ()=>{ close(); closeTimer = setTimeout(reset, 400); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && document.body.classList.contains('support-open')) close(); });
+  document.getElementById('supportPage').addEventListener('click', close);
+  // The page stays usable while the drawer is open — keep «Страница» in step
+  // with whatever the person navigates to.
+  document.getElementById('nav').addEventListener('click', ()=>{
+    setTimeout(()=>{ document.getElementById('supportPage').textContent = currentPageName(); }, 0);
+  });
+
+  // Demo attachments: «Добавить» attaches one more screenshot, × removes it.
+  addBtn.addEventListener('click', ()=> shots.insertBefore(shotTemplate.cloneNode(true), addBtn));
+  shots.addEventListener('click', (e)=>{
+    const del = e.target.closest('.support-shot-del');
+    if(del) del.closest('.support-shot').remove();
+  });
+
+  subject.addEventListener('input', ()=> subject.classList.remove('is-invalid'));
+  document.getElementById('supportSend').addEventListener('click', ()=>{
+    if(!subject.value.trim()){ subject.classList.add('is-invalid'); subject.focus(); return; }
+    drawer.classList.add('is-sent');
+    closeTimer = setTimeout(()=>{ close(); setTimeout(reset, 400); }, 1800);
+  });
+})();
 </script>
 
 </body>
