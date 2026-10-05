@@ -71,7 +71,7 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
           <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Сегмент</button>
           <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Настройки сегмента</button>
           <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Оферы</button>
-          <button aria-current="page" style="border: 0; background: transparent; padding: 10px 30px; height: 44px; color: #0f6f7d; box-shadow: inset 0 -2px 0 #0f7d8c">Параметры отправки</button>
+          <button aria-current="page" style="border: 0; background: transparent; padding: 10px 30px; height: 44px; color: #0f6f7d; box-shadow: inset 0 -2px 0 #0f7d8c">Параметры запуска</button>
         </div>
         <div style="display: flex; border: 1px solid #dfe3e8; border-radius: 4px; background: #fafbfc">
           <button class="tab" style="border: 0; background: transparent; padding: 0 18px; height: 44px">Предпросмотр</button>
@@ -114,7 +114,7 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
                     </span>
                   </div>
                   <div style="padding: 0 18px">
-                    <label style="display: flex; align-items: center; gap: 6px; height: 32px; box-sizing: border-box; border: 1px solid #6b7785; border-radius: 4px; padding: 0 8px; background: #ffffff">
+                    <label style="display: flex; align-items: center; gap: 6px; height: 24px; box-sizing: border-box; border: 1px solid #6b7785; border-radius: 4px; padding: 0 6px; background: #ffffff">
                       <input type="text" aria-label="Лимит на кампанию" value="{{ch.limit}}" onChange="{{ch.setLimit}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 14px">
                       <sc-if value="{{ch.showUnit}}" hint-placeholder-val="{{false}}"><span style="color: #5b6572; font-size: 15px">шт</span></sc-if>
                     </label>
@@ -122,14 +122,14 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
                   <div style="padding: 0 18px; display: flex; align-items: center; gap: 18px">
                     <div style="display: flex; align-items: center; gap: 10px; padding-right: 18px">
                       <span style="font-weight: 400; color: #1c2430; white-space: nowrap">Окно коммуникации</span>
-                      <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 32px; padding: 0 8px; width: 100px; box-sizing: border-box; background: #ffffff">
+                      <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 24px; padding: 0 6px; width: 100px; box-sizing: border-box; background: #ffffff">
                         <input type="text" aria-label="Начало окна" value="{{ch.from}}" onChange="{{ch.setFrom}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 14px">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
                       </span>
                       <span aria-hidden="true">–</span>
-                      <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 32px; padding: 0 8px; width: 100px; box-sizing: border-box; background: #ffffff">
+                      <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 24px; padding: 0 6px; width: 100px; box-sizing: border-box; background: #ffffff">
                         <input type="text" aria-label="Конец окна" value="{{ch.to}}" onChange="{{ch.setTo}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 14px">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
                       </span>
                     </div>
                     <div style="flex: none">
@@ -193,8 +193,31 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
           </sc-if>
         </div>
 
-        <sc-if value="{{isSchedule}}" hint-placeholder-val="{{true}}">
-          <div style="margin-top: 24px; background: #eaf3fc; border: 1px solid #cfe3f7; border-radius: 4px; padding: 14px 10px 10px; display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: flex-end">
+        <sc-if value="{{noTrigSched}}" hint-placeholder-val="{{false}}">
+          <h3 style="margin: 24px 0 10px; font-size: 15px; font-weight: 600; height: 28px; display: flex; align-items: center">Расписание</h3>
+          <div style="border: 1px dashed #aab2bc; border-radius: 4px; background: #fafafa; padding: 12px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
+            <span style="display: inline-flex; align-items: center; gap: 6px; background: #f1f3f5; border-radius: 12px; padding: 3px 10px; font-weight: 500">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16l13-8z"></path></svg>
+              Запуск вручную
+            </span>
+            <span style="color: #4a5461">Расписание не задано — триггер начнёт работать после того, как кампанию запустят вручную.</span>
+            <button onClick="{{addTrigSched}}" style="height: 28px; border: 0; background: transparent; padding: 0 4px; color: #0f6f7d; font-weight: 500; display: flex; align-items: center; gap: 6px">
+              Добавить расписание
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            </button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{showPanel}}" hint-placeholder-val="{{true}}">
+          <sc-if value="{{isTrigger}}" hint-placeholder-val="{{false}}">
+            <div style="margin-top: 24px; height: 28px; display: flex; align-items: center; gap: 6px">
+              <h3 style="margin: 0; font-size: 15px; font-weight: 600">Расписание</h3>
+              <button class="ghost" aria-label="Удалить расписание" onClick="{{removeTrigSched}}" style="width: 28px; height: 28px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #55606d">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"></path></svg>
+              </button>
+            </div>
+          </sc-if>
+          <div style="margin-top: {{panelGap}}; background: #eaf4fe; border: 1px solid #8ec5f5; border-radius: 4px; padding: 14px 10px 10px; display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: flex-end">
             <div>
               <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px; height: 26px"><span style="font-weight: 400; color: #4a5461">Начало</span></div>
               <div style="display: flex; gap: 10px">
@@ -231,6 +254,7 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
               </div>
             </div>
 
+            <sc-if value="{{isSchedule}}" hint-placeholder-val="{{true}}">
             <div>
               <div id="period-label" style="font-weight: 400; color: #4a5461; margin-bottom: 8px; height: 26px; display: flex; align-items: center">Периодичность</div>
               <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
@@ -293,10 +317,24 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
                 </sc-if>
               </div>
             </div>
+            </sc-if>
+
+            <sc-if value="{{showAddEnd}}" hint-placeholder-val="{{false}}">
+              <button onClick="{{openTrigEnd}}" style="height: 34px; border: 0; background: transparent; padding: 0 4px; color: #0f6f7d; font-weight: 500; display: flex; align-items: center; gap: 8px">
+                Время и дата завершения
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              </button>
+            </sc-if>
 
             <sc-if value="{{showEnd}}" hint-placeholder-val="{{true}}">
               <div>
-                <div style="font-weight: 400; color: #4a5461; margin-bottom: 8px; height: 26px; display: flex; align-items: center">Окончание</div>
+                <div style="font-weight: 400; color: #4a5461; margin-bottom: 8px; height: 26px; display: flex; align-items: center; gap: 6px">Окончание
+                  <sc-if value="{{isTrigger}}" hint-placeholder-val="{{false}}">
+                    <button class="ghost" aria-label="Убрать время и дату завершения" onClick="{{removeTrigEnd}}" style="width: 26px; height: 26px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #55606d">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"></path></svg>
+                    </button>
+                  </sc-if>
+                </div>
                 <div style="display: flex; gap: 10px">
                   <div style="position: relative">
                     <span style="display: flex; align-items: center; border: 1px solid {{endCal.border}}; border-radius: 4px; height: 34px; padding: 0 2px 0 8px; width: 164px; box-sizing: border-box; background: #ffffff">
@@ -329,6 +367,43 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
                   </span>
                 </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isTrigger}}" hint-placeholder-val="{{false}}">
+          <button role="switch" aria-checked="{{trig.on}}" onClick="{{trig.toggle}}" style="margin-top: 12px; border: 0; background: transparent; padding: 4px 0; display: flex; align-items: center; gap: 8px; text-align: left">
+            <span style="width: 32px; height: 18px; border-radius: 9px; background: {{trig.bg}}; display: block; position: relative; flex: none"><span style="position: absolute; top: 2px; left: {{trig.x}}; width: 14px; height: 14px; border-radius: 50%; background: #ffffff"></span></span>
+            Триггер срабатывает один раз для клиента
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.5"></path></svg>
+          </button>
+          <h3 style="margin: 24px 0 10px; font-size: 15px; font-weight: 600">Триггер</h3>
+          <div style="border: 1px solid #dfe3e8; border-radius: 6px; padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-direction: row-reverse">
+              <button class="ghost" aria-label="Развернуть на весь экран" style="width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #55606d">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"></path></svg>
+              </button>
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="color: #4a5461">Тип события <span style="color: #b3261e">*</span></span>
+              <select value="{{trigEvent}}" onChange="{{setTrigEvent}}" style="width: 280px; max-width: 100%; height: 34px; border: 1px solid #6b7785; border-radius: 4px; padding: 0 8px; background: #ffffff; font-size: 15px">
+                <option value="">Выберите тип события</option>
+                <option value="activity">Активность клиента</option>
+              </select>
+            </label>
+            </div>
+            <sc-if value="{{hasTrigEvent}}" hint-placeholder-val="{{true}}">
+              <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+                <div style="display: flex; flex-direction: column; align-items: center; width: 414px; max-width: 100%">
+                  <div style="width: 100%; box-sizing: border-box; border: 1px solid #c9ced5; border-radius: 4px; padding: 8px 12px; text-align: center; font-weight: 600; background: #ffffff">Триггер: {{trigEventLabel}}</div>
+                  <div style="width: 1px; height: 34px; background: #9aa3ad"></div>
+                  <button aria-label="Добавить фильтр" style="width: 54px; height: 32px; border: 0; border-radius: 4px; background: #e4f1f3; color: #0f7d8c; padding: 0; display: flex; align-items: center; justify-content: center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 8v6l-4-2v-4z"></path></svg>
+                  </button>
+                </div>
+                <button aria-label="Комментарий" style="width: 40px; height: 32px; border: 0; border-radius: 4px; background: #e4f1f3; color: #0f7d8c; padding: 0; display: flex; align-items: center; justify-content: center; flex: none">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 9h8M8 12h5"></path></svg>
+                </button>
               </div>
             </sc-if>
           </div>
@@ -423,7 +498,7 @@ input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
 
         <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 2px">
           <sc-for list="{{switches}}" as="sw" hint-placeholder-count="2">
-            <button role="switch" aria-checked="{{sw.on}}" onClick="{{sw.toggle}}" style="border: 0; background: transparent; padding: 4px 0; display: flex; align-items: center; gap: 8px; text-align: left; align-self: flex-start">
+            <button role="switch" aria-checked="{{sw.on}}" disabled="{{sw.disabled}}" onClick="{{sw.toggle}}" style="opacity: {{sw.opacity}}; border: 0; background: transparent; padding: 4px 0; display: flex; align-items: center; gap: 8px; text-align: left; align-self: flex-start">
               <span style="width: 32px; height: 18px; border-radius: 9px; background: {{sw.bg}}; display: block; position: relative; flex: none"><span style="position: absolute; top: 2px; left: {{sw.x}}; width: 14px; height: 14px; border-radius: 50%; background: #ffffff"></span></span>
               {{sw.label}}
               <sc-if value="{{sw.info}}" hint-placeholder-val="{{false}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.5"></path></svg></sc-if>
@@ -750,8 +825,8 @@ class Component extends DCLogic {
     });
 
     const switches = [
-      { label: 'Запретить повторную отправку офера одному и тому же клиенту', on: s.noRepeat, info: false, ...sw(s.noRepeat), toggle: () => this.setState({ noRepeat: !s.noRepeat }) },
-      { label: 'Равномерно распределять сегмент по дням отправки', on: s.even, info: true, ...sw(s.even), toggle: () => this.setState({ even: !s.even }) }
+      { label: 'Запретить повторную отправку офера одному и тому же клиенту', on: s.noRepeat, info: false, disabled: false, opacity: 1, ...sw(s.noRepeat), toggle: () => this.setState({ noRepeat: !s.noRepeat }) },
+      { label: 'Равномерно распределять сегмент по дням отправки', on: s.even && s.launch !== 'trigger', info: true, disabled: s.launch === 'trigger', opacity: s.launch === 'trigger' ? 0.5 : 1, ...sw(s.even && s.launch !== 'trigger'), toggle: () => this.setState({ even: !s.even }) }
     ];
 
     const weekendModes = [['run', 'Запускать в выходной день'], ['shift', 'Переносить на ближайший будний день'], ['manual', 'Решать вручную для каждого случая']]
@@ -899,10 +974,20 @@ class Component extends DCLogic {
       periodOptions, periodLabel,
       isEvery: s.period === 'every', isWeekly: s.period === 'weekly',
       isMonthlyDate: s.period === 'monthly_date', isMonthlyDow: s.period === 'monthly_dow',
-      showEnd: s.period !== 'once',
+      showEnd: s.launch === 'trigger' ? !!s.trigEndOpen : s.period !== 'once',
+      isTrigger: s.launch === 'trigger', showPanel: s.launch === 'schedule' || (s.launch === 'trigger' && s.trigSched !== false),
+      noTrigSched: s.launch === 'trigger' && s.trigSched === false,
+      removeTrigSched: () => this.setState({ trigSched: false, calOpen: null }), addTrigSched: () => this.setState({ trigSched: true }),
+      panelGap: s.launch === 'trigger' ? '10px' : '24px',
+      showAddEnd: s.launch === 'trigger' && !s.trigEndOpen,
+      openTrigEnd: () => this.setState({ trigEndOpen: true }),
+      removeTrigEnd: () => this.setState({ trigEndOpen: false, endDate: '', endTime: '', calOpen: null }),
+      trig: { on: s.trigOnce !== false, ...sw(s.trigOnce !== false), toggle: () => this.setState({ trigOnce: s.trigOnce === false }) },
+      trigEvent: s.trigEvent == null ? 'activity' : s.trigEvent, setTrigEvent: set('trigEvent'),
+      hasTrigEvent: (s.trigEvent == null ? 'activity' : s.trigEvent) !== '', trigEventLabel: 'Активность клиента',
       everyN: s.everyN, everyUnit: s.everyUnit, dayNum: s.dayNum, nth: s.nth, nthDow: s.nthDow,
       setEveryN: set('everyN'), setEveryUnit: set('everyUnit'), setDayNum: set('dayNum'), setNth: set('nth'), setNthDow: set('nthDow'),
-      weekdayButtons, switches, weekendModes, rows, noRows: rows.length === 0
+      weekdayButtons, switches: s.launch === 'trigger' ? [] : switches, weekendModes, rows, noRows: rows.length === 0
     };
   }
 }
