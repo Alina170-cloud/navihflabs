@@ -224,6 +224,51 @@
   .login-error{ display:none; width:100%; margin-top:16px; text-align:center; font-size:14px; line-height:19px; letter-spacing:.1px; color:#d6232f; }
   .login.has-error .login-error{ display:block; }
 
+  /* ---- Start chooser: shown right after sign-in, before the app opens ---- */
+  .chooser{ display:none; width:760px; max-width:100%; margin-bottom:4vh; background:#fff; border-radius:12px;
+    box-shadow:0 18px 48px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.05), 0 0 0 1px rgba(16,24,40,.05); }
+  .login.is-choosing .login-card{ display:none; }
+  .login.is-choosing .chooser{ display:block; animation:chooserIn .38s cubic-bezier(.22,.61,.36,1) both; }
+  @keyframes chooserIn{ from{ opacity:0; transform:translateY(8px) scale(.985); } to{ opacity:1; transform:none; } }
+  .chooser{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
+  .login.is-leaving .chooser{ transform:translateY(-10px) scale(.985); opacity:0; }
+  .chooser-head{ padding:24px 28px 18px; border-bottom:1px solid var(--border-soft); }
+  .chooser-title{ font-size:20px; line-height:26px; font-weight:600; letter-spacing:-.1px; color:#1b1e24; }
+  .chooser-sub{ margin-top:4px; font-size:14px; line-height:20px; letter-spacing:.1px; color:#6b6f75; }
+  .chooser-body{ display:grid; grid-template-columns:1fr 1fr 1fr; }
+  .chooser-col{ padding:14px 14px 18px; display:flex; flex-direction:column; gap:14px; min-width:0; }
+  .chooser-col + .chooser-col{ border-left:1px solid var(--border-soft); }
+  .chooser-group{ display:flex; flex-direction:column; gap:2px; }
+  .chooser-label{ padding:4px 10px 6px; font-size:11px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px; }
+  .chooser-item{
+    all:unset; box-sizing:border-box; display:flex; align-items:center; gap:10px; width:100%;
+    padding:5px 10px 5px 5px; border-radius:6px; cursor:pointer;
+    font-size:14px; line-height:18px; font-weight:500; letter-spacing:.2px; color:var(--text-page);
+    transition:background .15s var(--ease), color .15s var(--ease);
+  }
+  .chooser-item .chooser-icon{ width:34px; height:34px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:inherit; transition:background .15s var(--ease), box-shadow .15s var(--ease); }
+  .chooser-item .chooser-icon svg{ width:22px; height:22px; }
+  .chooser-item .chooser-name{ flex:1; min-width:0; }
+  .chooser-item .chooser-go{ color:var(--accent); opacity:0; transform:translateX(-4px); transition:opacity .15s var(--ease), transform .15s var(--ease); line-height:0; }
+  /* Hover and the selected row share one look. While the pointer is over a
+     row, only that row is highlighted; when it leaves, the highlight returns
+     to the selected row (hover is never stored). */
+  .chooser-item:hover, .chooser-item.is-selected{ background:var(--l1-product-fill); color:var(--accent); }
+  .chooser-item:hover .chooser-icon, .chooser-item.is-selected .chooser-icon{ background:#fff; box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08); }
+  .chooser-item:hover .chooser-go, .chooser-item.is-selected .chooser-go{ opacity:1; transform:none; }
+  .chooser-body:has(.chooser-item:hover) .chooser-item.is-selected:not(:hover){ background:transparent; color:var(--text-page); }
+  .chooser-body:has(.chooser-item:hover) .chooser-item.is-selected:not(:hover) .chooser-icon{ background:transparent; box-shadow:none; }
+  .chooser-body:has(.chooser-item:hover) .chooser-item.is-selected:not(:hover) .chooser-go{ opacity:0; transform:translateX(-4px); }
+  .chooser-item:focus-visible{ box-shadow:0 0 0 2px rgba(14,125,143,.35); }
+  @media (max-width:680px){
+    .chooser-body{ grid-template-columns:1fr; }
+    .chooser-col + .chooser-col{ border-left:0; border-top:1px solid var(--border-soft); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .login.is-choosing .chooser{ animation:none; }
+    .chooser{ transition:none; }
+  }
+
   /* ---- User account dropdown (roles + logout) ---- */
   .user-menu-wrap{ position:relative; }
   .user-chip{ cursor:pointer; }
@@ -1074,6 +1119,15 @@
       <button class="login-submit" id="loginSubmit" type="button">Войти</button>
     </div>
     <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
+  </div>
+
+  <!-- Start chooser: after sign-in the person picks where to go. -->
+  <div class="chooser" id="startChooser" role="dialog" aria-modal="true" aria-labelledby="chooserTitle">
+    <div class="chooser-head">
+      <div class="chooser-title" id="chooserTitle">Куда перейти?</div>
+      <div class="chooser-sub">Выберите продукт. Сменить его можно в любой момент через меню приложений.</div>
+    </div>
+    <div class="chooser-body" id="chooserBody"></div>
   </div>
 </div>
 
@@ -2051,7 +2105,7 @@ function showLogin(){
   loginUser.value = '';
   loginPass.value = '';
   clearTimeout(loginLeaveTimer);
-  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving');
+  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving', 'is-choosing');
   loginScreen.classList.remove('is-entering');
   void loginScreen.offsetWidth;
   loginScreen.classList.add('is-entering');
@@ -2096,14 +2150,77 @@ function enterApp(){
   clearTimeout(loginLeaveTimer);
   loginLeaveTimer = setTimeout(()=>{
     loginScreen.classList.add('is-hidden');
-    loginScreen.classList.remove('is-leaving');
+    loginScreen.classList.remove('is-leaving', 'is-choosing');
     app.classList.remove('is-arriving');
   }, 620);
 }
 
+// After a successful sign-in the form gives way to the start chooser: the
+// person picks a product (Клиент lists all of its products; Данные and
+// Управление list theirs) and only then lands in the app.
+const chooserBody = document.getElementById('chooserBody');
+const chooserLayout = [
+  [ { label:'Управление', domains:['vyshka'] } ],
+  [ { label:'Клиент', domains:['client'] } ],
+  [ { label:'Данные', domains:['maskirovshik','perekoder'] } ],
+];
+const chooserDefaultProduct = 'client'; // Единый клиент is preselected
+const chooserArrow = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function renderChooser(){
+  chooserBody.innerHTML = chooserLayout.map(col=>{
+    const groups = col.map(group=>{
+      const items = group.domains.map(domainKey=>
+        domainConfigs[domainKey].groups.map(g=>
+          `<button class="chooser-item" type="button" data-domain="${domainKey}" data-product="${g.key}">
+            <span class="chooser-icon">${g.icon}</span>
+            <span class="chooser-name">${g.title}</span>
+            <span class="chooser-go">${chooserArrow}</span>
+          </button>`).join('')).join('');
+      return `<div class="chooser-group"><div class="chooser-label">${group.label}</div>${items}</div>`;
+    }).join('');
+    return `<div class="chooser-col">${groups}</div>`;
+  }).join('');
+}
+function showChooser(){
+  renderChooser();
+  loginScreen.classList.remove('has-error', 'is-entering');
+  loginScreen.classList.add('is-choosing');
+  const def = chooserBody.querySelector(`.chooser-item[data-product="${chooserDefaultProduct}"]`) || chooserBody.querySelector('.chooser-item');
+  if(def){ selectChooserItem(def); def.focus({ preventScroll:true }); }
+}
+// Exactly one row is selected at a time.
+function selectChooserItem(item){
+  chooserBody.querySelectorAll('.chooser-item.is-selected').forEach(el=>el.classList.remove('is-selected'));
+  item.classList.add('is-selected');
+}
+// Hover is only a transient highlight (CSS); the selection moves with the keyboard.
+chooserBody.addEventListener('focusin', (e)=>{
+  const item = e.target.closest('.chooser-item');
+  if(item) selectChooserItem(item);
+});
+// Opens a product on its first page (same routing as the apps menu).
+function goToProduct(domainKey, productKey){
+  renderNav(domainKey, productKey);
+  setScreen(productKey === 'kus' ? 'screenC' : (domainScreenMap[domainKey] || 'screenA'));
+}
+chooserBody.addEventListener('click', (e)=>{
+  const item = e.target.closest('.chooser-item');
+  if(!item) return;
+  goToProduct(item.dataset.domain, item.dataset.product);
+  enterApp();
+});
+chooserBody.addEventListener('keydown', (e)=>{
+  if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const items = Array.from(chooserBody.querySelectorAll('.chooser-item'));
+  const i = items.indexOf(document.activeElement);
+  if(i < 0) return;
+  e.preventDefault();
+  items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
+});
+
 function tryLogin(){
   if(loginUser.value.trim() && loginPass.value.trim()){
-    enterApp();
+    showChooser();
     return;
   }
   loginScreen.classList.add('has-error');
