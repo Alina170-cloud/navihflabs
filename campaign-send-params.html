@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кампания — параметры отправки (прототип)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0f6f7d}a:hover{color:#0a5560}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid #0f7d8c;outline-offset:2px}
+.opt:hover{background:#eef5f6;color:#0f6f7d}
+.ghost:hover{background:#eef1f4}
+.tab:hover{color:#0f6f7d}
+.day:hover:not(:disabled):not([aria-pressed=true]){background:#eef5f6}
+button:disabled{cursor:default}
+input[type=radio]{accent-color:#0f7d8c;width:18px;height:18px;margin:0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<template id="tpl">
+<div style="min-height: 100vh; display: flex; background: #fafafa; color: #1c2430; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.4">
+
+  <nav aria-label="Разделы" style="position: sticky; top: 0; z-index: 7; height: 100vh; align-self: flex-start; box-sizing: border-box; width: 58px; flex: none; background: #ffffff; border-right: 1px solid #e3e6ea; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0">
+    <button class="ghost" aria-label="Меню" style="width: 44px; height: 44px; border: 1px solid #e3e6ea; border-radius: 8px; background: #ffffff; color: #0f7d8c; display: flex; align-items: center; justify-content: center; margin-bottom: 8px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M6 12h12M9 18h6"></path></svg>
+    </button>
+    <button class="ghost" aria-label="Дашборд" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #55606d; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+    </button>
+    <button class="ghost" aria-label="Клиенты" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #55606d; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M19 15c2 1 3 3 3 6"></path></svg>
+    </button>
+    <button class="ghost" aria-label="Сообщения" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #55606d; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 7l10 7 10-7"></path></svg>
+    </button>
+    <button aria-label="Кампании" aria-current="page" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: #e4f1f3; color: #0f7d8c; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M8 7v13M16 7v13"></path></svg>
+    </button>
+    <button class="ghost" aria-label="Отчёты" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #55606d; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="13" rx="1"></rect><path d="M8 12V9M12 12V7M16 12v-2M12 16v2M8 21l4-3 4 3"></path></svg>
+    </button>
+  </nav>
+
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="position: sticky; top: 0; z-index: 6; height: 38px; background: #ffffff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #eceef1">
+      <a href="#top" style="display: flex; align-items: center; gap: 6px; color: #55606d; text-decoration: none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+        Кампании
+      </a>
+      <button class="ghost" style="display: flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 6px 8px; border-radius: 6px; color: #2a3340">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#9aa3ad" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="9.5" r="3.5" fill="#ffffff"></circle><path d="M5.5 18.5c1.5-3 4-4 6.5-4s5 1 6.5 4a9.9 9.9 0 0 1-13 0z" fill="#ffffff"></path></svg>
+        performer_consent
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+    </header>
+
+    <main id="top" style="flex: 1; padding: 20px 24px 32px; display: flex; flex-direction: column; gap: 18px; max-width: 1800px; width: 100%; box-sizing: border-box">
+      <div style="position: sticky; top: 39px; z-index: 5; background: #fafafa; margin: -20px -24px -10px; padding: 20px 24px 10px; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap">
+        <h1 style="margin: 0; font-size: 20px; font-weight: 600">Сниженная ставка по ипотеке</h1>
+        <span style="color: #4a5461">Черновик</span>
+      </div>
+
+      <div style="display: flex; align-items: flex-end; flex-wrap: wrap; row-gap: 8px">
+        <div style="display: flex; flex-wrap: wrap; border-bottom: 1px solid #55606d">
+          <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Основные</button>
+          <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Сегмент</button>
+          <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Настройки сегмента</button>
+          <button class="tab" style="border: 0; background: transparent; padding: 10px 30px; height: 44px">Оферы</button>
+          <button aria-current="page" style="border: 0; background: transparent; padding: 10px 30px; height: 44px; color: #0f6f7d; box-shadow: inset 0 -2px 0 #0f7d8c">Параметры отправки</button>
+        </div>
+        <div style="display: flex; border: 1px solid #dfe3e8; border-radius: 4px; background: #fafbfc">
+          <button class="tab" style="border: 0; background: transparent; padding: 0 18px; height: 44px">Предпросмотр</button>
+          <button class="tab" style="border: 0; background: transparent; padding: 0 18px; height: 44px">Запуски</button>
+        </div>
+      </div>
+      </div>
+
+      <section style="background: #ffffff; border: 1px solid #dfe3e8; border-radius: 6px; padding: 20px 24px 26px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600">Контактная политика</h2>
+          <button role="switch" aria-checked="{{policy.on}}" aria-label="Контактная политика" onClick="{{policy.toggle}}" style="width: 44px; height: 44px; margin: -12px -6px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+            <span style="width: 32px; height: 18px; border-radius: 9px; background: {{policy.bg}}; display: block; position: relative"><span style="position: absolute; top: 2px; left: {{policy.x}}; width: 14px; height: 14px; border-radius: 50%; background: #ffffff"></span></span>
+          </button>
+        </div>
+        <p style="margin: 14px 0 0; max-width: 640px; color: #5b6572; font-size: 13px">Отсеивает: клиентов по правилам контактной политики, без действующего согласия, из-за настроек времени отправки в канале и кампании.</p>
+      </section>
+
+      <section style="background: #ffffff; border: 1px solid #dfe3e8; border-radius: 6px; padding: 20px 24px 22px">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 28px">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600">Настройки каналов коммуникации</h2>
+          <span style="background: #f1f3f5; border-radius: 12px; padding: 3px 10px">По часовому поясу клиента</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 24px 36px; align-items: center">
+          <div style="overflow-x: auto; width: 100%">
+            <div style="width: max-content; min-width: 100%; box-sizing: border-box; border: 1px solid #dfe3e8; border-radius: 6px">
+              <div style="display: grid; grid-template-columns: 150px 200px minmax(0, 1fr); align-items: center; height: 36px; border-bottom: 1px solid #dfe3e8; background: #f7f7f8; color: #5b6572; border-radius: 5px 5px 0 0">
+                <div style="padding: 0 18px; border-right: 1px solid #dfe3e8; height: 100%; display: flex; align-items: center">Канал</div>
+                <div style="padding: 0 18px; border-right: 1px solid #dfe3e8; height: 100%; display: flex; align-items: center">Лимит на кампанию</div>
+                <div style="padding: 0 18px; display: flex; align-items: center; gap: 12px; white-space: nowrap">Параметры запуска <span style="font-size: 13px">· интенсивность действует в рамках окна коммуникации</span></div>
+              </div>
+              <sc-for list="{{channels}}" as="ch" hint-placeholder-count="3">
+                <div style="display: grid; grid-template-columns: 150px 200px minmax(0, 1fr); align-items: center; padding: 7px 0; border-top: {{ch.borderTop}}">
+                  <div style="padding: 0 18px">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; background: #f1f3f5; border-radius: 12px; padding: 3px 8px; font-weight: 500; white-space: nowrap">
+                      <sc-if value="{{ch.isSms}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 9h8M8 12h5"></path></svg></sc-if>
+                      <sc-if value="{{ch.isPush}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h11M4 5v11h5l3 3 3-3h5V11"></path><circle cx="19" cy="6" r="2.5"></circle></svg></sc-if>
+                      <sc-if value="{{ch.isEmail}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></sc-if>
+                      {{ch.name}}
+                    </span>
+                  </div>
+                  <div style="padding: 0 18px">
+                    <label style="display: flex; align-items: center; gap: 6px; height: 32px; box-sizing: border-box; border: 1px solid #6b7785; border-radius: 4px; padding: 0 8px; background: #ffffff">
+                      <input type="text" aria-label="Лимит на кампанию" value="{{ch.limit}}" onChange="{{ch.setLimit}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 14px">
+                      <sc-if value="{{ch.showUnit}}" hint-placeholder-val="{{false}}"><span style="color: #5b6572; font-size: 15px">шт</span></sc-if>
+                    </label>
+                  </div>
+                  <div style="padding: 0 18px; display: flex; align-items: center; gap: 18px">
+                    <div style="display: flex; align-items: center; gap: 10px; padding-right: 18px">
+                      <span style="font-weight: 400; color: #1c2430; white-space: nowrap">Окно коммуникации</span>
+                      <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 32px; padding: 0 8px; width: 100px; box-sizing: border-box; background: #ffffff">
+                        <input type="text" aria-label="Начало окна" value="{{ch.from}}" onChange="{{ch.setFrom}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 14px">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
+                      </span>
+                      <span aria-hidden="true">–</span>
+                      <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 32px; padding: 0 8px; width: 100px; box-sizing: border-box; background: #ffffff">
+                        <input type="text" aria-label="Конец окна" value="{{ch.to}}" onChange="{{ch.setTo}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 14px">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
+                      </span>
+                    </div>
+                    <div style="flex: none">
+                      <div role="radiogroup" aria-label="Интенсивность" style="display: flex; align-items: center; gap: 14px; white-space: nowrap">
+                        <span style="font-weight: 400; color: #1c2430">Интенсивность</span>
+                        <label style="display: flex; align-items: center; gap: 8px; min-height: 28px"><input type="radio" name="{{ch.radioName}}" checked="{{ch.isNow}}" onChange="{{ch.setNow}}"> Сразу</label>
+                        <label style="display: flex; align-items: center; gap: 8px; min-height: 28px; margin-left: 10px"><input type="radio" name="{{ch.radioName}}" checked="{{ch.isEven}}" onChange="{{ch.setEven}}"> Равномерно</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex-basis: 100%; margin-top: -14px; padding-left: clamp(0px, calc(100% - 440px), 369px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px">
+            <div id="missed-label" style="font-weight: 400; color: #4a5461">Если окно коммуникации пропущено:</div>
+            <div style="position: relative">
+              <button aria-haspopup="listbox" aria-expanded="{{missOpen}}" aria-labelledby="missed-label" onClick="{{toggleMiss}}" style="border: 0; background: transparent; padding: 4px 0; color: #0f6f7d; display: flex; align-items: center; gap: 6px; font-weight: 500; text-align: left">
+                {{missedLabel}}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{missOpen}}" hint-placeholder-val="{{false}}">
+                <button aria-label="Закрыть список" onClick="{{closeMiss}}" style="position: fixed; inset: 0; z-index: 10; border: 0; background: transparent; cursor: default"></button>
+                <div role="listbox" aria-labelledby="missed-label" style="position: absolute; z-index: 11; top: 32px; left: 0; width: 400px; max-width: 86vw; background: #ffffff; border: 1px solid #dfe3e8; border-radius: 6px; box-shadow: 0 6px 20px rgba(28, 36, 48, 0.16); overflow: hidden; padding: 4px 0">
+                  <sc-for list="{{missedOptions}}" as="mo" hint-placeholder-count="3">
+                    <button class="opt" role="option" aria-selected="{{mo.selected}}" onClick="{{mo.pick}}" style="width: 100%; min-height: 40px; border: 0; background: #ffffff; padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; text-align: left; color: {{mo.color}}">
+                      {{mo.label}}
+                      <sc-if value="{{mo.selected}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f7d8c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background: #ffffff; border: 1px solid #dfe3e8; border-radius: 6px; padding: 20px 24px 24px">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 28px">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600">Запуск</h2>
+          <span style="background: #f1f3f5; border-radius: 12px; padding: 3px 10px">МСК, UTC+3</span>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding-bottom: 24px; border-bottom: 1px solid #dfe3e8">
+          <div role="radiogroup" aria-label="Способ запуска" style="display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid #dfe3e8; border-radius: 22px; padding: 5px 8px">
+            <sc-for list="{{launchModes}}" as="lm" hint-placeholder-count="4">
+              <label style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px 0 6px; border-radius: 15px; background: {{lm.bg}}; cursor: pointer"><input type="radio" name="launch" checked="{{lm.checked}}" onChange="{{lm.pick}}"> {{lm.label}}</label>
+            </sc-for>
+          </div>
+          <sc-if value="{{isSchedule}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-wrap: wrap; border: 1px solid #8ec5f5; border-radius: 4px; background: #eaf4fe; color: #0f62a8; font-weight: 500">
+              <span style="display: flex; align-items: center; gap: 6px; padding: 6px 8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+                {{nextLaunch}}
+              </span>
+              <span style="display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-left: 1px solid #8ec5f5">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M19 15c2 1 3 3 3 6"></path></svg>
+                363 236 получателей
+              </span>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{isSchedule}}" hint-placeholder-val="{{true}}">
+          <div style="margin-top: 24px; background: #eaf3fc; border: 1px solid #cfe3f7; border-radius: 4px; padding: 14px 10px 10px; display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: flex-end">
+            <div>
+              <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px; height: 26px"><span style="font-weight: 400; color: #4a5461">Начало</span></div>
+              <div style="display: flex; gap: 10px">
+                <div style="position: relative">
+                  <span style="display: flex; align-items: center; border: 1px solid {{startCal.border}}; border-radius: 4px; height: 34px; padding: 0 2px 0 8px; width: 164px; box-sizing: border-box; background: #ffffff">
+                    <input type="text" aria-label="Дата начала" placeholder="ДД.ММ.ГГГГ" value="{{startDate}}" onChange="{{setStartDate}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 15px">
+                    <button class="ghost" aria-label="Открыть календарь" aria-expanded="{{startCal.open}}" onClick="{{toggleStartCal}}" style="width: 30px; height: 30px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #55606d">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+                    </button>
+                  </span>
+                  <sc-if value="{{startCal.open}}" hint-placeholder-val="{{false}}">
+                    <button aria-label="Закрыть календарь" onClick="{{closeCal}}" style="position: fixed; inset: 0; z-index: 10; border: 0; background: transparent; cursor: default"></button>
+                    <div role="dialog" aria-label="Выбор даты начала" style="position: absolute; z-index: 11; top: 38px; left: 0; width: 304px; box-sizing: border-box; background: #ffffff; border: 1px solid #dfe3e8; border-radius: 4px; box-shadow: 0 6px 20px rgba(28, 36, 48, 0.16); padding: 10px 10px 12px">
+                      <div style="display: flex; align-items: center; justify-content: space-between">
+                        <button class="ghost" aria-label="Предыдущий месяц" disabled="{{startCal.prevDisabled}}" onClick="{{startCal.prev}}" style="width: 40px; height: 40px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: {{startCal.prevColor}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+                        <div style="display: flex; gap: 22px; font-size: 16px; font-weight: 600; color: #0f6f7d"><span>{{startCal.month}}</span><span>{{startCal.year}}</span></div>
+                        <button class="ghost" aria-label="Следующий месяц" onClick="{{startCal.next}}" style="width: 40px; height: 40px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #2a3340"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+                      </div>
+                      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; color: #2a3340; height: 36px; align-items: center">
+                        <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                      </div>
+                      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px">
+                        <sc-for list="{{startCal.days}}" as="cd" hint-placeholder-count="42">
+                          <button class="day" aria-label="{{cd.aria}}" aria-pressed="{{cd.selected}}" disabled="{{cd.disabled}}" onClick="{{cd.pick}}" style="height: 38px; border: 0; border-radius: 4px; background: {{cd.bg}}; color: {{cd.color}}; font-weight: {{cd.weight}}; font-size: 15px; padding: 0; cursor: {{cd.cursor}}">{{cd.num}}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+                <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 34px; padding: 0 8px; width: 98px; box-sizing: border-box; background: #ffffff">
+                  <input type="text" aria-label="Время начала" placeholder="ЧЧ:ММ" value="{{startTime}}" onChange="{{setStartTime}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 15px">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <div id="period-label" style="font-weight: 400; color: #4a5461; margin-bottom: 8px; height: 26px; display: flex; align-items: center">Периодичность</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+                <div style="position: relative; width: 274px">
+                  <button aria-haspopup="listbox" aria-expanded="{{ddOpen}}" aria-labelledby="period-label" onClick="{{toggleDd}}" style="width: 100%; height: 34px; border: 1px solid {{ddBorder}}; border-radius: 4px; background: #ffffff; padding: 0 10px; display: flex; align-items: center; justify-content: space-between; font-size: 15px; text-align: left">
+                    {{periodLabel}}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+                  </button>
+                  <sc-if value="{{ddOpen}}" hint-placeholder-val="{{false}}">
+                    <button aria-label="Закрыть список" onClick="{{closeDd}}" style="position: fixed; inset: 0; z-index: 10; border: 0; background: transparent; cursor: default"></button>
+                    <div role="listbox" aria-labelledby="period-label" style="position: absolute; z-index: 11; top: 38px; left: 0; width: 100%; background: #ffffff; border: 1px solid #dfe3e8; border-radius: 4px; box-shadow: 0 6px 20px rgba(28, 36, 48, 0.16); overflow: hidden">
+                      <sc-for list="{{periodOptions}}" as="po" hint-placeholder-count="6">
+                        <button class="opt" role="option" aria-selected="{{po.selected}}" onClick="{{po.pick}}" style="width: 100%; height: 46px; border: 0; border-top: {{po.borderTop}}; background: #ffffff; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; font-size: 16px; text-align: left; color: {{po.color}}">
+                          {{po.label}}
+                          <sc-if value="{{po.selected}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f7d8c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <sc-if value="{{isEvery}}" hint-placeholder-val="{{false}}">
+                  <input type="number" min="1" aria-label="Интервал" value="{{everyN}}" onChange="{{setEveryN}}" style="width: 72px; height: 34px; box-sizing: border-box; border: 1px solid #6b7785; border-radius: 4px; padding: 0 10px; background: #ffffff; font-size: 15px">
+                  <select aria-label="Единица интервала" value="{{everyUnit}}" onChange="{{setEveryUnit}}" style="height: 34px; border: 1px solid #6b7785; border-radius: 4px; padding: 0 8px; background: #ffffff; font-size: 15px">
+                    <option value="day">дней</option>
+                    <option value="week">недель</option>
+                    <option value="month">месяцев</option>
+                  </select>
+                </sc-if>
+
+                <sc-if value="{{isWeekly}}" hint-placeholder-val="{{false}}">
+                  <div role="group" aria-label="Дни недели" style="display: flex; gap: 4px">
+                    <sc-for list="{{weekdayButtons}}" as="wd" hint-placeholder-count="7">
+                      <button aria-pressed="{{wd.on}}" onClick="{{wd.toggle}}" style="width: 36px; height: 34px; border: 1px solid {{wd.border}}; border-radius: 4px; background: {{wd.bg}}; color: {{wd.color}}; padding: 0; font-weight: 500">{{wd.label}}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{isMonthlyDate}}" hint-placeholder-val="{{true}}">
+                  <input type="number" min="1" max="31" aria-label="Число месяца" value="{{dayNum}}" onChange="{{setDayNum}}" style="width: 114px; height: 34px; box-sizing: border-box; border: 1px solid #6b7785; border-radius: 4px; padding: 0 10px; background: #ffffff; font-size: 15px">
+                </sc-if>
+
+                <sc-if value="{{isMonthlyDow}}" hint-placeholder-val="{{false}}">
+                  <select aria-label="Какой по счёту" value="{{nth}}" onChange="{{setNth}}" style="height: 34px; border: 1px solid #6b7785; border-radius: 4px; padding: 0 8px; background: #ffffff; font-size: 15px">
+                    <option value="1">первый</option>
+                    <option value="2">второй</option>
+                    <option value="3">третий</option>
+                    <option value="4">четвёртый</option>
+                    <option value="5">последний</option>
+                  </select>
+                  <select aria-label="День недели" value="{{nthDow}}" onChange="{{setNthDow}}" style="height: 34px; border: 1px solid #6b7785; border-radius: 4px; padding: 0 8px; background: #ffffff; font-size: 15px">
+                    <option value="1">понедельник</option>
+                    <option value="2">вторник</option>
+                    <option value="3">среда</option>
+                    <option value="4">четверг</option>
+                    <option value="5">пятница</option>
+                    <option value="6">суббота</option>
+                    <option value="0">воскресенье</option>
+                  </select>
+                </sc-if>
+              </div>
+            </div>
+
+            <sc-if value="{{showEnd}}" hint-placeholder-val="{{true}}">
+              <div>
+                <div style="font-weight: 400; color: #4a5461; margin-bottom: 8px; height: 26px; display: flex; align-items: center">Окончание</div>
+                <div style="display: flex; gap: 10px">
+                  <div style="position: relative">
+                    <span style="display: flex; align-items: center; border: 1px solid {{endCal.border}}; border-radius: 4px; height: 34px; padding: 0 2px 0 8px; width: 164px; box-sizing: border-box; background: #ffffff">
+                      <input type="text" aria-label="Дата окончания" placeholder="Дата" value="{{endDate}}" onChange="{{setEndDate}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 15px">
+                      <button class="ghost" aria-label="Открыть календарь" aria-expanded="{{endCal.open}}" onClick="{{toggleEndCal}}" style="width: 30px; height: 30px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #55606d">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+                      </button>
+                    </span>
+                    <sc-if value="{{endCal.open}}" hint-placeholder-val="{{false}}">
+                      <button aria-label="Закрыть календарь" onClick="{{closeCal}}" style="position: fixed; inset: 0; z-index: 10; border: 0; background: transparent; cursor: default"></button>
+                      <div role="dialog" aria-label="Выбор даты окончания" style="position: absolute; z-index: 11; top: 38px; left: 0; width: 304px; box-sizing: border-box; background: #ffffff; border: 1px solid #dfe3e8; border-radius: 4px; box-shadow: 0 6px 20px rgba(28, 36, 48, 0.16); padding: 10px 10px 12px">
+                        <div style="display: flex; align-items: center; justify-content: space-between">
+                          <button class="ghost" aria-label="Предыдущий месяц" disabled="{{endCal.prevDisabled}}" onClick="{{endCal.prev}}" style="width: 40px; height: 40px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: {{endCal.prevColor}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+                          <div style="display: flex; gap: 22px; font-size: 16px; font-weight: 600; color: #0f6f7d"><span>{{endCal.month}}</span><span>{{endCal.year}}</span></div>
+                          <button class="ghost" aria-label="Следующий месяц" onClick="{{endCal.next}}" style="width: 40px; height: 40px; border: 0; border-radius: 4px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; color: #2a3340"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; color: #2a3340; height: 36px; align-items: center">
+                          <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px">
+                          <sc-for list="{{endCal.days}}" as="cd" hint-placeholder-count="42">
+                            <button class="day" aria-label="{{cd.aria}}" aria-pressed="{{cd.selected}}" disabled="{{cd.disabled}}" onClick="{{cd.pick}}" style="height: 38px; border: 0; border-radius: 4px; background: {{cd.bg}}; color: {{cd.color}}; font-weight: {{cd.weight}}; font-size: 15px; padding: 0; cursor: {{cd.cursor}}">{{cd.num}}</button>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <span style="display: flex; align-items: center; border: 1px solid #6b7785; border-radius: 4px; height: 34px; padding: 0 8px; width: 98px; box-sizing: border-box; background: #ffffff">
+                    <input type="text" aria-label="Время окончания" placeholder="Время" value="{{endTime}}" onChange="{{setEndTime}}" style="border: 0; outline: 0; padding: 0; flex: 1; min-width: 0; background: transparent; font-size: 15px">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5h4"></path></svg>
+                  </span>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isSchedule}}" hint-placeholder-val="{{true}}">
+          <sc-if value="{{hasWeekend}}" hint-placeholder-val="{{true}}">
+            <div role="radiogroup" aria-labelledby="weekend-label" style="margin-top: 24px; display: flex; flex-direction: column; gap: 6px">
+              <div id="weekend-label" style="font-weight: 400; color: #4a5461; margin-bottom: 4px">Если дата запуска — выходной день</div>
+              <sc-for list="{{weekendModes}}" as="wm" hint-placeholder-count="3">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px">
+                  <label style="display: flex; align-items: center; gap: 8px; min-height: 22px; cursor: pointer"><input type="radio" name="weekend" checked="{{wm.checked}}" onChange="{{wm.pick}}"> {{wm.label}}</label>
+                  <sc-if value="{{wm.note}}" hint-placeholder-val="{{false}}">
+                    <span style="display: inline-flex; align-items: center; gap: 8px; background: #f3ecfd; border: 1px solid #d2bdf2; border-radius: 6px; padding: 2px 3px 2px 8px">
+                      <span style="color: #6229ad; font-size: 13px; font-weight: 500">Были изменения</span>
+                      <button class="ghost" onClick="{{wm.reset}}" style="display: inline-flex; align-items: center; gap: 5px; height: 24px; border: 1px solid #d2bdf2; border-radius: 4px; background: #ffffff; padding: 0 8px 0 6px; color: #2a3340; font-size: 13px; font-weight: 500">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5v5h5"></path><path d="M4.6 10A8 8 0 1 1 4 14"></path></svg>
+                        Сбросить
+                      </button>
+                    </span>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="margin-top: {{tableGap}}; overflow-x: auto">
+            <div style="min-width: 1040px; border: 1px solid #dfe3e8; border-radius: 6px; overflow: hidden">
+              <div style="display: grid; grid-template-columns: 150px 120px 180px 150px minmax(0, 1fr) 60px; align-items: center; height: 36px; padding-left: 18px; background: #f7f7f8; color: #5b6572">
+                <span style="align-self: stretch; display: flex; align-items: center; border-right: 1px solid #dfe3e8; margin-right: 18px">Дата по правилу</span>
+                <span style="align-self: stretch; display: flex; align-items: center; border-right: 1px solid #dfe3e8; margin-right: 18px">День недели</span>
+                <span style="align-self: stretch; display: flex; align-items: center; border-right: 1px solid #dfe3e8; margin-right: 18px">Статус</span>
+                <span>Дата запуска</span><span></span><span></span>
+              </div>
+              <div tabindex="0" role="group" aria-label="Список запусков" style="max-height: 370px; overflow-y: auto">
+              <sc-for list="{{rows}}" as="row" hint-placeholder-count="10">
+                <div style="display: grid; grid-template-columns: 150px 120px 180px 150px minmax(0, 1fr) 60px; align-items: center; min-height: 36px; padding-left: 18px; border-top: 1px solid #dfe3e8; background: {{row.bg}}">
+                  <span style="font-weight: 400; font-size: 14px; color: {{row.ruleColor}}; text-decoration: {{row.ruleDeco}}">{{row.rule}}</span>
+                  <span style="color: {{row.dowColor}}; font-weight: {{row.dowWeight}}">{{row.dow}}</span>
+                  <span><span style="display: inline-block; border: 1px solid {{row.chipBorder}}; background: {{row.chipBg}}; color: {{row.chipColor}}; border-radius: 6px; padding: 1px 7px; font-size: 13px; font-weight: 500">{{row.chip}}</span></span>
+                  <span style="display: flex; align-items: center; gap: 6px; font-weight: 400; font-size: 14px">
+                    <sc-if value="{{row.moved}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#55606d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></sc-if>
+                    {{row.launch}}
+                    <sc-if value="{{row.moved}}" hint-placeholder-val="{{false}}"><span style="font-weight: 400; font-size: 13px; color: #5b6572">{{row.launchDow}}</span></sc-if>
+                  </span>
+                  <div style="min-width: 0">
+                    <sc-if value="{{row.editing}}" hint-placeholder-val="{{false}}">
+                      <div style="margin: 10px 0; background: #ffffff; border-radius: 6px; padding: 18px; display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-start">
+                        <div style="border: 1px solid #dfe3e8; border-radius: 6px; padding: 12px 10px 8px">
+                          <div style="font-weight: 600; margin: 0 2px 6px">{{row.calTitle}}</div>
+                          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; font-size: 11px; color: #5b6572; text-align: center; width: 208px">
+                            <span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span>
+                          </div>
+                          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; width: 208px; margin-top: 4px">
+                            <sc-for list="{{row.calDays}}" as="day" hint-placeholder-count="14">
+                              <button aria-label="{{day.aria}}" aria-pressed="{{day.selected}}" onClick="{{day.pick}}" style="width: 28px; height: 28px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+                                <span style="width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1.5px solid {{day.ring}}; background: {{day.bg}}; color: {{day.color}}; font-weight: {{day.weight}}">{{day.num}}</span>
+                              </button>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div style="flex: 1; min-width: 260px">
+                          <div style="font-weight: 600">{{row.line1}}</div>
+                          <sc-if value="{{row.draftManual}}" hint-placeholder-val="{{true}}"><div style="margin-top: 4px">Вручную выбрано <b style="font-weight: 600">{{row.draftText}}</b>.</div></sc-if>
+                          <sc-if value="{{row.draftRule}}" hint-placeholder-val="{{false}}"><div style="margin-top: 4px">Запуск в исходную дату, без переноса.</div></sc-if>
+                          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px">
+                            <button onClick="{{row.save}}" style="height: 34px; border: 0; border-radius: 6px; background: #0f7d8c; color: #ffffff; padding: 0 16px; font-weight: 500">Сохранить дату</button>
+                            <button class="ghost" onClick="{{row.reset}}" style="height: 34px; border: 1px solid #dfe3e8; border-radius: 6px; background: #ffffff; padding: 0 14px">{{row.resetLabel}}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <span style="display: flex; justify-content: center">
+                    <sc-if value="{{row.canEdit}}" hint-placeholder-val="{{true}}">
+                      <button aria-label="{{row.editAria}}" aria-expanded="{{row.editing}}" onClick="{{row.toggleEdit}}" style="width: 44px; height: 34px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+                        <span style="width: 28px; height: 28px; border-radius: 4px; border: 1px solid {{row.editBorder}}; background: {{row.editBg}}; color: {{row.editColor}}; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"></path><path d="M18.5 3.5l2 2L12 14l-3 1 1-3z"></path></svg>
+                        </span>
+                      </button>
+                    </sc-if>
+                  </span>
+                </div>
+              </sc-for>
+              </div>
+              <sc-if value="{{noRows}}" hint-placeholder-val="{{false}}">
+                <div style="padding: 16px 18px; border-top: 1px solid #dfe3e8; color: #5b6572">В выбранном периоде нет запусков — проверьте даты начала и окончания.</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 2px">
+          <sc-for list="{{switches}}" as="sw" hint-placeholder-count="2">
+            <button role="switch" aria-checked="{{sw.on}}" onClick="{{sw.toggle}}" style="border: 0; background: transparent; padding: 4px 0; display: flex; align-items: center; gap: 8px; text-align: left; align-self: flex-start">
+              <span style="width: 32px; height: 18px; border-radius: 9px; background: {{sw.bg}}; display: block; position: relative; flex: none"><span style="position: absolute; top: 2px; left: {{sw.x}}; width: 14px; height: 14px; border-radius: 50%; background: #ffffff"></span></span>
+              {{sw.label}}
+              <sc-if value="{{sw.info}}" hint-placeholder-val="{{false}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.5"></path></svg></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </main>
+
+    <footer style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 6px 24px; border-top: 1px solid #e3e6ea; font-size: 12px; color: #5b6572">
+      <span>HFLabs License</span>
+      <span>Версия: vX.Y.Z │ Ревизия: abcdefg12345 │ Бранч/Тег: feature/branch-name или release-tag │ Время сборки: DD-MM-YYYY HH:MM:SS</span>
+    </footer>
+  </div>
+</div>
+</template>
+<script>
+// Мини-рантайм прототипа: рендерит шаблон из <template id="tpl"> по данным Component.renderVals()
+(function () {
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var HOLE = /\{\{\s*([^}]+?)\s*\}\}/g;
+
+  function lookup(path, scope) {
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (path === 'null') return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    var parts = path.split('.');
+    var cur;
+    for (var s = scope; s; s = s.parent) {
+      if (Object.prototype.hasOwnProperty.call(s.vars, parts[0])) { cur = s.vars[parts[0]]; break; }
+    }
+    for (var i = 1; i < parts.length && cur != null; i++) cur = cur[parts[i]];
+    return cur;
+  }
+
+  function interp(str, scope) {
+    var whole = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/.exec(str);
+    if (whole) return lookup(whole[1], scope);
+    return str.replace(HOLE, function (_, p) { var v = lookup(p, scope); return v == null ? '' : String(v); });
+  }
+
+  function build(node, scope, out) {
+    if (node.nodeType === 3) {
+      var t = node.nodeValue;
+      if (!/\S/.test(t)) { if (!/\n/.test(t)) out.push(t); return; }
+      var v = interp(t, scope);
+      out.push(v == null ? '' : String(v));
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    var tag = node.localName, i;
+    if (tag === 'sc-if') {
+      if (interp(node.getAttribute('value') || '', scope)) for (i = 0; i < node.childNodes.length; i++) build(node.childNodes[i], scope, out);
+      return;
+    }
+    if (tag === 'sc-for') {
+      var list = interp(node.getAttribute('list') || '', scope) || [];
+      var as = node.getAttribute('as') || 'item';
+      list.forEach(function (item, idx) {
+        var vars = { $index: idx }; vars[as] = item;
+        var child = { vars: vars, parent: scope };
+        for (var j = 0; j < node.childNodes.length; j++) build(node.childNodes[j], child, out);
+      });
+      return;
+    }
+    var vn = { tag: tag, svg: node.namespaceURI === SVG_NS, attrs: {}, children: [] };
+    for (i = 0; i < node.attributes.length; i++) {
+      var a = node.attributes[i];
+      if (a.name.indexOf('hint-') === 0) continue;
+      vn.attrs[a.name] = interp(a.value, scope);
+    }
+    for (i = 0; i < node.childNodes.length; i++) build(node.childNodes[i], scope, vn.children);
+    out.push(vn);
+  }
+
+  function eventFor(el, name) {
+    if (name === 'onchange') {
+      var type = (el.getAttribute('type') || 'text').toLowerCase();
+      return el.localName === 'input' && type !== 'radio' && type !== 'checkbox' ? 'input' : 'change';
+    }
+    return name.slice(2);
+  }
+
+  function setAttrs(el, vn) {
+    var old = el.__attrs || {}, name;
+    for (name in old) if (!(name in vn.attrs)) el.removeAttribute(name);
+    el.__h = el.__h || {};
+    for (name in vn.attrs) {
+      var v = vn.attrs[name];
+      if (name.indexOf('on') === 0) {
+        var ev = eventFor(el, name);
+        if (!(ev in el.__h)) el.addEventListener(ev, (function (e) { return function (x) { var h = el.__h[e]; if (typeof h === 'function') h(x); }; })(ev));
+        el.__h[ev] = v;
+        continue;
+      }
+      if (name === 'value') continue;
+      if (name === 'checked' || name === 'disabled') { el[name] = !!v; continue; }
+      if (v === false || v == null) {
+        if (name.indexOf('aria-') === 0) el.setAttribute(name, 'false'); else el.removeAttribute(name);
+      } else {
+        var sv = v === true ? (name.indexOf('aria-') === 0 ? 'true' : '') : String(v);
+        if (el.getAttribute(name) !== sv) el.setAttribute(name, sv);
+      }
+    }
+    el.__attrs = vn.attrs;
+  }
+
+  function create(vn) {
+    if (typeof vn === 'string') return document.createTextNode(vn);
+    var el = vn.svg ? document.createElementNS(SVG_NS, vn.tag) : document.createElement(vn.tag);
+    el.__tag = vn.tag;
+    update(el, vn);
+    return el;
+  }
+
+  function update(el, vn) {
+    setAttrs(el, vn);
+    patch(el, vn.children);
+    if ('value' in vn.attrs) {
+      var v = vn.attrs.value == null ? '' : String(vn.attrs.value);
+      if (el.value !== v) el.value = v;
+    }
+  }
+
+  function patch(parent, vnodes) {
+    var kids = parent.childNodes, i;
+    for (i = 0; i < vnodes.length; i++) {
+      var vn = vnodes[i], cur = kids[i];
+      if (!cur) { parent.appendChild(create(vn)); continue; }
+      if (typeof vn === 'string') {
+        if (cur.nodeType === 3) { if (cur.nodeValue !== vn) cur.nodeValue = vn; }
+        else parent.replaceChild(create(vn), cur);
+      } else if (cur.nodeType === 1 && cur.__tag === vn.tag) update(cur, vn);
+      else parent.replaceChild(create(vn), cur);
+    }
+    while (kids.length > vnodes.length) parent.removeChild(parent.lastChild);
+  }
+
+  function DCLogic() { this.props = {}; }
+  DCLogic.prototype.setState = function (partial) {
+    var next = typeof partial === 'function' ? partial(this.state) : partial;
+    if (next == null) return;
+    this.state = Object.assign({}, this.state, next);
+    this.__render();
+  };
+  DCLogic.prototype.forceUpdate = function () { this.__render(); };
+
+  window.DCLogic = DCLogic;
+  window.mountPrototype = function (Component) {
+    var tpl = document.getElementById('tpl').content;
+    var root = document.getElementById('root');
+    var inst = new Component();
+    inst.__render = function () {
+      var out = [], scope = { vars: inst.renderVals(), parent: null };
+      for (var i = 0; i < tpl.childNodes.length; i++) build(tpl.childNodes[i], scope, out);
+      patch(root, out);
+    };
+    inst.__render();
+  };
+})();
+
+</script>
+<script>
+class Component extends DCLogic {
+  state = {
+    policy: true,
+    noRepeat: true,
+    even: false,
+    launch: 'schedule',
+    period: 'monthly_date',
+    ddOpen: false,
+    calOpen: null,
+    calY: 2026,
+    calM: 1,
+    startDate: '02.02.2026',
+    startTime: '12:00',
+    endDate: '',
+    endTime: '',
+    dayNum: '2',
+    everyN: '2',
+    everyUnit: 'day',
+    weekdays: [1],
+    nth: '1',
+    nthDow: '1',
+    weekend: 'manual',
+    overrides: {},
+    editKey: null,
+    draft: null,
+    ch: {
+      sms: { limit: 'Без ограничения', mode: 'now', from: '08:00', to: '23:59' },
+      push: { limit: '30 000', mode: 'now', from: '08:00', to: '23:59' },
+      email: { limit: 'Без ограничения', mode: 'now', from: '08:00', to: '23:59' }
+    }
+  };
+
+  parse(str) {
+    const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec((str || '').trim());
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return isNaN(d) ? null : d;
+  }
+  key(d) {
+    const p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  fromKey(k) { const a = k.split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
+  fmt(d) {
+    const p = (n) => String(n).padStart(2, '0');
+    return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear();
+  }
+  isWeekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
+  nextWeekday(d) {
+    let r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    while (this.isWeekend(r)) r = new Date(r.getFullYear(), r.getMonth(), r.getDate() + 1);
+    return r;
+  }
+  clampInt(v, min, max, def) {
+    const n = parseInt(v, 10);
+    if (isNaN(n)) return def;
+    return Math.max(min, Math.min(max, n));
+  }
+
+  generate(start, end, max = 8) {
+    const s = this.state, out = [];
+    const y = start.getFullYear(), m = start.getMonth(), d0 = start.getDate();
+    const push = (d) => { if (d >= start && (!end || d <= end) && out.length < max) out.push(d); };
+    const inMonth = (k, day) => {
+      const dim = new Date(y, m + k + 1, 0).getDate();
+      return new Date(y, m + k, Math.min(day, dim));
+    };
+    if (s.period === 'once') push(start);
+    else if (s.period === 'daily') { for (let i = 0; i < max; i++) push(new Date(y, m, d0 + i)); }
+    else if (s.period === 'every') {
+      const n = this.clampInt(s.everyN, 1, 365, 1);
+      for (let i = 0; i < max; i++) {
+        if (s.everyUnit === 'day') push(new Date(y, m, d0 + i * n));
+        else if (s.everyUnit === 'week') push(new Date(y, m, d0 + i * n * 7));
+        else push(inMonth(i * n, d0));
+      }
+    } else if (s.period === 'weekly') {
+      for (let i = 0; i < max * 7 + 7 && out.length < max; i++) {
+        const d = new Date(y, m, d0 + i);
+        if (s.weekdays.indexOf(d.getDay()) >= 0) push(d);
+      }
+    } else if (s.period === 'monthly_date') {
+      const day = this.clampInt(s.dayNum, 1, 31, 1);
+      for (let i = 0; i < max + 6 && out.length < max; i++) push(inMonth(i, day));
+    } else {
+      const nth = +s.nth, dow = +s.nthDow;
+      for (let i = 0; i < max + 6 && out.length < max; i++) {
+        let day;
+        if (nth === 5) {
+          const last = new Date(y, m + i + 1, 0);
+          day = last.getDate() - ((last.getDay() - dow + 7) % 7);
+        } else {
+          const first = new Date(y, m + i, 1);
+          day = 1 + ((dow - first.getDay() + 7) % 7) + (nth - 1) * 7;
+        }
+        push(new Date(y, m + i, day));
+      }
+    }
+    return out;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const set = (k) => (e) => this.setState({ [k]: e.target.value });
+    const DOW = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+    const DOW_FULL = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+    const MON_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+    const MON = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    const human = (d) => d.getDate() + ' ' + MON_GEN[d.getMonth()];
+    const sw = (on) => ({ bg: on ? '#0f7d8c' : '#7d8792', x: on ? '16px' : '2px' });
+
+    const chDefs = [['sms', 'SMS'], ['push', 'Mobile Push'], ['email', 'Email']];
+    const setCh = (id, f, v) => this.setState((p) => ({ ch: { ...p.ch, [id]: { ...p.ch[id], [f]: v } } }));
+    const channels = chDefs.map(([id, name], i) => ({
+      name, ...s.ch[id],
+      isSms: id === 'sms', isPush: id === 'push', isEmail: id === 'email',
+      borderTop: i ? '1px solid #dfe3e8' : '0',
+      radioName: 'intensity-' + id,
+      showUnit: /\d/.test(s.ch[id].limit),
+      isNow: s.ch[id].mode === 'now', isEven: s.ch[id].mode === 'even',
+      setNow: () => setCh(id, 'mode', 'now'),
+      setEven: () => setCh(id, 'mode', 'even'),
+      setLimit: (e) => setCh(id, 'limit', e.target.value),
+      setFrom: (e) => setCh(id, 'from', e.target.value),
+      setTo: (e) => setCh(id, 'to', e.target.value)
+    }));
+
+    const MISSED = [['skip', 'Офер не отправляется'], ['next', 'Переносить отправку на следующий день'], ['nextWork', 'Переносить отправку на следующий будний день']];
+    const missedCur = s.missed || 'next';
+    const missedOptions = MISSED.map(([id, label]) => ({
+      label, selected: missedCur === id, color: missedCur === id ? '#0f6f7d' : '#1c2430',
+      pick: () => this.setState({ missed: id, missOpen: false })
+    }));
+    const missedFull = MISSED.find((m) => m[0] === missedCur)[1];
+    const missedLabel = missedFull.charAt(0).toLowerCase() + missedFull.slice(1);
+
+    const launchModes = [['manual', 'Вручную'], ['schedule', 'По расписанию'], ['trigger', 'По триггеру'], ['data', 'По триггеру в данных']]
+      .map(([id, label]) => ({ label, checked: s.launch === id, bg: s.launch === id ? '#eef1f4' : '#f7f8fa', pick: () => this.setState({ launch: id, ddOpen: false }) }));
+
+    const PERIODS = [['once', 'Однократно'], ['daily', 'Ежедневно'], ['every', 'Каждые'], ['weekly', 'Еженедельно'], ['monthly_date', 'Ежемесячно по числам'], ['monthly_dow', 'Ежемесячно по дням нед.']];
+    const periodOptions = PERIODS.map(([id, label], i) => ({
+      label, selected: s.period === id,
+      color: s.period === id ? '#0f6f7d' : '#1c2430',
+      borderTop: i ? '1px solid #e6e9ed' : '0',
+      pick: () => this.setState({ period: id, ddOpen: false, editKey: null })
+    }));
+    const periodLabel = PERIODS.find((p) => p[0] === s.period)[1];
+
+    const weekdayButtons = [1, 2, 3, 4, 5, 6, 0].map((dow) => {
+      const on = s.weekdays.indexOf(dow) >= 0;
+      return {
+        label: DOW[dow], on,
+        bg: on ? '#0f7d8c' : '#ffffff', color: on ? '#ffffff' : '#1c2430', border: on ? '#0f7d8c' : '#6b7785',
+        toggle: () => this.setState((p) => {
+          const has = p.weekdays.indexOf(dow) >= 0;
+          if (has && p.weekdays.length === 1) return null;
+          return { weekdays: has ? p.weekdays.filter((x) => x !== dow) : p.weekdays.concat(dow), editKey: null };
+        })
+      };
+    });
+
+    const switches = [
+      { label: 'Запретить повторную отправку офера одному и тому же клиенту', on: s.noRepeat, info: false, ...sw(s.noRepeat), toggle: () => this.setState({ noRepeat: !s.noRepeat }) },
+      { label: 'Равномерно распределять сегмент по дням отправки', on: s.even, info: true, ...sw(s.even), toggle: () => this.setState({ even: !s.even }) }
+    ];
+
+    const weekendModes = [['run', 'Запускать в выходной день'], ['shift', 'Переносить на ближайший будний день'], ['manual', 'Решать вручную для каждого случая']]
+      .map(([id, label]) => ({
+        label, checked: s.weekend === id,
+        pick: () => {
+          if (s.weekend === id) return;
+          this.setState({ weekend: id, editKey: null, restored: id === 'manual' && Object.keys(s.overrides).length > 0 });
+        },
+        note: id === 'manual' && s.weekend === 'manual' && !!s.restored && Object.keys(s.overrides).length > 0,
+        reset: () => this.setState({ overrides: {}, editKey: null, restored: false })
+      }));
+
+    const start = this.parse(s.startDate) || new Date(2026, 1, 2);
+    const end = s.period === 'once' ? null : this.parse(s.endDate);
+    const horizon = end || new Date(start.getFullYear() + 1, start.getMonth(), start.getDate());
+    const dates = this.generate(start, horizon, 400);
+    const hasWeekend = dates.some((d) => this.isWeekend(d));
+    const wMode = hasWeekend ? s.weekend : 'run';
+    const applyOv = s.period !== 'once' && (!hasWeekend || s.weekend === 'manual');
+
+    const mockToday = new Date(2026, 0, 28);
+    const mkCal = (field, value, min) => {
+      const open = s.calOpen === field;
+      if (!open) return { open: false, border: '#6b7785', days: [] };
+      const y = s.calY, m = s.calM;
+      const first1 = new Date(y, m, 1);
+      const off = (first1.getDay() + 6) % 7;
+      const selKey = value ? this.key(value) : '';
+      const prevDisabled = y * 12 + m <= min.getFullYear() * 12 + min.getMonth();
+      const shift = (k) => () => { const d = new Date(y, m + k, 1); this.setState({ calY: d.getFullYear(), calM: d.getMonth() }); };
+      const days = Array.from({ length: 42 }, (_, i) => {
+        const c = new Date(y, m, 1 - off + i);
+        const selected = this.key(c) === selKey, disabled = c < min, other = c.getMonth() !== m;
+        return {
+          num: c.getDate(), selected, disabled,
+          aria: human(c) + ' ' + c.getFullYear() + ', ' + DOW_FULL[c.getDay()],
+          bg: selected ? '#0f7d8c' : 'transparent',
+          color: selected ? '#ffffff' : disabled ? '#a3a9b1' : other ? '#6b7480' : this.isWeekend(c) ? '#b3261e' : '#1c2430',
+          weight: selected ? 600 : 400,
+          cursor: disabled ? 'default' : 'pointer',
+          pick: () => this.setState({ [field + 'Date']: this.fmt(c), calOpen: null, editKey: null })
+        };
+      });
+      return { open, border: '#0f7d8c', month: MON[m], year: y, days, prevDisabled, prevColor: prevDisabled ? '#c3c8ce' : '#2a3340', prev: shift(-1), next: shift(1) };
+    };
+    const openCal = (field, base) => () => {
+      if (s.calOpen === field) return this.setState({ calOpen: null });
+      this.setState({ calOpen: field, calY: base.getFullYear(), calM: base.getMonth(), ddOpen: false });
+    };
+    const endParsed = this.parse(s.endDate);
+    const startCal = mkCal('start', this.parse(s.startDate), mockToday);
+    const endCal = mkCal('end', endParsed, start);
+
+    const GREEN = { chipBg: '#e9f7ef', chipBorder: '#9fd8b9', chipColor: '#0b6b45' };
+    const ORANGE = { chipBg: '#fff3e2', chipBorder: '#f0c282', chipColor: '#9a4600' };
+    const PURPLE = { chipBg: '#f3ecfd', chipBorder: '#d2bdf2', chipColor: '#6229ad' };
+
+    const rows = dates.map((d) => {
+      const k = this.key(d);
+      const we = this.isWeekend(d);
+      const auto = we ? this.nextWeekday(d) : d;
+      const base = we && wMode === 'shift' ? auto : d;
+      const baseKey = this.key(base);
+      const ov = applyOv && s.overrides[k] && s.overrides[k] !== baseKey ? s.overrides[k] : null;
+      let launch = base, chip = 'будний день', tone = GREEN;
+      if (we) { tone = ORANGE; chip = wMode === 'shift' ? 'выходной - перенесено' : 'выходной день'; }
+      if (ov === k) { launch = d; chip = 'выходной день'; tone = ORANGE; }
+      else if (ov) { launch = this.fromKey(ov); chip = 'изменено вручную'; tone = PURPLE; }
+
+      const launchKey = this.key(launch);
+      const moved = launchKey !== k;
+      const editing = applyOv && s.editKey === k;
+      const row = {
+        rule: this.fmt(d), dow: DOW[d.getDay()], chip, ...tone,
+        ruleColor: moved ? '#6b7480' : '#1c2430', ruleDeco: moved ? 'line-through' : 'none',
+        dowColor: we ? '#b04e00' : '#4a5461', dowWeight: we ? 600 : 400,
+        launch: this.fmt(launch), launchDow: DOW[launch.getDay()], moved,
+        canEdit: applyOv, editing,
+        bg: editing ? '#e8f0f5' : '#ffffff',
+        editBg: editing ? '#0f7d8c' : '#ffffff', editColor: editing ? '#ffffff' : '#2a3340', editBorder: editing ? '#0f7d8c' : '#dfe3e8',
+        editAria: 'Изменить дату запуска ' + this.fmt(d),
+        toggleEdit: () => this.setState(editing ? { editKey: null } : { editKey: k, draft: launchKey })
+      };
+      if (editing) {
+        const draft = s.draft || launchKey;
+        const dd = this.fromKey(draft);
+        const mondayOffset = (d.getDay() + 6) % 7;
+        const autoKey = this.key(auto);
+        row.calTitle = MON[d.getMonth()] + ' ' + d.getFullYear();
+        row.calDays = Array.from({ length: 14 }, (_, i) => {
+          const c = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mondayOffset + i);
+          const ck = this.key(c);
+          const selected = ck === draft, isRule = ck === k, isAuto = we && ck === autoKey;
+          const muted = this.isWeekend(c) || c.getMonth() !== d.getMonth();
+          return {
+            num: c.getDate(), selected,
+            aria: human(c) + ', ' + DOW_FULL[c.getDay()],
+            bg: selected ? '#5b2fb0' : 'transparent',
+            ring: selected ? '#5b2fb0' : isRule ? '#c2570a' : isAuto ? '#10855a' : 'transparent',
+            color: selected ? '#ffffff' : isRule ? '#9a4600' : isAuto ? '#0b6b45' : muted ? '#6b7480' : '#1c2430',
+            weight: selected ? 600 : 400,
+            pick: () => this.setState({ draft: ck })
+          };
+        });
+        row.line1 = 'Исходная дата ' + human(d) + ' — ' + DOW_FULL[d.getDay()] + '.';
+        row.draftManual = draft !== k;
+        row.draftRule = draft === k;
+        row.draftText = human(dd);
+        row.resetLabel = 'Вернуть по правилу (' + human(d) + ')';
+        const store = (val) => this.setState((p) => {
+          const o = { ...p.overrides };
+          if (val === baseKey) delete o[k]; else o[k] = val;
+          return { overrides: o, editKey: null, restored: false };
+        });
+        row.save = () => store(draft);
+        row.reset = () => store(k);
+      }
+      return row;
+    });
+
+    let nextLaunch = 'Нет запланированных запусков';
+    if (dates.length) {
+      const first = this.parse(rows[0].launch);
+      const today = new Date(2026, 0, 28);
+      const n = Math.round((first - today) / 86400000);
+      const m10 = n % 10, m100 = n % 100;
+      const word = m10 === 1 && m100 !== 11 ? 'день' : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'дня' : 'дней');
+      const rel = n > 0 ? 'Через ' + n + ' ' + word : n === 0 ? 'Сегодня' : 'Дата в прошлом';
+      nextLaunch = 'Ближайший запуск: ' + human(first) + ' в ' + (s.startTime || '00:00') + '. ' + rel;
+    }
+
+    return {
+      policy: { on: s.policy, ...sw(s.policy), toggle: () => this.setState({ policy: !s.policy }) },
+      channels, launchModes, isSchedule: s.launch === 'schedule', nextLaunch,
+      startDate: s.startDate, startTime: s.startTime, endDate: s.endDate, endTime: s.endTime,
+      setStartDate: set('startDate'), setStartTime: set('startTime'), setEndDate: set('endDate'), setEndTime: set('endTime'),
+      missedOptions, missedLabel, missOpen: !!s.missOpen,
+      toggleMiss: () => this.setState({ missOpen: !s.missOpen, ddOpen: false, calOpen: null }), closeMiss: () => this.setState({ missOpen: false }),
+      hasWeekend, tableGap: hasWeekend ? '10px' : '24px',
+      startCal, endCal, closeCal: () => this.setState({ calOpen: null }),
+      toggleStartCal: openCal('start', start), toggleEndCal: openCal('end', endParsed || start),
+      ddOpen: s.ddOpen, ddBorder: s.ddOpen ? '#0f7d8c' : '#6b7785',
+      toggleDd: () => this.setState({ ddOpen: !s.ddOpen }), closeDd: () => this.setState({ ddOpen: false }),
+      periodOptions, periodLabel,
+      isEvery: s.period === 'every', isWeekly: s.period === 'weekly',
+      isMonthlyDate: s.period === 'monthly_date', isMonthlyDow: s.period === 'monthly_dow',
+      showEnd: s.period !== 'once',
+      everyN: s.everyN, everyUnit: s.everyUnit, dayNum: s.dayNum, nth: s.nth, nthDow: s.nthDow,
+      setEveryN: set('everyN'), setEveryUnit: set('everyUnit'), setDayNum: set('dayNum'), setNth: set('nth'), setNthDow: set('nthDow'),
+      weekdayButtons, switches, weekendModes, rows, noRows: rows.length === 0
+    };
+  }
+}
+mountPrototype(Component);
+</script>
+</body>
+</html>
