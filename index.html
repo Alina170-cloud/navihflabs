@@ -103,6 +103,12 @@
     flex-shrink:0;
   }
   .grid-btn:hover{ background:var(--page-hover); color:var(--text-page); }
+  /* The domain title is clickable too — it opens the same product menu. */
+  .domain-name{ cursor:pointer; padding:4px 4px 4px 6px; margin:-4px -4px -4px -6px; border-radius:6px; transition:background .15s var(--ease); }
+  .domain-name:hover, .sidebar.menu-open .domain-name{ background:var(--page-hover); }   /* background only — the text keeps its colour */
+  .domain-name .title{ border-radius:4px; outline:none; }
+  .domain-name:hover .grid-btn{ color:var(--text-page); }
+  .domain-name .title:focus-visible{ box-shadow:0 0 0 2px rgba(14,125,143,.35); }
   .grid-btn[aria-expanded="true"]{ background:var(--page-hover); color:var(--text-page); }
 
   /* ---- Domain switcher dropdown (opened by the grid button) ---- */
@@ -205,7 +211,10 @@
     .login, .login-card{ transition:none; }
     .app.is-arriving{ animation:none; }
   }
-  .login-card{ width:400px; max-width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:6vh; }
+  /* The form sits in a bordered card with a soft shadow. */
+  .login-card{ box-sizing:border-box; width:480px; max-width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:6vh;
+    padding:44px 40px 24px; background:#fff; border:1px solid #e3e7ea; border-radius:12px;
+    box-shadow:0 18px 48px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.05); }
   .login-brand{ display:flex; align-items:center; gap:12px; }
   .login-brand-name{ font-size:34px; font-weight:600; letter-spacing:-.5px; line-height:1; color:#1b1e24; }
   .login-title{ margin-top:22px; font-size:18px; letter-spacing:.1px; color:#6b6f75; }
@@ -221,20 +230,36 @@
   }
   .login-submit:hover{ background:#2c3038; }
   .login-submit:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px #1b1e24; }
-  .login-error{ display:none; width:100%; margin-top:16px; text-align:center; font-size:14px; line-height:19px; letter-spacing:.1px; color:#d6232f; }
-  .login.has-error .login-error{ display:block; }
+  /* The error line always keeps its place under the button, so the card
+     does not change height when the message appears. */
+  .login-error{ visibility:hidden; width:100%; min-height:19px; margin-top:16px; text-align:center; font-size:14px; line-height:19px; letter-spacing:.1px; color:#d6232f; }
+  .login.has-error .login-error{ visibility:visible; }
+  @media (max-width:480px){ .login-card{ padding:32px 20px 20px; } .login-error{ min-height:38px; } }
 
-  /* ---- Start chooser: shown right after sign-in, before the app opens ---- */
-  .chooser{ display:none; width:760px; max-width:100%; margin-bottom:4vh; background:#fff; border-radius:12px;
-    box-shadow:0 18px 48px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.05), 0 0 0 1px rgba(16,24,40,.05); }
-  .login.is-choosing .login-card{ display:none; }
-  .login.is-choosing .chooser{ display:block; animation:chooserIn .38s cubic-bezier(.22,.61,.36,1) both; }
-  @keyframes chooserIn{ from{ opacity:0; transform:translateY(8px) scale(.985); } to{ opacity:1; transform:none; } }
-  .chooser{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
-  .login.is-leaving .chooser{ transform:translateY(-10px) scale(.985); opacity:0; }
+  /* ---- Start chooser: a pop-up over the app right after sign-in, while
+     Единый клиент is still loading underneath. A click outside closes it. ---- */
+  .chooser-overlay{
+    position:fixed; inset:0; z-index:1500; overflow:auto;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(16,24,40,.32);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .28s cubic-bezier(.22,.61,.36,1), visibility 0s linear .28s;
+  }
+  .chooser-overlay.open{ opacity:1; visibility:visible; pointer-events:auto; transition:opacity .28s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+  .chooser{ width:760px; max-width:100%; margin-bottom:4vh; background:#fff; border-radius:12px;
+    box-shadow:0 24px 64px rgba(16,24,40,.22), 0 4px 12px rgba(16,24,40,.08), 0 0 0 1px rgba(16,24,40,.05);
+    transform:translateY(10px) scale(.985); opacity:0;
+    transition:transform .34s cubic-bezier(.22,.61,.36,1), opacity .26s cubic-bezier(.22,.61,.36,1); }
+  .chooser-overlay.open .chooser{ transform:none; opacity:1; }
   .chooser-head{ padding:24px 28px 18px; border-bottom:1px solid var(--border-soft); }
   .chooser-title{ font-size:20px; line-height:26px; font-weight:600; letter-spacing:-.1px; color:#1b1e24; }
   .chooser-sub{ margin-top:4px; font-size:14px; line-height:20px; letter-spacing:.1px; color:#6b6f75; }
+  /* The apps-menu glyph shown inline in the hint — the same icon as the
+     button next to the domain title, so the person knows what to look for. */
+  .chooser-sub-icon{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; margin:-2px 0 -2px 6px; vertical-align:middle;
+    border-radius:4px; background:var(--page-hover); color:var(--text-page); }
+  .note-text .chooser-sub-icon{ margin-left:5px; margin-right:1px; }
+  .chooser-sub-icon svg{ width:14px; height:14px; display:block; }
   .chooser-body{ display:grid; grid-template-columns:1fr 1fr 1fr; }
   .chooser-col{ padding:14px 14px 18px; display:flex; flex-direction:column; gap:14px; min-width:0; }
   .chooser-col + .chooser-col{ border-left:1px solid var(--border-soft); }
@@ -252,21 +277,22 @@
   .chooser-item .chooser-go{ color:var(--accent); opacity:0; transform:translateX(-4px); transition:opacity .15s var(--ease), transform .15s var(--ease); line-height:0; }
   /* Hover and the selected row share one look. While the pointer is over a
      row, only that row is highlighted; when it leaves, the highlight returns
-     to the selected row (hover is never stored). */
-  .chooser-item:hover, .chooser-item.is-selected{ background:var(--l1-product-fill); color:var(--accent); }
-  .chooser-item:hover .chooser-icon, .chooser-item.is-selected .chooser-icon{ background:#fff; box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08); }
-  .chooser-item:hover .chooser-go, .chooser-item.is-selected .chooser-go{ opacity:1; transform:none; }
-  .chooser-body:has(.chooser-item:hover) .chooser-item.is-selected:not(:hover){ background:transparent; color:var(--text-page); }
-  .chooser-body:has(.chooser-item:hover) .chooser-item.is-selected:not(:hover) .chooser-icon{ background:transparent; box-shadow:none; }
-  .chooser-body:has(.chooser-item:hover) .chooser-item.is-selected:not(:hover) .chooser-go{ opacity:0; transform:translateX(-4px); }
+     to the selected row (hover is never stored). The hover look is a class
+     set on real pointer movement, so a pointer that merely happens to rest
+     where the pop-up appears does not steal the default highlight. */
+  .chooser-item.is-hover, .chooser-item.is-selected{ background:var(--l1-product-fill); color:var(--accent); }
+  .chooser-item.is-hover .chooser-icon, .chooser-item.is-selected .chooser-icon{ background:#fff; box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08); }
+  .chooser-item.is-hover .chooser-go, .chooser-item.is-selected .chooser-go{ opacity:1; transform:none; }
+  .chooser-body:has(.chooser-item.is-hover) .chooser-item.is-selected:not(.is-hover){ background:transparent; color:var(--text-page); }
+  .chooser-body:has(.chooser-item.is-hover) .chooser-item.is-selected:not(.is-hover) .chooser-icon{ background:transparent; box-shadow:none; }
+  .chooser-body:has(.chooser-item.is-hover) .chooser-item.is-selected:not(.is-hover) .chooser-go{ opacity:0; transform:translateX(-4px); }
   .chooser-item:focus-visible{ box-shadow:0 0 0 2px rgba(14,125,143,.35); }
   @media (max-width:680px){
     .chooser-body{ grid-template-columns:1fr; }
     .chooser-col + .chooser-col{ border-left:0; border-top:1px solid var(--border-soft); }
   }
   @media (prefers-reduced-motion: reduce){
-    .login.is-choosing .chooser{ animation:none; }
-    .chooser{ transition:none; }
+    .chooser-overlay, .chooser-overlay.open, .chooser{ transition:none; }
   }
 
   /* ---- User account dropdown (roles + logout) ---- */
@@ -532,7 +558,7 @@
     display:flex;
     align-items:center;
     height:32px;
-    padding:4px 8px 4px 11px; /* text starts at the left edge of the product icons */
+    padding:4px 8px 4px 42px; /* text starts at the left edge of the product name */
     border-radius:4px;
     cursor:pointer;
     text-decoration:none;
@@ -612,7 +638,7 @@
   .skeleton.is-leaving{ opacity:0; pointer-events:none; }
   .sk{ border-radius:4px; background:linear-gradient(100deg, #eceef1 30%, #f6f7f9 50%, #eceef1 70%); background-size:300% 100%; animation:skShimmer 1.5s linear infinite; }
   @keyframes skShimmer{ from{ background-position:100% 0; } to{ background-position:-50% 0; } }
-  .sk-top{ height:42px; flex-shrink:0; display:flex; align-items:center; gap:26px; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
+  .sk-top{ height:48px; flex-shrink:0; display:flex; align-items:center; gap:26px; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
   .sk-top .sk{ height:12px; }
   .sk-top-spacer{ flex:1; }
   .sk-body{ flex:1; min-height:0; overflow:hidden; padding:18px; display:flex; flex-direction:column; gap:14px; }
@@ -624,12 +650,19 @@
   @media (prefers-reduced-motion: reduce){ .sk{ animation:none; } .skeleton{ transition:none; } }
   .topbar{
     display:flex; align-items:center; padding:0 18px;
-    border-bottom:1px solid var(--border); height:42px; gap:26px; flex-shrink:0;
+    border-bottom:1px solid var(--border); height:48px; gap:26px; flex-shrink:0;   /* bottom edge lines up with the bottom of the logo mark */
   }
-  .tab{ font-size:14px; color:var(--text-soft); padding:12px 0; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s var(--ease), border-color .15s var(--ease); }
+  .tab{ font-size:14px; color:var(--text-soft); padding:15px 0; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s var(--ease), border-color .15s var(--ease); }
   .tab:hover{ color:var(--text-page); }
   .tab.active{ color:var(--accent); font-weight:600; border-bottom-color:var(--accent); }
   .topbar-spacer{ flex:1; }
+  /* Page actions in the header's right corner. */
+  .page-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .page-actions.is-hidden{ display:none; }
+  .page-actions.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
+  .page-actions .btn{ padding:6px 12px; }
+  .page-actions .icon-btn{ width:32px; height:30px; }
+  @media (prefers-reduced-motion: reduce){ .page-actions.is-entering{ animation:none; } }
   .header-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
   .header-divider{ width:1px; height:24px; background:#e5e5e6; flex-shrink:0; }
   .user-chip{ display:flex; align-items:center; gap:8px; color:var(--text-soft); font-size:14px; cursor:pointer; }
@@ -721,6 +754,54 @@
   .tabs-group::-webkit-scrollbar{ display:none; }
   .tabs-group > *{ flex-shrink:0; white-space:nowrap; }
   .tabs-group.is-hidden{ display:none; }
+
+  /* ---- Sidebar footer: account + support live at the bottom of the navigation ---- */
+  .sidebar{ overflow:visible; }
+  .nav{ flex:1; min-height:0; overflow-y:auto; margin:0 -8px; padding:0 8px; width:auto; }   /* the page list scrolls, the footer stays put */
+  .sidebar-foot{ display:flex; align-items:center; gap:4px; flex-shrink:0; margin:0 -4px -4px; padding-top:8px; border-top:1px solid var(--border-soft); }
+  .sidebar-foot .user-menu-wrap{ flex:1; min-width:0; }
+  .sidebar-foot .user-chip{ height:36px; padding:0 8px; border-radius:6px; gap:10px; font-weight:500; letter-spacing:.2px; color:var(--text-page); transition:background .15s var(--ease); }
+  .sidebar-foot .user-chip svg{ flex-shrink:0; color:var(--text-soft); }
+  .sidebar-foot .user-chip-name{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sidebar-foot .user-chip:hover, .sidebar-foot .user-chip[aria-expanded="true"]{ background:var(--page-hover); }
+  .sidebar-foot .header-divider{ height:20px; background:var(--border); }
+  .sidebar-foot .help-icon{ width:36px; height:36px; flex-shrink:0; align-items:center; justify-content:center; border-radius:6px; color:var(--text-soft); transition:background .15s var(--ease), color .15s var(--ease); }
+  .sidebar-foot .help-icon:hover, .sidebar-foot .help-icon[aria-expanded="true"]{ background:var(--page-hover); color:var(--text-page); }
+  /* The account menu opens upwards from the footer. */
+  .sidebar-foot .user-menu{ top:auto; bottom:calc(100% + 4px); left:0; right:auto; width:228px; flex-direction:column-reverse; align-items:flex-start; transform:translateY(6px); }
+  .sidebar-foot .user-menu.open{ transform:translateY(0); }
+  .sidebar-foot .user-menu-caret{ margin:0 0 0 12px; transform:rotate(180deg); filter:drop-shadow(0 -1px 1px rgba(0,0,0,.05)); }
+  .sidebar-foot .user-menu-card{ width:228px; box-shadow:0 4px 12px rgba(0,0,0,.08), 0 0 2px rgba(0,0,0,.08), 0 0 1px rgba(0,0,0,.04); }
+
+  /* ---- screenN: annotation page («О прототипе») — one of the placeholder
+     screens that rotate when the person moves between sidebar pages ---- */
+  .note{ max-width:920px; padding-bottom:24px; }
+  .note-head{ margin:2px 0 18px; }
+  .note-title{ margin:0; font-size:20px; line-height:26px; font-weight:600; letter-spacing:-.1px; color:var(--text-primary); }
+  .note-lead{ margin:4px 0 0; font-size:14px; line-height:20px; letter-spacing:.1px; color:var(--text-soft); }
+  .note-card{ background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px 24px; box-shadow:0 1px 2px rgba(10,13,18,.05); }
+  .note-card + .note-card{ margin-top:16px; }
+  .note-card-title{ margin:0 0 6px; font-size:16px; line-height:22px; font-weight:600; color:var(--text-primary); }
+  .note-list{ list-style:none; margin:0; padding:0; }
+  .note-item{ display:flex; gap:14px; padding:14px 0; }
+  .note-item + .note-item{ border-top:1px solid var(--border-soft); }
+  .note-item:last-child{ padding-bottom:2px; }
+  .note-num{ flex-shrink:0; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:600; color:var(--accent); background:var(--l1-fill); }
+  .note-body{ min-width:0; flex:1; }
+  .note-item-title{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:14px; line-height:20px; font-weight:600; letter-spacing:.1px; color:var(--text-page); }
+  .note-text{ margin:4px 0 0; font-size:14px; line-height:21px; letter-spacing:.1px; color:var(--text-soft); max-width:720px; }
+  .note-text b{ font-weight:500; color:var(--text-page); }
+  .note-tag{ font-size:12px; line-height:18px; font-weight:500; letter-spacing:.1px; padding:0 7px; border-radius:5px; white-space:nowrap; }
+  .note-tag.is-mock{ color:#6b6f75; background:#eef0f2; }
+  .note-tag.is-real{ color:#1a7a4c; background:#e6f5ed; }
+  .note-tag.is-plan{ color:#1f6bab; background:#e8f1fa; }
+  .note-path{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; }
+  .note-crumb{ font-size:13px; line-height:20px; font-weight:500; padding:0 8px; border-radius:5px; color:var(--text-page); background:var(--row-bg); border:1px solid var(--border); white-space:nowrap; }
+  .note-arrow{ color:var(--text-faint); line-height:0; }
+  .note-go{ all:unset; display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:14px; line-height:20px; font-weight:500; letter-spacing:.1px; color:var(--accent); cursor:pointer; border-radius:4px; }
+  .note-go:hover{ color:#0a6574; text-decoration:underline; text-underline-offset:3px; }
+  .note-go:focus-visible{ box-shadow:0 0 0 2px rgba(14,125,143,.35); }
 
   /* ---- screenC (Списки / Журнал проверок) specific bits ---- */
   .page-heading{
@@ -1120,12 +1201,14 @@
     </div>
     <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
   </div>
+</div>
 
-  <!-- Start chooser: after sign-in the person picks where to go. -->
+<!-- Start chooser: pops up over the app after sign-in; a click outside closes it. -->
+<div class="chooser-overlay" id="chooserOverlay" aria-hidden="true">
   <div class="chooser" id="startChooser" role="dialog" aria-modal="true" aria-labelledby="chooserTitle">
     <div class="chooser-head">
       <div class="chooser-title" id="chooserTitle">Куда перейти?</div>
-      <div class="chooser-sub">Выберите продукт. Сменить его можно в любой момент через меню приложений.</div>
+      <div class="chooser-sub">Выберите продукт. Сменить его можно в любой момент через меню приложений<span class="chooser-sub-icon" id="chooserSubIcon" role="img" aria-label="значок меню приложений"></span></div>
     </div>
     <div class="chooser-body" id="chooserBody"></div>
   </div>
@@ -1140,7 +1223,7 @@
         <path d="M18.2064 20.4544H16.3821V14.8068H9.82815V20.4544H8.00391V7.66719H9.82815V13.4409H16.3821V7.66719H18.2064V20.4544Z" fill="#D91528"/>
       </svg>
       <div class="domain-name">
-        <span class="title">Клиент</span>
+        <span class="title" role="button" tabindex="0" aria-haspopup="menu" title="Выбрать продукт">Клиент</span>
         <div class="grid-btn" id="domainMenuBtn" title="Приложения" aria-expanded="false">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6.3 2.25H3.45C3.02996 2.25 2.81994 2.25 2.65951 2.33175C2.51839 2.40365 2.40365 2.51839 2.33175 2.65951C2.25 2.81994 2.25 3.02996 2.25 3.45V6.3C2.25 6.72004 2.25 6.93006 2.33175 7.09049C2.40365 7.23161 2.51839 7.34635 2.65951 7.41825C2.81994 7.5 3.02996 7.5 3.45 7.5H6.3C6.72004 7.5 6.93006 7.5 7.09049 7.41825C7.23161 7.34635 7.34635 7.23161 7.41825 7.09049C7.5 6.93006 7.5 6.72004 7.5 6.3V3.45C7.5 3.02996 7.5 2.81994 7.41825 2.65951C7.34635 2.51839 7.23161 2.40365 7.09049 2.33175C6.93006 2.25 6.72004 2.25 6.3 2.25Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1161,6 +1244,38 @@
     </div>
 
     <nav class="nav" id="nav"></nav>
+
+    <!-- Account + support, pinned to the bottom of the navigation -->
+  <div class="sidebar-foot">
+    <div class="user-menu-wrap">
+      <div class="user-chip" id="userMenuBtn" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.4-4 4.2-6 7.5-6s6.1 2 7.5 6"/></svg>
+        <span class="user-chip-name">performer_consent</span>
+      </div>
+      <div class="user-menu" id="userMenu">
+        <div class="user-menu-caret">
+          <svg viewBox="0 0 16 8" width="16" height="8" fill="currentColor"><path d="M8 0l8 8H0z"/></svg>
+        </div>
+        <div class="user-menu-card">
+          <div class="user-menu-section-label">Роли</div>
+          <div class="user-menu-roles">
+            <span class="role-chip">Исполнитель согласия</span>
+            <span class="role-chip">Оператор ЕК</span>
+            <span class="role-chip">Администратор КУС</span>
+          </div>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-logout" id="logoutBtn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h6"/></svg>
+            Выйти
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="help-icon" id="supportBtn" role="button" tabindex="0" title="Написать в поддержку" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9.2"/><path d="M9.4 9.3a2.6 2.6 0 1 1 3.7 2.4c-.9.5-1.4 1-1.4 2" /><circle cx="12" cy="16.7" r=".2" fill="currentColor" stroke-width="1.2"/></svg>
+    </div>
+  </div>
   </aside>
 
   <!-- ========== MAIN ========== -->
@@ -1216,7 +1331,14 @@
         <div class="tab active">Активные</div>
         <div class="tab">Архив</div>
       </div>
-      <div class="tabs-group is-hidden" id="tabsC"></div>
+      <!-- КУС → Списки: the two views are top-level tabs in the header, like on other pages -->
+      <div class="tabs-group is-hidden" id="tabsC">
+        <div class="tab active" data-view="journal">Журнал проверок</div>
+        <div class="tab" data-view="detections">Выявления</div>
+      </div>
+      <div class="tabs-group is-hidden" id="tabsN">
+        <div class="tab active">О прототипе</div>
+      </div>
       <div class="tabs-group is-hidden" id="tabsD">
         <div class="header-back-btn" id="entityBack">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
@@ -1236,35 +1358,29 @@
         <div class="tab">Договоры</div>
       </div>
       <div class="topbar-spacer"></div>
-      <div class="header-actions">
-        <div class="user-menu-wrap">
-          <div class="user-chip" id="userMenuBtn" aria-expanded="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.4-4 4.2-6 7.5-6s6.1 2 7.5 6"/></svg>
-            performer_consent
+      <!-- Page actions: live in the header's right corner (where the account used to be).
+           Each group belongs to one screen and is shown together with it. -->
+      <div class="page-actions" data-screen="screenA">
+        <div class="btn-group">
+          <button class="btn btn-primary">Разрешить все</button>
+          <button class="btn btn-secondary">Разлить и разрешить</button>
+          <button class="btn btn-danger">Отклонить</button>
+        </div>
+        <div class="v-divider"></div>
+        <div class="icon-group">
+          <div class="icon-btn" title="Скачать">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
           </div>
-          <div class="user-menu" id="userMenu">
-            <div class="user-menu-caret">
-              <svg viewBox="0 0 16 8" width="16" height="8" fill="currentColor"><path d="M8 0l8 8H0z"/></svg>
-            </div>
-            <div class="user-menu-card">
-              <div class="user-menu-section-label">Роли</div>
-              <div class="user-menu-roles">
-                <span class="role-chip">Исполнитель согласия</span>
-                <span class="role-chip">Оператор ЕК</span>
-                <span class="role-chip">Администратор КУС</span>
-              </div>
-              <div class="user-menu-divider"></div>
-              <button class="user-menu-logout" id="logoutBtn">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h6"/></svg>
-                Выйти
-              </button>
-            </div>
+          <div class="icon-btn" title="Поделиться">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.1 10.7l7.8-4.3M8.1 13.3l7.8 4.3"/></svg>
           </div>
         </div>
-        <div class="header-divider"></div>
-        <div class="help-icon" id="supportBtn" role="button" tabindex="0" title="Написать в поддержку" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9.2"/><path d="M9.4 9.3a2.6 2.6 0 1 1 3.7 2.4c-.9.5-1.4 1-1.4 2" /><circle cx="12" cy="16.7" r=".2" fill="currentColor" stroke-width="1.2"/></svg>
-        </div>
+      </div>
+      <div class="page-actions is-hidden" data-screen="screenB">
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Маскировка
+        </button>
       </div>
     </div>
 
@@ -1282,21 +1398,6 @@
             <div class="search" style="width:320px">
               <span>Поиск</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            </div>
-            <div class="v-divider"></div>
-            <div class="btn-group">
-              <button class="btn btn-primary">Разрешить все</button>
-              <button class="btn btn-secondary">Разлить и разрешить</button>
-              <button class="btn btn-danger">Отклонить</button>
-            </div>
-            <div class="v-divider"></div>
-            <div class="icon-group">
-              <div class="icon-btn" title="Скачать">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-              </div>
-              <div class="icon-btn" title="Поделиться">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.1 10.7l7.8-4.3M8.1 13.3l7.8 4.3"/></svg>
-              </div>
             </div>
           </div>
         </div>
@@ -1353,10 +1454,6 @@
             <span>Поиск</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           </div>
-          <button class="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-            Маскировка
-          </button>
         </div>
 
         <div class="toolbar-row2">
@@ -1384,12 +1481,83 @@
       </div>
 
       <!-- Screen C: Списки — Журнал проверок (КУС) -->
-      <div class="screen is-hidden" id="screenC">
-        <div class="local-tabs">
-          <div class="tab active" data-view="journal">Журнал проверок</div>
-          <div class="tab" data-view="detections">Выявления</div>
-        </div>
+      <!-- Screen N: annotation page («О прототипе»). Part of the placeholder rotation A → B → N. -->
+      <div class="screen is-hidden" id="screenN">
+        <div class="note">
+          <div class="note-head">
+            <h1 class="note-title">О прототипе</h1>
+            <p class="note-lead">Короткая памятка: что здесь условно и на что стоит обратить внимание.</p>
+          </div>
 
+          <section class="note-card">
+            <h2 class="note-card-title">Как читать прототип</h2>
+            <ul class="note-list">
+              <li class="note-item">
+                <span class="note-num">1</span>
+                <div class="note-body">
+                  <div class="note-item-title">Контент страниц условный <span class="note-tag is-mock">Заглушка</span></div>
+                  <p class="note-text">Содержимое, которое сменяется при переходе по страницам, не связано с выбранным продуктом и его страницей. Экраны просто чередуются; если контент подошёл к странице&nbsp;— это совпадение.</p>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">2</span>
+                <div class="note-body">
+                  <div class="note-item-title">Анимация смены контента настоящая <span class="note-tag is-real">Как в продукте</span></div>
+                  <p class="note-text">Переход между страницами будет выглядеть именно так, как вы видите здесь.</p>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <section class="note-card">
+            <h2 class="note-card-title">Что стоит посмотреть</h2>
+            <ul class="note-list">
+              <li class="note-item">
+                <span class="note-num">1</span>
+                <div class="note-body">
+                  <div class="note-item-title">Группировка продуктов в меню приложений</div>
+                  <p class="note-text">Откройте меню приложений&nbsp;— кликом по названию домена рядом с логотипом или по значку<span class="chooser-sub-icon js-apps-glyph" role="img" aria-label="значок меню приложений"></span>. Продукты в нём собраны в группы: «Управление», «Клиент» и «Данные».</p>
+                  <div><button class="note-go" type="button" data-go="apps-menu">Открыть меню приложений <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">2</span>
+                <div class="note-body">
+                  <div class="note-item-title">Перемещение по продуктам в меню навигации</div>
+                  <p class="note-text">В меню слева раскройте другой продукт и выберите его страницу&nbsp;— так можно перейти из продукта в продукт внутри группы, не открывая меню приложений.</p>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">3</span>
+                <div class="note-body">
+                  <div class="note-item-title">Переход из КУС в Единый клиент</div>
+                  <p class="note-text">Откройте «Выявления» и кликните по ФИО. Вы окажетесь в Едином клиенте&nbsp;— обратите внимание на кнопку «назад» в шапке: она возвращает в КУС.</p>
+                  <div class="note-path"><span class="note-crumb">КУС</span><span class="note-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="note-crumb">Списки</span><span class="note-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="note-crumb">Выявления</span><span class="note-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="note-crumb">клик по ФИО</span></div>
+                  <div><button class="note-go" type="button" data-go="kus-detections">Открыть «Выявления» <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">4</span>
+                <div class="note-body">
+                  <div class="note-item-title">Карточка сущности</div>
+                  <p class="note-text">На странице «Сущности» откройте карточку любого человека&nbsp;— кнопка «назад» есть и там.</p>
+                  <div class="note-path"><span class="note-crumb">Единый клиент</span><span class="note-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="note-crumb">Сущности</span><span class="note-arrow"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="note-crumb">клик по ФИО</span></div>
+                  <div><button class="note-go" type="button" data-go="ek-entities">Открыть «Сущности» <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">5</span>
+                <div class="note-body">
+                  <div class="note-item-title">Навигация браузера <span class="note-tag is-plan">В планах</span></div>
+                  <p class="note-text">Глобально планируем опираться на навигацию браузера: сохранять каждый переход в истории и перемещаться по ним кнопками «вперёд» и «назад».</p>
+                </div>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+
+      <div class="screen is-hidden" id="screenC">
         <!-- Journal view (Журнал проверок) -->
         <div class="kus-view" id="kusViewJournal">
           <div class="toolbar-row1">
@@ -2053,13 +2221,23 @@ function closeDomainMenu(){
   domainBtn.setAttribute('aria-expanded', 'false');
 }
 
-domainBtn.addEventListener('click', (e)=>{
-  e.stopPropagation();
+// The domain title (Клиент / Данные / Управление) and the grid button next
+// to it are one trigger: a click on either opens the product menu.
+const domainTrigger = document.querySelector('.domain-name');
+const domainTitle = domainTrigger.querySelector('.title');
+function toggleDomainMenu(){
   domainMenu.classList.contains('open') ? closeDomainMenu() : openDomainMenu();
+}
+domainTrigger.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  toggleDomainMenu();
+});
+domainTitle.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleDomainMenu(); }
 });
 
 document.addEventListener('click', (e)=>{
-  if(domainMenu.classList.contains('open') && !domainMenu.contains(e.target) && e.target !== domainBtn && !domainBtn.contains(e.target)){
+  if(domainMenu.classList.contains('open') && !domainMenu.contains(e.target) && !domainTrigger.contains(e.target)){
     closeDomainMenu();
   }
 });
@@ -2105,7 +2283,8 @@ function showLogin(){
   loginUser.value = '';
   loginPass.value = '';
   clearTimeout(loginLeaveTimer);
-  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving', 'is-choosing');
+  closeChooser();
+  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving');
   loginScreen.classList.remove('is-entering');
   void loginScreen.offsetWidth;
   loginScreen.classList.add('is-entering');
@@ -2150,14 +2329,13 @@ function enterApp(){
   clearTimeout(loginLeaveTimer);
   loginLeaveTimer = setTimeout(()=>{
     loginScreen.classList.add('is-hidden');
-    loginScreen.classList.remove('is-leaving', 'is-choosing');
+    loginScreen.classList.remove('is-leaving');
     app.classList.remove('is-arriving');
   }, 620);
 }
 
-// After a successful sign-in the form gives way to the start chooser: the
-// person picks a product (Клиент lists all of its products; Данные and
-// Управление list theirs) and only then lands in the app.
+// Start chooser: after a successful sign-in the app opens on Единый клиент
+// and this pop-up offers the other products (Управление, Клиент, Данные).
 const chooserBody = document.getElementById('chooserBody');
 const chooserLayout = [
   [ { label:'Управление', domains:['vyshka'] } ],
@@ -2181,10 +2359,15 @@ function renderChooser(){
     return `<div class="chooser-col">${groups}</div>`;
   }).join('');
 }
+const chooserOverlay = document.getElementById('chooserOverlay');
+// Reuse the exact glyph of the apps-menu button wherever the text mentions it.
+document.querySelectorAll('#chooserSubIcon, .js-apps-glyph').forEach(el=>{
+  el.appendChild(document.querySelector('#domainMenuBtn svg').cloneNode(true));
+});
 function showChooser(){
   renderChooser();
-  loginScreen.classList.remove('has-error', 'is-entering');
-  loginScreen.classList.add('is-choosing');
+  chooserOverlay.classList.add('open');
+  chooserOverlay.setAttribute('aria-hidden', 'false');
   const def = chooserBody.querySelector(`.chooser-item[data-product="${chooserDefaultProduct}"]`) || chooserBody.querySelector('.chooser-item');
   if(def){ selectChooserItem(def); def.focus({ preventScroll:true }); }
 }
@@ -2193,21 +2376,62 @@ function selectChooserItem(item){
   chooserBody.querySelectorAll('.chooser-item.is-selected').forEach(el=>el.classList.remove('is-selected'));
   item.classList.add('is-selected');
 }
-// Hover is only a transient highlight (CSS); the selection moves with the keyboard.
+// Hover is only a transient highlight: on while the pointer moves over a row,
+// gone as soon as it leaves. The selection itself moves with the keyboard.
+function clearChooserHover(){
+  chooserBody.querySelectorAll('.chooser-item.is-hover').forEach(el=>el.classList.remove('is-hover'));
+}
+chooserBody.addEventListener('mousemove', (e)=>{
+  const item = e.target.closest('.chooser-item');
+  if(item && item.classList.contains('is-hover')) return;
+  clearChooserHover();
+  if(item) item.classList.add('is-hover');
+});
+chooserBody.addEventListener('mouseleave', clearChooserHover);
 chooserBody.addEventListener('focusin', (e)=>{
   const item = e.target.closest('.chooser-item');
   if(item) selectChooserItem(item);
 });
 // Opens a product on its first page (same routing as the apps menu).
-function goToProduct(domainKey, productKey){
+function goToProduct(domainKey, productKey, animate){
   renderNav(domainKey, productKey);
-  setScreen(productKey === 'kus' ? 'screenC' : (domainScreenMap[domainKey] || 'screenA'));
+  const targetId = productKey === 'kus' ? 'screenC' : (domainScreenMap[domainKey] || 'screenA');
+  const sameScreen = document.querySelector('.screen:not(.is-hidden)').id === targetId;
+  setScreen(targetId);
+  if(animate && sameScreen) replayScreenEnter();
+}
+// Replays the page-content entrance (content + header tabs) on the screen
+// that is already visible — setScreen() only animates when the screen changes.
+function replayScreenEnter(){
+  const screen = document.querySelector('.screen:not(.is-hidden)');
+  const tabs = document.querySelector('.tabs-group:not(.is-hidden)');
+  const actions = document.querySelector('.page-actions:not(.is-hidden)');
+  [screen, tabs, actions].forEach(el=>{ if(el) el.classList.remove('is-entering'); });
+  void screen.offsetWidth;
+  [screen, tabs, actions].forEach(el=>{ if(el) el.classList.add('is-entering'); });
+  document.querySelector('.content').scrollTop = 0;
+}
+function closeChooser(){
+  chooserOverlay.classList.remove('open');
+  chooserOverlay.setAttribute('aria-hidden', 'true');
 }
 chooserBody.addEventListener('click', (e)=>{
   const item = e.target.closest('.chooser-item');
   if(!item) return;
+  closeChooser();
+  // Единый клиент is already loading underneath — just reveal it. Any other
+  // product opens with its own loading skeleton.
+  if(item.dataset.product === chooserDefaultProduct) return;
   goToProduct(item.dataset.domain, item.dataset.product);
-  enterApp();
+  showSkeleton(1400);
+});
+// A click on the dimmed area outside the card (or Esc) dismisses the pop-up
+// and leaves the person in Единый клиент.
+chooserOverlay.addEventListener('click', (e)=>{
+  if(e.target === chooserOverlay) closeChooser();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && chooserOverlay.classList.contains('open')) closeChooser();
 });
 chooserBody.addEventListener('keydown', (e)=>{
   if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -2220,6 +2444,12 @@ chooserBody.addEventListener('keydown', (e)=>{
 
 function tryLogin(){
   if(loginUser.value.trim() && loginPass.value.trim()){
+    // Sign-in always lands on Единый клиент → «Сущности» in the sidebar, with
+    // the annotation page («О прототипе») as the first content screen; the
+    // chooser pops up over it while the screen is still loading.
+    goToProduct('client', chooserDefaultProduct);
+    setScreen('screenN');
+    enterApp();
     showChooser();
     return;
   }
@@ -2281,11 +2511,12 @@ function renderDomainMenu(){
 domainMenuCard.addEventListener('click', (e)=>{
   const item = e.target.closest('.domain-item');
   if(!item) return;
-  const domainKey = item.dataset.domain;
-  const productKey = item.dataset.product;
-  renderNav(domainKey, productKey);
-  setScreen(domainScreenMap[domainKey] || 'screenA');
   closeDomainMenu();
+  // Re-picking the product that is already open changes nothing.
+  if(item.classList.contains('active')) return;
+  // Switching products always plays the page-content transition, even when
+  // the new product happens to reuse the screen that is already showing.
+  goToProduct(item.dataset.domain, item.dataset.product, true);
 });
 
 document.querySelectorAll('.tabs-group .tab, .local-tabs .tab').forEach(tab=>{
@@ -2308,7 +2539,7 @@ function setScreen(targetId){
   if(current.id === targetId) return;
   const currentTabs = document.querySelector('.tabs-group:not(.is-hidden)');
   const other = document.getElementById(targetId);
-  const tabsIdMap = { screenA:'tabsA', screenB:'tabsB', screenC:'tabsC', screenD:'tabsD', screenE:'tabsE', screenF:'tabsF' };
+  const tabsIdMap = { screenA:'tabsA', screenB:'tabsB', screenC:'tabsC', screenD:'tabsD', screenE:'tabsE', screenF:'tabsF', screenN:'tabsN' };
   const otherTabs = document.getElementById(tabsIdMap[targetId]);
 
   current.classList.add('is-hidden');
@@ -2316,19 +2547,47 @@ function setScreen(targetId){
   currentTabs.classList.add('is-hidden');
   otherTabs.classList.remove('is-hidden');
 
+  // Header actions belong to a screen and switch together with it.
+  let otherActions = null;
+  document.querySelectorAll('.page-actions').forEach(el=>{
+    const mine = el.dataset.screen === targetId;
+    el.classList.toggle('is-hidden', !mine);
+    el.classList.remove('is-entering');
+    if(mine) otherActions = el;
+  });
+
   other.classList.remove('is-entering');
   otherTabs.classList.remove('is-entering');
   void other.offsetWidth; // force reflow so the animation replays every time
   other.classList.add('is-entering');
   otherTabs.classList.add('is-entering');
+  if(otherActions) otherActions.classList.add('is-entering');
 
   document.querySelector('.content').scrollTop = 0;
 }
 
+// Placeholder pages rotate through three screens: A → B → N (the annotation
+// page «О прототипе») → A. From any other screen the rotation restarts at A.
 function swapScreen(){
   const current = document.querySelector('.screen:not(.is-hidden)');
-  setScreen(current.id === 'screenA' ? 'screenB' : 'screenA');
+  const next = { screenA:'screenB', screenB:'screenN' };
+  setScreen(next[current.id] || 'screenA');
 }
+
+// Shortcuts on the annotation page: jump straight to the place it talks about.
+document.getElementById('screenN').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.note-go');
+  if(!btn) return;
+  if(btn.dataset.go === 'kus-detections'){
+    goToProduct('client', 'kus', true);
+    document.querySelector('#tabsC .tab[data-view="detections"]').click();
+  } else if(btn.dataset.go === 'ek-entities'){
+    goToProduct('client', 'client', true);
+  } else if(btn.dataset.go === 'apps-menu'){
+    e.stopPropagation();   // keep the outside-click handler from closing it at once
+    openDomainMenu();
+  }
+});
 
 /* ---------------- INTERACTIONS ---------------- */
 nav.addEventListener('click', (e)=>{
@@ -2557,8 +2816,9 @@ function openEntityDetail(name){
 
   const activeGroupEl = document.querySelector('.nav-group.active-product');
   const activeProductKey = activeGroupEl ? activeGroupEl.dataset.key : null;
-  // The back button is always named after the PAGE the person came from,
-  // never after the product (so it never reads "КУС", "ЦУС", …).
+  // The back button is named after the PAGE the person came from. When the
+  // card is opened from ANOTHER product, the label starts with that product's
+  // name: «КУС. Выявления». Inside Единый клиент it stays page-only.
   const originPageEl = activeGroupEl ? activeGroupEl.querySelector('.nav-page.active .nav-page-text') : null;
   const originPageLabel = originPageEl ? originPageEl.textContent : 'Сущности';
 
@@ -2575,6 +2835,9 @@ function openEntityDetail(name){
       const onDetections = !document.getElementById('kusViewDetections').classList.contains('is-hidden');
       cameFrom.label = onDetections ? 'Выявления' : 'Журнал проверок';
     }
+    // Crossing products: lead with the product we are leaving.
+    const originProductEl = activeGroupEl.querySelector('.nav-product .label');
+    if(originProductEl) cameFrom.label = originProductEl.textContent.trim() + '. ' + cameFrom.label;
 
     // Remember which product groups were already expanded (e.g. КУС), so the
     // switch to Единый клиент doesn't visually collapse them — only the
@@ -2615,7 +2878,9 @@ function openEntityDetail(name){
   // If the page we came from has top-level tabs in the header, the back
   // button names the tab too: «Сущности. ФЛ».
   const originTopTab = document.querySelector('.tabs-group:not(.is-hidden) .tab.active');
-  if(originTopTab) cameFrom.label += '. ' + originTopTab.textContent.trim();
+  // (КУС → Списки is the exception: its header tabs ARE the views, and the
+  // label already names the view — «КУС. Выявления».)
+  if(originTopTab && cameFrom.screenId !== 'screenC') cameFrom.label += '. ' + originTopTab.textContent.trim();
 
   // Opened from another product (КУС) the card lands on «Проверки»;
   // from Единый клиент itself — on «Атрибутика».
@@ -2636,7 +2901,7 @@ tbodyLists.addEventListener('click', (e)=>{
 });
 
 /* ---------------- КУС / Списки: Журнал проверок vs Выявления ---------------- */
-document.querySelectorAll('#screenC .local-tabs .tab').forEach(tab=>{
+document.querySelectorAll('#tabsC .tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     const view = tab.dataset.view;
     document.getElementById('kusViewJournal').classList.toggle('is-hidden', view !== 'journal');
