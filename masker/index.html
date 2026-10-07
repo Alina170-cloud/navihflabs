@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Маскировщик — Маскировки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- tokens taken from Figma (Навигация) ---- */
+    --red: #e6332a;
+    --accent: #0e7d8f;        /* simpletext/accent */
+    --accent-icon-bg: #f5fafb;/* accent/100 */
+    --text-primary: #1b1e24;  /* simpletext/primary */
+    --text-page: #08080a;     /* dark/700 */
+    --row-bg: #fafafa;        /* dark/50 */
+    --row-hover: #eef2f4;
+    --page-hover: #f1f4f7;
+    --border: #e6e9ec;
+    --border-soft: #eef0f2;
+    --text-soft: #5b636b;
+    --text-faint: #8b939b;
+    --blue: #2f7fc4;
+    --blue-dark: #1f6bab;
+    --bg: #ffffff;
+    --sidebar-bg: #ffffff;
+    --ease: cubic-bezier(.4,0,.2,1);
+
+    /* ---- Active-menu levels ----
+       L1 = global navigation (sidebar): dark ink on a teal-tinted fill.
+       L2 = menu inside a product page: dark ink on a grey fill. */
+    --l1-fill: #eff7f8;   /* same tint as the active product row */
+    --l1-text: var(--accent);
+    --l1-product: var(--accent);   /* active product: label, icon, chevron */
+    --l1-product-fill: #eff7f8;    /* active product row: lighter tint than the page */
+    --l1-product-chip: #fff;
+    --l2-fill: #eef0f2;
+    --l2-ink: #1b1e24;
+    /* One shared, soft transition for both levels: fill, text and marker
+       cross-fade together so nothing lags behind. */
+    --menu-fade: .34s cubic-bezier(.25,.1,.25,1);
+    /* Page content eases in a touch slower than the menu highlight. */
+    --page-fade: .42s cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:'Inter', -apple-system, "Segoe UI", Arial, sans-serif;
+    color:var(--text-page);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{ display:flex; height:100vh; overflow:hidden; }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar{
+    width:244px;
+    min-width:244px;
+    background:var(--sidebar-bg);
+    border-right:1px solid var(--border);
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    overflow-y:auto;
+  }
+
+  .domain{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:3px 0 3px 2px;
+    width:100%;
+    position:relative;
+  }
+  .logo-mark{
+    flex-shrink:0;
+  }
+  .domain-name{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-width:0;
+  }
+  .domain-name .title{
+    font-weight:600;
+    font-size:18px;
+    line-height:20px;
+    letter-spacing:.2px;
+    color:var(--text-page);
+    white-space:nowrap;
+  }
+  /* Single-product build: the title is a plain label — no product menu. */
+
+  /* ---- Login screen (shown after «Выйти») ---- */
+  .login{
+    position:fixed; inset:0; z-index:2000; overflow:auto;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:
+      radial-gradient(120% 70% at 50% -18%, rgba(217,21,40,.22) 0%, rgba(217,21,40,.08) 38%, rgba(217,21,40,0) 68%),   /* top glow: logo red (#d91528) */
+      radial-gradient(120% 70% at 50% 118%, rgba(14,125,143,.30) 0%, rgba(14,125,143,.11) 38%, rgba(14,125,143,0) 68%),   /* bottom glow: accent teal (#0e7d8f) */
+      #fcfdfd;
+  }
+  .login.is-hidden{ display:none; }
+  .login.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
+  /* Soft hand-off into the app: the form lifts and dissolves while the
+     app underneath settles into place. */
+  .login{ transition:opacity .55s cubic-bezier(.22,.61,.36,1); }
+  .login-card{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
+  .login.is-leaving{ opacity:0; pointer-events:none; }
+  .login.is-leaving .login-card{ transform:translateY(-10px) scale(.985); opacity:0; }
+  .app.is-arriving{ animation:appArrive .6s cubic-bezier(.22,.61,.36,1) both; }
+  @keyframes appArrive{ from{ opacity:.35; transform:scale(.992); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){
+    .login, .login-card{ transition:none; }
+    .app.is-arriving{ animation:none; }
+  }
+  /* The form sits in a bordered card with a soft shadow. */
+  .login-card{ box-sizing:border-box; width:480px; max-width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:6vh;
+    padding:44px 40px 24px; background:#fff; border:1px solid #e3e7ea; border-radius:12px;
+    box-shadow:0 18px 48px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.05); }
+  .login-brand{ display:flex; align-items:center; gap:12px; }
+  .login-brand-name{ font-size:34px; font-weight:600; letter-spacing:-.5px; line-height:1; color:#1b1e24; }
+  .login-title{ margin-top:26px; font-size:14px; line-height:20px; letter-spacing:.1px; color:#6b6f75; }
+  /* Product lockup: the product's own icon (same as in the sidebar, on the
+     active-product chip) next to its name — says which product you sign in to. */
+  .login-product{ margin-top:10px; display:flex; align-items:center; gap:12px; }
+  .login-product-logo{ width:44px; height:44px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    color:#1b1e24; background:#fff; box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08); }
+  .login-product-logo svg{ width:28px; height:28px; display:block; }
+  .login-product-name{ font-size:24px; line-height:28px; font-weight:600; letter-spacing:-.2px; color:#1b1e24; }
+  .login-form{ width:100%; margin-top:32px; display:flex; flex-direction:column; gap:16px; }
+  .login-input{ width:100%; height:37px; padding:0 8px; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #a7acb1; border-radius:3px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
+  .login-input::placeholder{ color:#7b8288; }
+  .login-input:focus{ border-color:#387c8c; box-shadow:0 0 0 2px rgba(56,124,140,.18); }
+  .login-submit{
+    all:unset; box-sizing:border-box; width:100%; height:44px; margin-top:4px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:#1b1e24; color:#fff; font-size:15px; font-weight:500; letter-spacing:.1px;
+    border-radius:4px; cursor:pointer; transition:background .15s var(--ease);
+  }
+  .login-submit:hover{ background:#2c3038; }
+  .login-submit:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px #1b1e24; }
+  /* The error line always keeps its place under the button, so the card
+     does not change height when the message appears. */
+  .login-error{ visibility:hidden; width:100%; min-height:19px; margin-top:16px; text-align:center; font-size:14px; line-height:19px; letter-spacing:.1px; color:#d6232f; }
+  .login.has-error .login-error{ visibility:visible; }
+  @media (max-width:480px){ .login-card{ padding:32px 20px 20px; } .login-error{ min-height:38px; } }
+
+  /* ---- User account dropdown (roles + logout) ---- */
+  .user-menu-wrap{ position:relative; }
+  .user-chip{ cursor:pointer; }
+  .user-chip[aria-expanded="true"]{ color:var(--text-page); }
+  .user-menu{
+    position:absolute;
+    top:32px;
+    right:0;
+    width:248px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    z-index:40;
+    opacity:0;
+    transform:translateY(-6px);
+    pointer-events:none;
+    transition:opacity .18s var(--ease), transform .18s var(--ease);
+  }
+  .user-menu.open{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+  }
+  .user-menu-caret{
+    margin-right:14px;
+    color:#fff;
+    line-height:0;
+    filter:drop-shadow(0 -1px 1px rgba(0,0,0,.05));
+  }
+  .user-menu-card{
+    width:248px;
+    background:#fff;
+    border-radius:8px;
+    padding:12px;
+    box-shadow:0 4px 8px rgba(0,0,0,.04), 0 0 2px rgba(0,0,0,.06), 0 0 1px rgba(0,0,0,.04);
+  }
+  .user-menu-section-label{
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    margin-bottom:8px;
+  }
+  .user-menu-roles{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .role-chip{
+    font-size:14px;
+    font-weight:500;
+    color:var(--text-primary);
+    background:#f8f8f8;
+    border-radius:6px;
+    padding:6px 10px;
+  }
+  .user-menu-divider{ height:1px; background:var(--border-soft); margin:12px 0; }
+  .user-menu-logout{
+    all:unset;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    padding:8px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    color:#d91528;
+    transition:background .15s var(--ease);
+  }
+  .user-menu-logout:hover{ background:#fceaec; }
+
+  /* ---- Nav dims while the domain menu is open, so it doesn't fight for attention ---- */
+  .nav{
+    transition:opacity .25s var(--ease);
+  }
+  .sidebar.menu-open .nav{
+    opacity:.35;
+    pointer-events:none;
+  }
+
+  .nav{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    width:100%;
+  }
+
+  /* ---- Product row ---- */
+  /* States mirror the Figma "Product" component (node 107:36478):
+     - Default: no row bg, plain icon chip, dark text, chevron down
+     - Hover:   light grey row bg, plain icon chip, dark text, chevron down
+     - Opened (expanded, not the active context product): grey row bg,
+       plain icon chip, dark text, chevron up
+     - Active (the current context product, e.g. Единый клиент): grey row bg,
+       accent-tinted icon chip, accent text, chevron up
+     "active-product" class = Active; "open" class = expanded (chevron/pages) */
+  .nav-group{ position:relative; }
+
+  .nav-product{
+    all:unset;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    width:100%;
+    padding:2px 6px 2px 2px;
+    border-radius:6px;
+    background:transparent;
+    cursor:pointer;
+    transition:background .18s var(--ease);
+    height:38px;
+    position:relative;
+    z-index:1;
+  }
+  /* Only the active product keeps a fill; an open-but-inactive one stays flat. */
+  /* Product rows: hover and active fills bleed to both edges of the sidebar
+     (12px = the sidebar's side padding). */
+  .nav-product,
+  .nav-product:hover,
+  .nav-product:active{ background:transparent; }
+  .nav-product::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0;
+    left:-4px; right:-4px;   /* 8px short of each sidebar edge */
+    border-radius:6px;
+    background:var(--row-hover);
+    opacity:0;
+    z-index:-1;
+    transition:opacity .18s var(--ease), background .18s var(--ease);
+  }
+  .nav-product:hover::before{ opacity:1; }
+  .nav-product:active::before{ opacity:1; background:#e5e9ec; }
+  .nav-group.active-product > .nav-product::before,
+  .nav-group.active-product > .nav-product:hover::before,
+  .nav-group.active-product > .nav-product:active::before{ opacity:1; background:var(--l1-product-fill); }
+  .nav-group.active-product.open > .nav-product{ cursor:default; }
+
+  .nav-product .icon-chip{
+    width:34px;height:34px;
+    border-radius:6px;
+    background:var(--row-bg);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    transition:background .18s var(--ease);
+  }
+  .nav-group.active-product > .nav-product .icon-chip{
+    background:var(--l1-product-chip);
+    box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08);
+  }
+  .nav-product .icon-chip svg{ width:24px;height:24px; color:var(--text-primary); transition:color .18s var(--ease); }
+  .nav-group.active-product > .nav-product .icon-chip svg{ color:var(--l1-product); }
+
+  .nav-product .label-row{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-width:0;
+  }
+  .nav-product .label{
+    font-weight:500;
+    font-size:14px;
+    line-height:18px;
+    letter-spacing:.2px;
+    color:var(--text-page);
+    /* Long names wrap onto a second line inside the same 38px row;
+       anything longer than two lines is cut with an ellipsis. */
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    transition:color .18s var(--ease);
+  }
+  .nav-group.active-product > .nav-product .label{ color:var(--l1-product); font-weight:500; }
+
+  .nav-product .chev{
+    width:18px;height:18px;
+    flex-shrink:0;
+    color:var(--text-soft);
+    opacity:0; /* hidden at rest, shown only on hover / keyboard focus */
+    transition:transform .3s var(--ease), color .18s var(--ease), opacity .18s var(--ease);
+    transform:rotate(180deg); /* closed = pointing down */
+  }
+  .nav-product:hover .chev,
+  .nav-product:focus-visible .chev{ opacity:.6; }
+  .nav-group.open > .nav-product .chev{
+    transform:rotate(0deg); /* open = pointing up */
+    color:var(--text-primary);
+  }
+  .nav-group.active-product > .nav-product .chev{
+    color:var(--l1-product);
+  }
+  .nav-group.active-product > .nav-product:hover .chev,
+  .nav-group.active-product > .nav-product:focus-visible .chev{ opacity:1; }
+
+  /* ---- Collapsible pages region (auto-height animation) ---- */
+  .nav-sub-wrapper{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows .32s var(--ease);
+  }
+  .nav-group.open > .nav-sub-wrapper{ grid-template-rows:1fr; }
+  /* The clip box is widened by the sidebar padding (12px each side) so the
+     active page's fill can bleed to both edges of the sidebar. */
+  .nav-sub-inner{ overflow:hidden; min-height:0; margin:0 -12px; padding:0 12px; }
+  .nav-sub{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding-top:6px;
+    position:relative;
+    opacity:0;
+    transform:translateY(-4px);
+    transition:opacity .22s var(--ease) .02s, transform .22s var(--ease) .02s;
+  }
+  .nav-group.open .nav-sub{ opacity:1; transform:translateY(0); }
+  .nav-group.no-anim > .nav-sub-wrapper,
+  .nav-group.no-anim .nav-sub,
+  .nav-group.no-anim .chev{ transition:none !important; }
+  /* Single-product build: the only product cannot be collapsed, so its row has no chevron. */
+  .nav-product .chev{ display:none; }
+
+  /* Shared highlight pill that flies into whichever page becomes active —
+     it snaps to the right row instantly, then sweeps in from the right
+     edge, landing with a slight overshoot. */
+  .rail-indicator{
+    position:absolute;
+    left:0;
+    right:0;
+    width:auto;
+    height:32px;
+    border-radius:4px;
+    background:var(--l1-fill);
+    display:none; /* replaced by the per-row cross-fade */
+    opacity:0;
+    z-index:0;
+    pointer-events:none;
+    transform-origin:right center;
+    transform:translateX(0) scaleX(1);
+    transition:transform .36s cubic-bezier(.22,1.4,.36,1), opacity .2s var(--ease);
+  }
+  /* Static accent tick marking the active row — jumps straight to place,
+     no transition of its own, so it never squishes or slides with the pill. */
+  .rail-tick{
+    position:absolute;
+    left:19px;
+    width:2px;
+    height:24px;
+    border-radius:2px;
+    background:var(--accent);
+    display:none; /* replaced by .nav-page::before */
+    opacity:0;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .nav-page{
+    display:flex;
+    align-items:center;
+    height:32px;
+    padding:4px 8px 4px 42px; /* text starts at the left edge of the product name */
+    border-radius:4px;
+    cursor:pointer;
+    text-decoration:none;
+    font-weight:500;
+    font-size:14px;
+    line-height:18px;
+    letter-spacing:.2px;
+    color:var(--text-page);
+    position:relative;
+    z-index:1;
+    transition:background var(--menu-fade), color var(--menu-fade);
+  }
+  /* Active marker: a bar on the very left edge of the fill, full height. */
+  .nav-page::before{
+    content:"";
+    position:absolute;
+    left:-4px; top:0; bottom:0;
+    width:4px;
+    border-radius:4px 0 0 4px;
+    background:var(--l1-text);
+    opacity:0;
+    transition:opacity var(--menu-fade);
+  }
+  .nav-page.active::before{ opacity:1; }
+  /* Fill behind the hovered / active page. */
+  .nav-page::after{
+    content:"";
+    position:absolute;
+    top:0; bottom:0;
+    left:-4px; right:-4px;   /* 8px short of each sidebar edge */
+    border-radius:4px;
+    background:var(--page-hover);
+    opacity:0;
+    z-index:-1;
+    transition:opacity var(--menu-fade), background var(--menu-fade);
+  }
+  .nav-page:hover::after{ opacity:1; }
+  .nav-page.active::after,
+  .nav-page.active:hover::after{ opacity:1; background:var(--l1-fill); }
+  .nav-page-text{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    flex:1;
+    min-width:0;
+  }
+  .nav-page:hover{ background:transparent; }
+  .nav-page.active{
+    background:transparent;
+    color:var(--l1-text);
+  }
+  .nav-page.active:hover{ background:transparent; }
+  .badge-counter{
+    flex-shrink:0;
+    margin-left:4px;
+    height:18px;
+    padding:0 4px;
+    border-radius:999px;
+    background:#de3142;
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    line-height:18px;
+    letter-spacing:.2px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ============ MAIN (context only) ============ */
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; position:relative; }
+
+  /* ---- Loading skeleton: covers everything except the sidebar for a few
+     seconds after signing in. ---- */
+  .skeleton{ position:absolute; inset:0; z-index:50; display:flex; flex-direction:column; background:#fafafa; transition:opacity .45s cubic-bezier(.22,.61,.36,1); }
+  .skeleton.is-hidden{ display:none; }
+  .skeleton.is-leaving{ opacity:0; pointer-events:none; }
+  .sk{ border-radius:4px; background:linear-gradient(100deg, #eceef1 30%, #f6f7f9 50%, #eceef1 70%); background-size:300% 100%; animation:skShimmer 1.5s linear infinite; }
+  @keyframes skShimmer{ from{ background-position:100% 0; } to{ background-position:-50% 0; } }
+  .sk-top{ height:48px; flex-shrink:0; display:flex; align-items:center; gap:26px; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
+  .sk-top .sk{ height:12px; }
+  .sk-top-spacer{ flex:1; }
+  .sk-body{ flex:1; min-height:0; overflow:hidden; padding:18px; display:flex; flex-direction:column; gap:14px; }
+  .sk-row{ display:flex; align-items:center; gap:10px; }
+  .sk-table{ flex:1; min-height:0; overflow:hidden; background:#fff; border:1px solid var(--border); border-radius:8px; }
+  .sk-tr{ display:grid; grid-template-columns:2.2fr 1fr 1.2fr 1.4fr 1.6fr; gap:28px; align-items:center; height:41px; padding:0 14px; border-top:1px solid var(--border-soft); }
+  .sk-tr:first-child{ border-top:none; background:#fafafa; height:42px; }
+  .sk-tr .sk{ height:11px; }
+  @media (prefers-reduced-motion: reduce){ .sk{ animation:none; } .skeleton{ transition:none; } }
+  .topbar{
+    display:flex; align-items:center; padding:0 18px;
+    border-bottom:1px solid var(--border); height:48px; gap:26px; flex-shrink:0;   /* bottom edge lines up with the bottom of the logo mark */
+  }
+  .tab{ font-size:14px; color:var(--text-soft); padding:15px 0; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s var(--ease), border-color .15s var(--ease); }
+  .tab:hover{ color:var(--text-page); }
+  .tab.active{ color:var(--accent); font-weight:600; border-bottom-color:var(--accent); }
+  .topbar-spacer{ flex:1; }
+  /* Page actions in the header's right corner. */
+  .page-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .page-actions.is-hidden{ display:none; }
+  .page-actions.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
+  .page-actions .btn{ padding:6px 12px; }
+  .page-actions .icon-btn{ width:32px; height:30px; }
+  @media (prefers-reduced-motion: reduce){ .page-actions.is-entering{ animation:none; } }
+  .header-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .header-divider{ width:1px; height:24px; background:#e5e5e6; flex-shrink:0; }
+  .user-chip{ display:flex; align-items:center; gap:8px; color:var(--text-soft); font-size:14px; cursor:pointer; }
+  .user-chip svg{ width:20px; height:20px; }
+  .help-icon{ color:var(--text-faint); cursor:pointer; display:flex; border-radius:50%; transition:color .15s var(--ease); }
+  .help-icon:hover, .help-icon[aria-expanded="true"]{ color:var(--text-page); }
+
+  /* ---- Support drawer (opened by the «?» button) ---- */
+  /* The drawer pushes the page: the app column narrows by the drawer's width
+     instead of being covered. */
+  .app{ transition:margin-right .38s cubic-bezier(.22,.61,.36,1); }
+  body.support-open .app{ margin-right:400px; }
+  @media (max-width:900px){ body.support-open .app{ margin-right:0; } }
+  .support{ position:fixed; top:0; right:0; bottom:0; z-index:1501; width:400px; max-width:100vw; display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--border); box-shadow:-6px 0 18px rgba(10,13,18,.06), -1px 0 3px rgba(10,13,18,.04); transform:translateX(calc(100% + 24px)); visibility:hidden; transition:transform .38s cubic-bezier(.22,.61,.36,1), visibility 0s linear .38s; }
+  body.support-open .support{ transform:none; visibility:visible; transition:transform .38s cubic-bezier(.22,.61,.36,1), visibility 0s; }
+  .support-head{ position:relative; padding:22px 24px 18px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .support-close{ all:unset; position:absolute; top:14px; right:14px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:6px; color:var(--text-soft); cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); }
+  .support-close:hover{ background:var(--page-hover); color:var(--text-page); }
+  .support-close:focus-visible, .support-btn:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--accent); }
+  .support-title{ font-size:18px; font-weight:700; letter-spacing:.1px; color:var(--text-page); margin:0 36px 14px 0; }
+  .support-meta{ display:flex; flex-direction:column; gap:8px; font-size:14px; letter-spacing:.2px; }
+  .support-meta div{ color:var(--text-page); }
+  .support-meta span{ color:var(--text-faint); margin-left:6px; }
+  .support-meta a{ color:var(--accent); margin-left:6px; text-decoration:none; cursor:pointer; }
+  .support-meta a:hover{ text-decoration:underline; }
+  .support-body{ flex:1; min-height:0; overflow-y:auto; padding:18px 24px 20px; display:flex; flex-direction:column; gap:14px; }
+  .support-input, .support-textarea{ width:100%; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #cfd4d9; border-radius:4px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
+  .support-input{ height:38px; padding:0 12px; flex-shrink:0; }
+  .support-textarea{ flex:1; min-height:180px; padding:10px 12px; line-height:20px; resize:none; }
+  .support-input::placeholder, .support-textarea::placeholder{ color:var(--text-faint); }
+  .support-input:focus, .support-textarea:focus{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(14,125,143,.16); }
+  .support-input.is-invalid{ border-color:#e08a8f; }
+  .support-shots-title{ font-size:14px; font-weight:700; color:var(--text-page); margin-top:6px; }
+  .support-shots{ display:grid; grid-template-columns:1fr 1fr; gap:12px; flex-shrink:0; }
+  .support-shot, .support-shot-add{ position:relative; height:92px; border-radius:6px; border:1px dashed #b7c9ce; overflow:hidden; }
+  .support-shot{ background:#fafafa; }
+  .support-shot svg{ display:block; width:100%; height:100%; }
+  .support-shot-del{ all:unset; position:absolute; top:5px; right:5px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(27,30,36,.72); color:#fff; cursor:pointer; opacity:0; transition:opacity .15s var(--ease); }
+  .support-shot:hover .support-shot-del, .support-shot-del:focus-visible{ opacity:1; }
+  .support-shot-add{ all:unset; box-sizing:border-box; height:92px; border-radius:6px; border:1px dashed #7fb4bd; display:flex; align-items:center; justify-content:center; gap:8px; color:var(--accent); font-size:14px; font-weight:500; cursor:pointer; transition:background .15s var(--ease); }
+  .support-shot-add:hover{ background:#f3f9fa; }
+  .support-foot{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px 24px 20px; border-top:1px solid var(--border); flex-shrink:0; }
+  .support-btn{ all:unset; box-sizing:border-box; height:40px; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:14px; font-weight:600; letter-spacing:.2px; cursor:pointer; transition:background .15s var(--ease), border-color .15s var(--ease); }
+  .support-btn.ghost{ border:1px solid #cfd4d9; color:var(--text-page); background:#fff; }
+  .support-btn.ghost:hover{ background:var(--page-hover); }
+  .support-btn.primary{ background:var(--accent); color:#fff; }
+  .support-btn.primary:hover{ background:#0b6b7b; }
+  .support-done{ display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; color:var(--text-soft); font-size:14px; line-height:20px; }
+  .support-done b{ font-size:16px; color:var(--text-page); }
+  .support.is-sent .support-body, .support.is-sent .support-foot{ display:none; }
+  .support.is-sent .support-done{ display:flex; }
+  @media (prefers-reduced-motion: reduce){ .support, .app{ transition:none !important; } }
+  .help-icon svg{ width:20px; height:20px; }
+
+  .content{ padding:18px 18px 0; overflow:auto; flex:1; display:grid; background:#fafafa; }
+
+  /* ---- Screen swap: instant replace, with the simplest possible fade-in ---- */
+  .screen{
+    grid-area:1 / 1;
+  }
+  .screen.is-hidden{
+    display:none;
+  }
+  .screen.is-entering{
+    animation:screenFadeIn var(--page-fade) both;
+  }
+  @keyframes screenFadeIn{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:none; }
+  }
+  /* Header tabs / back button fade in together with the page. */
+  .tabs-group.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
+  @keyframes tabsFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){
+    .screen.is-entering, .tabs-group.is-entering{ animation:none; }
+  }
+  .tabs-group{
+    display:flex;
+    align-items:center;
+    gap:26px;
+    height:100%;
+    /* When the column narrows (support drawer open, small window) the tabs
+       scroll sideways instead of pushing the user menu and «?» off-screen. */
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+  }
+  .tabs-group::-webkit-scrollbar{ display:none; }
+  .tabs-group > *{ flex-shrink:0; white-space:nowrap; }
+  .tabs-group.is-hidden{ display:none; }
+
+  /* ---- Sidebar footer: account + support live at the bottom of the navigation ---- */
+  .sidebar{ overflow:visible; }
+  .nav{ flex:1; min-height:0; overflow-y:auto; margin:0 -8px; padding:0 8px; width:auto; }   /* the page list scrolls, the footer stays put */
+  .sidebar-foot{ display:flex; align-items:center; gap:4px; flex-shrink:0; margin:0 -4px -4px; padding-top:8px; border-top:1px solid var(--border-soft); }
+  .sidebar-foot .user-menu-wrap{ flex:1; min-width:0; }
+  .sidebar-foot .user-chip{ height:36px; padding:0 8px; border-radius:6px; gap:10px; font-weight:500; letter-spacing:.2px; color:var(--text-page); transition:background .15s var(--ease); }
+  .sidebar-foot .user-chip svg{ flex-shrink:0; color:var(--text-soft); }
+  .sidebar-foot .user-chip-name{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sidebar-foot .user-chip:hover, .sidebar-foot .user-chip[aria-expanded="true"]{ background:var(--page-hover); }
+  .sidebar-foot .header-divider{ height:20px; background:var(--border); }
+  .sidebar-foot .help-icon{ width:36px; height:36px; flex-shrink:0; align-items:center; justify-content:center; border-radius:6px; color:var(--text-soft); transition:background .15s var(--ease), color .15s var(--ease); }
+  .sidebar-foot .help-icon:hover, .sidebar-foot .help-icon[aria-expanded="true"]{ background:var(--page-hover); color:var(--text-page); }
+  /* The account menu opens upwards from the footer. */
+  .sidebar-foot .user-menu{ top:auto; bottom:calc(100% + 4px); left:0; right:auto; width:228px; flex-direction:column-reverse; align-items:flex-start; transform:translateY(6px); }
+  .sidebar-foot .user-menu.open{ transform:translateY(0); }
+  .sidebar-foot .user-menu-caret{ margin:0 0 0 12px; transform:rotate(180deg); filter:drop-shadow(0 -1px 1px rgba(0,0,0,.05)); }
+  .sidebar-foot .user-menu-card{ width:228px; box-shadow:0 4px 12px rgba(0,0,0,.08), 0 0 2px rgba(0,0,0,.08), 0 0 1px rgba(0,0,0,.04); }
+
+  /* ---- screenN: annotation page («О прототипе») — one of the placeholder
+     screens that rotate when the person moves between sidebar pages ---- */
+  .note{ max-width:920px; padding-bottom:24px; }
+  .note-head{ margin:2px 0 18px; }
+  .note-title{ margin:0; font-size:20px; line-height:26px; font-weight:600; letter-spacing:-.1px; color:var(--text-primary); }
+  .note-lead{ margin:4px 0 0; font-size:14px; line-height:20px; letter-spacing:.1px; color:var(--text-soft); }
+  .note-card{ background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px 24px; box-shadow:0 1px 2px rgba(10,13,18,.05); }
+  .note-card + .note-card{ margin-top:16px; }
+  .note-card-title{ margin:0 0 6px; font-size:16px; line-height:22px; font-weight:600; color:var(--text-primary); }
+  .note-list{ list-style:none; margin:0; padding:0; }
+  .note-item{ display:flex; gap:14px; padding:14px 0; }
+  .note-item + .note-item{ border-top:1px solid var(--border-soft); }
+  .note-item:last-child{ padding-bottom:2px; }
+  .note-num{ flex-shrink:0; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:600; color:var(--accent); background:var(--l1-fill); }
+  .note-body{ min-width:0; flex:1; }
+  .note-item-title{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:14px; line-height:20px; font-weight:600; letter-spacing:.1px; color:var(--text-page); }
+  .note-text{ margin:4px 0 0; font-size:14px; line-height:21px; letter-spacing:.1px; color:var(--text-soft); max-width:720px; }
+  .note-text b{ font-weight:500; color:var(--text-page); }
+  .note-tag{ font-size:12px; line-height:18px; font-weight:500; letter-spacing:.1px; padding:0 7px; border-radius:5px; white-space:nowrap; }
+  .note-tag.is-mock{ color:#6b6f75; background:#eef0f2; }
+  .note-tag.is-real{ color:#1a7a4c; background:#e6f5ed; }
+  .note-tag.is-plan{ color:#1f6bab; background:#e8f1fa; }
+  .note-path{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; }
+  .note-crumb{ font-size:13px; line-height:20px; font-weight:500; padding:0 8px; border-radius:5px; color:var(--text-page); background:var(--row-bg); border:1px solid var(--border); white-space:nowrap; }
+  .note-arrow{ color:var(--text-faint); line-height:0; }
+  .note-go{ all:unset; display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:14px; line-height:20px; font-weight:500; letter-spacing:.1px; color:var(--accent); cursor:pointer; border-radius:4px; }
+  .note-go:hover{ color:#0a6574; text-decoration:underline; text-underline-offset:3px; }
+  .note-go:focus-visible{ box-shadow:0 0 0 2px rgba(14,125,143,.35); }
+
+  /* ---- screenC (Списки / Журнал проверок) specific bits ---- */
+  .page-heading{
+    font-size:22px;
+    font-weight:700;
+    color:var(--text-page);
+    margin-bottom:14px;
+  }
+  .local-tabs{
+    display:flex;
+    align-items:center;
+    gap:26px;
+    border-bottom:1px solid var(--border);
+    margin:0 -18px 18px;
+    padding:0 18px;
+  }
+  .local-tabs .tab{ padding:0 0 12px; }
+
+  .seg-toggle{
+    display:flex;
+    background:#fff;
+    border:1px solid #e5e5e6;
+    border-radius:4px;
+    padding:4px;
+    gap:2px;
+  }
+  .seg-toggle-item{
+    height:24px;
+    display:flex;
+    align-items:center;
+    padding:0 14px;
+    font-size:14px;
+    font-weight:500;
+    color:#36393e;
+    background:#f8f8f8;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .seg-toggle-item.active{ background:var(--accent); color:#fff; }
+
+  .checkbox-field{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--text-page);
+    cursor:pointer;
+    user-select:none;
+  }
+  .checkbox-field input{ position:absolute; opacity:0; width:0; height:0; }
+  .checkbox-box{
+    width:18px;height:18px;
+    border-radius:4px;
+    border:1px solid #8f9092;
+    background:#fff;
+    flex-shrink:0;
+    position:relative;
+    transition:background .15s var(--ease), border-color .15s var(--ease);
+  }
+  .checkbox-field input:checked + .checkbox-box{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .checkbox-field input:checked + .checkbox-box::after{
+    content:"";
+    position:absolute;
+    left:5px; top:1px;
+    width:5px; height:9px;
+    border:solid #fff;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+
+  .status-chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:13px;
+    font-weight:600;
+    background:#f1f1f1;
+    color:#6b6b6b;
+  }
+  .status-chip.green{ background:#e6f7ee; color:#1a9c5f; }
+  .status-chip.red{ background:#fceaec; color:#d91528; }
+  .status-chip.orange{ background:#fff4e0; color:#b8720a; }
+
+  /* ---- screenD (entity detail / проверки) ---- */
+  .header-back-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:100%;
+    color:var(--text-soft);
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:color .15s var(--ease);
+  }
+  .header-back-btn:hover{ color:var(--text-page); }
+  .entity-name{ font-size:22px; font-weight:700; color:var(--text-page); }
+  .entity-tab-panel.is-hidden{ display:none; }
+  /* still used by the КУС review screen */
+  .entity-link{ color:var(--blue); text-decoration:none; border-bottom:1px dashed currentColor; }
+  .entity-link:hover{ text-decoration:none; }
+  .risk-badge{ font-size:13px; font-weight:600; color:#b8720a; background:#fff0d9; padding:4px 10px; border-radius:999px; }
+
+  /* ---- Entity card: header ---- */
+  .ec-card-surface, .ec-head, .ec-menu-card, .attr-card, .attr-side{
+    background:#fff; border:1px solid var(--border); border-radius:6px;
+    box-shadow:0 1px 2px rgba(10,13,18,.04);
+  }
+  .ec-head{ display:flex; align-items:center; gap:14px; padding:14px 18px; }
+  .ec-avatar{ width:48px; height:48px; border-radius:50%; overflow:hidden; flex-shrink:0; }
+  .ec-head-main{ min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .ec-head .entity-name{ font-size:16px; font-weight:600; letter-spacing:.1px; }
+  .ec-meta{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; font-size:14px; color:var(--text-page); }
+  .ec-id{ display:inline-flex; align-items:center; gap:6px; background:#f5f6f8; border-radius:4px; padding:2px 6px; font-weight:500; letter-spacing:.2px; }
+  .ec-id-key{ color:var(--text-soft); font-weight:400; }
+  .ec-copy{ color:var(--text-faint); cursor:pointer; margin-left:2px; }
+  .ec-copy:hover{ color:var(--text-page); }
+  .ec-meta-sep{ width:1px; height:18px; background:var(--border); }
+  .ec-date{ color:var(--text-soft); }
+  .ec-quality{ color:#1a9c5f; border:1px solid #7fcfa8; border-radius:5px; padding:1px 7px; font-weight:500; background:#fff; }
+
+  /* ---- Entity card: sections ---- */
+  .ec-tabs{ display:inline-flex; margin-top:14px; border-bottom:1px solid #cfd4d9; }
+  .ec-tab{ padding:10px 22px 11px; font-size:14px; font-weight:500; letter-spacing:.2px; color:var(--text-page); cursor:pointer; margin-bottom:-1px; border-bottom:2px solid transparent; transition:color var(--menu-fade), border-color var(--menu-fade); }
+  .ec-tab:hover{ color:var(--accent); }
+  .ec-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+
+  .ec-body{ display:grid; grid-template-columns:232px minmax(0,1fr); gap:20px; margin-top:20px; align-items:start; padding-bottom:24px; }
+  .ec-center{ min-width:0; }
+  .ec-attr-grid{ display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:20px; align-items:start; }
+  .ec-empty{ color:var(--text-faint); text-align:center; padding:40px 20px; }
+
+  /* L2 — menu inside the product page: carries the accent colour, while the
+     global navigation stays neutral. */
+  .ec-menu{ display:flex; flex-direction:column; gap:6px; position:sticky; top:0; }
+  .ec-menu-card{ padding:8px; display:flex; flex-direction:column; gap:2px; }
+  .entity-attr-nav-item{ position:relative; display:flex; align-items:center; gap:8px; height:34px; padding:0 8px 0 12px; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.2px; color:var(--text-page); cursor:pointer; transition:background var(--menu-fade), color var(--menu-fade); }
+  .entity-attr-nav-item .ec-ico{ color:var(--text-soft); flex-shrink:0; transition:color var(--menu-fade); }
+  .entity-attr-nav-item:hover{ background:#f5f6f8; }
+  .entity-attr-nav-item.disabled{ color:#b3b9bf; cursor:default; }
+  .entity-attr-nav-item.disabled:hover{ background:none; }
+  .entity-attr-nav-item.active{ background:var(--l2-fill); color:var(--l2-ink); font-weight:600; }
+  .entity-attr-nav-item.active .ec-ico{ color:var(--l2-ink); }
+  /* Active marker on the very left edge of the fill, same as in the sidebar. */
+  .entity-attr-nav-item::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:4px 0 0 4px; background:var(--l2-ink); opacity:0; transition:opacity var(--menu-fade); }
+  .entity-attr-nav-item.active::before{ opacity:1; }
+  .ec-refresh{ margin-left:auto; display:flex; color:var(--text-faint); cursor:pointer; }
+  .ec-refresh:hover{ color:var(--text-page); }
+
+  /* Anchors to the sections of Атрибутика (not a selection — they scroll). */
+  .ec-sub{ display:flex; flex-direction:column; gap:2px; margin-top:2px; }
+  .ec-sub-item{ display:flex; align-items:center; gap:7px; height:34px; padding:0 8px 0 12px; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.2px; color:var(--text-page); cursor:pointer; transition:background .15s var(--ease); }
+  .ec-sub-item:hover{ background:#f5f6f8; }
+  .ec-sub-item.disabled{ color:#a9afb6; font-weight:400; cursor:default; }
+  .ec-sub-item.disabled:hover{ background:none; }
+  .ec-menu-divider{ height:1px; background:var(--border); margin:8px 8px; }
+  .ec-similar{ display:flex; align-items:center; height:34px; padding:0 8px 0 6px; }
+  .ec-similar-chip{ background:#f5f6f8; border-radius:4px; padding:2px 8px; font-size:14px; font-weight:500; color:var(--text-page); }
+
+  .attr-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .attr-dot.green{ background:#2fa873; }
+  .attr-dot.orange{ background:#f0a52b; }
+  .attr-dot.blue{ background:var(--blue); }
+  .attr-dot-pair{ display:flex; gap:0; flex-shrink:0; }
+  .attr-dot-pair .attr-dot + .attr-dot{ margin-left:-1px; }
+
+  /* ---- Атрибутика: cards ---- */
+  .attr-main{ display:flex; flex-direction:column; gap:12px; min-width:0; }
+  .attr-card{ padding:16px 24px 18px; scroll-margin-top:12px; }
+  .attr-card-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; min-height:26px; }
+  .attr-card-title{ font-size:16px; font-weight:600; letter-spacing:.1px; color:var(--text-page); }
+  .attr-card-add{ width:34px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:#f2f4f6; color:var(--text-page); cursor:pointer; flex-shrink:0; }
+  .attr-card-add:hover{ background:#e7eaed; }
+  .attr-card-add svg{ width:15px; height:15px; }
+
+  .attr-row{ display:grid; grid-template-columns:minmax(200px,36%) minmax(0,1fr); column-gap:16px; align-items:center; min-height:34px; padding:4px 0; }
+  .attr-label{ position:relative; padding-left:22px; font-size:14px; letter-spacing:.2px; color:var(--text-soft); }
+  .attr-label > .attr-dot, .attr-label > .attr-dot-pair{ position:absolute; left:6px; top:50%; transform:translateY(-50%); }
+  .attr-label > .attr-dot-pair{ left:-2px; }
+  .attr-label .attr-source{ color:var(--text-soft); }
+  .attr-card.no-dots .attr-label{ padding-left:0; }
+  .attr-value{ font-size:14px; letter-spacing:.2px; color:var(--text-page); font-weight:500; display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
+  .attr-value-empty{ color:var(--text-faint); font-weight:400; }
+
+  .attr-history{ position:relative; display:inline-flex; }
+  .attr-history-chip{ display:inline-flex; align-items:center; gap:6px; background:#f2f4f6; border-radius:4px; padding:2px 8px; font-size:14px; color:var(--text-page); font-weight:400; cursor:pointer; user-select:none; }
+  .attr-history-chip:hover, .attr-history.open .attr-history-chip{ background:#e9ecef; }
+  .attr-history-caret{ transition:transform .2s var(--ease); }
+  .attr-history.open .attr-history-caret{ transform:rotate(180deg); }
+  .attr-history-count{ background:var(--red); color:#fff; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .attr-history-pop{ position:absolute; top:calc(100% + 4px); left:0; z-index:20; min-width:340px; display:none; flex-direction:column; gap:10px; padding:10px 14px; background:#fff; border:1px solid var(--border); border-radius:6px; box-shadow:0 6px 18px rgba(10,13,18,.10), 0 1px 3px rgba(10,13,18,.06); }
+  .attr-history.open .attr-history-pop{ display:flex; }
+  .attr-history-row{ display:flex; align-items:center; justify-content:space-between; gap:24px; font-weight:500; }
+  .attr-history-meta{ display:block; font-size:12.5px; font-weight:400; color:var(--text-soft); }
+  .attr-history-del{ color:var(--red); display:flex; cursor:pointer; padding:4px; border-radius:4px; }
+  .attr-history-del:hover{ background:#fdecec; }
+
+  .attr-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; padding-top:18px; border-top:1px solid var(--border); }
+  .attr-tag-add{ display:inline-flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:5px; padding:2px 8px; font-size:14px; letter-spacing:.2px; color:var(--text-page); cursor:pointer; }
+  .attr-tag-add:hover{ background:#f5f6f8; }
+  .attr-tag-add svg{ width:13px; height:13px; color:var(--text-soft); }
+
+  .attr-side{ display:flex; flex-direction:column; gap:8px; padding:16px 16px 18px; }
+  .attr-side-title{ font-size:14px; font-weight:600; color:var(--text-page); margin-bottom:4px; }
+  .attr-side-row{ align-self:flex-start; background:#f5f6f8; border-radius:4px; padding:2px 8px; font-size:14px; letter-spacing:.2px; color:var(--text-soft); }
+  .attr-side-row b{ color:var(--text-page); font-weight:500; margin-left:4px; }
+
+  @media (max-width:1320px){
+    .ec-attr-grid{ grid-template-columns:minmax(0,1fr); }
+  }
+  .status-link{ color:var(--blue); font-size:13.5px; }
+  .kus-view.is-hidden{ display:none; }
+  .status-text{ font-size:12px; font-weight:700; letter-spacing:.2px; }
+  .status-text.blue{ color:var(--blue); }
+  .status-text.red{ color:#d91528; }
+  .status-text.green{ color:#1a9c5f; }
+  #tbodyDetections td:nth-child(1),
+  #tbodyDetections td:nth-child(3){ cursor:pointer; }
+  #tbodyDetections td:nth-child(1):hover,
+  #tbodyDetections td:nth-child(3):hover{ color:var(--blue); text-decoration:underline; }
+
+  .timeline-card{ margin-top:24px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px 24px; }
+  .timeline-year{ display:flex; align-items:center; gap:10px; color:var(--text-faint); font-size:13px; margin-bottom:12px; }
+  .timeline-year-line{ flex:1; height:1px; background:var(--border); }
+  .timeline-group{ position:relative; margin-left:120px; padding-left:20px; border-left:1px solid var(--border); }
+  .timeline-row{ display:flex; align-items:flex-start; position:relative; min-height:30px; }
+  .timeline-time{ position:absolute; left:-152px; top:0; width:120px; text-align:right; font-size:13px; color:var(--text-faint); white-space:nowrap; }
+  .timeline-dot{ position:absolute; left:-25px; top:6px; width:7px; height:7px; border-radius:50%; background:var(--text-faint); }
+  .timeline-dot.active{ background:var(--accent); width:9px; height:9px; left:-26px; }
+  .timeline-item{ display:flex; align-items:center; gap:8px; padding:5px 0; color:var(--text-faint); font-size:14px; }
+  .timeline-item .ti-icon{ flex-shrink:0; color:var(--text-faint); }
+  .timeline-item.active{ color:var(--accent); font-weight:600; }
+  .timeline-item.active .ti-icon{ color:var(--accent); }
+  .ti-status{ font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-icon-bg); padding:3px 8px; border-radius:4px; margin-left:4px; }
+  .ti-author{ display:flex; align-items:center; gap:4px; color:var(--text-faint); font-weight:400; font-size:13px; margin-left:4px; }
+  .expand-btn{
+    all:unset; box-sizing:border-box; display:inline-flex; align-items:center; gap:6px;
+    margin-top:18px; padding:8px 16px; border:1px solid var(--border); border-radius:4px;
+    color:var(--text-faint); font-size:13.5px; cursor:pointer;
+  }
+  .expand-btn:hover{ background:var(--page-hover); }
+
+  /* ---- screenE (КУС detection review / compare) ---- */
+  .review-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .review-nav{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--text-faint);
+    font-size:12px;
+    font-weight:600;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:6px 10px;
+  }
+  .review-comment{
+    all:unset;
+    box-sizing:border-box;
+    display:block;
+    width:100%;
+    min-height:70px;
+    margin-top:16px;
+    padding:12px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--text-page);
+    resize:vertical;
+  }
+  .review-comment::placeholder{ color:var(--text-faint); }
+  .review-actions{ display:flex; gap:24px; margin-top:16px; }
+  .review-action{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .review-btn{
+    all:unset; box-sizing:border-box; cursor:pointer;
+    padding:9px 22px; border-radius:6px; font-size:14px; font-weight:600; color:#fff;
+  }
+  .review-btn.reject{ background:#1a9c5f; }
+  .review-btn.confirm{ background:#c0392b; }
+  .review-btn.postpone{ background:#3a3f47; }
+  .review-hotkey{ font-size:11px; color:var(--text-faint); }
+
+  .compare-panel{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    margin-top:28px;
+    border-top:1px solid var(--border);
+    padding-top:18px;
+  }
+  .compare-col{ padding:0 24px; }
+  .compare-col:first-child{ border-right:1px solid var(--border); }
+  .compare-col-header{ display:flex; align-items:center; gap:8px; color:var(--text-faint); margin-bottom:8px; font-weight:600; }
+  .compare-col-header a{ color:var(--blue); text-decoration:none; font-size:15px; }
+  .compare-al{ color:var(--text-page); font-size:15px; font-weight:700; }
+  .compare-field{ padding:12px 0; border-top:1px solid var(--border-soft); }
+  .compare-field:first-of-type{ border-top:none; }
+  .compare-label{ font-size:12px; color:var(--text-faint); margin-bottom:4px; }
+  .compare-date{ color:var(--text-faint); }
+  .compare-value{ font-size:15px; font-weight:600; color:var(--text-page); }
+  .compare-value.hl{ background:#fdf1c8; display:inline; padding:2px 4px; border-radius:3px; }
+
+  .toolbar-row1{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+  .row1-right{ display:flex; align-items:center; gap:12px; }
+  .v-divider{ width:1px; height:20px; background:var(--border); flex-shrink:0; }
+  .btn-group{ display:flex; align-items:center; gap:6px; }
+  .icon-group{ display:flex; align-items:center; gap:4px; }
+  .seg{ display:flex; background:#fff; border:1px solid #e5e5e6; border-radius:4px; padding:4px; gap:0; }
+  .seg-item{ height:24px; display:flex; align-items:center; padding:0 12px; font-size:14px; font-weight:500; color:#36393e; background:#f8f8f8; cursor:pointer; }
+  .seg-item.active{ background:#fff; color:#0b6574; }
+  .search{
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:space-between;
+    border:1px solid #8f9092; border-radius:3px; padding:8px 12px;
+    color:#76787c; font-size:13.5px; gap:8px; background:#fff;
+  }
+  .search svg{ width:15px; height:15px; flex-shrink:0; }
+  .btn{ display:inline-flex; align-items:center; gap:4px; padding:8px 16px; border-radius:4px; font-size:13.5px; font-weight:600; cursor:pointer; border:none; white-space:nowrap; }
+  .btn svg{ width:16px; height:16px; flex-shrink:0; }
+  .btn-primary{ background:var(--accent); color:#fff; }
+  .btn-secondary{ background:#e9f3f5; color:var(--accent); }
+  .btn-danger{ background:#fceaec; color:#d91528; }
+  .icon-btn{
+    width:34px; height:32px; display:flex; align-items:center; justify-content:center;
+    border-radius:4px; border:1px solid transparent; color:var(--text-soft); cursor:pointer;
+    flex-shrink:0;
+  }
+  .icon-btn svg{ width:20px; height:20px; flex-shrink:0; }
+  .icon-btn.clear-all svg{ width:14px; height:14px; }
+  .icon-btn:hover{ background:#f2f4f6; }
+  .icon-btn.is-neutral{ background:#efeff0; }
+  .icon-btn.is-neutral:hover{ background:#e5e5e6; }
+  .icon-btn.is-active{ background:var(--accent-icon-bg); border-color:#9fcbd2; color:var(--accent); }
+  .icon-btn.is-active:hover{ background:var(--accent-icon-bg); }
+  .icon-btn.is-toggle{ background:#f3f3f3; }
+  .icon-btn.clear-all{ width:22px; height:22px; border-radius:100px; background:#f8f8f8; color:var(--text-soft); }
+  .toolbar-row2{ display:flex; align-items:center; gap:6px; padding-bottom:14px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .chip-group{ display:flex; align-items:center; background:#fff; border:1px solid #e5e5e6; border-radius:4px; padding:5px 6px 5px 10px; gap:6px; font-size:13px; height:32px; box-sizing:border-box; }
+  .chip-group .label{ font-weight:600; color:#36393e; }
+  .chip{ display:flex; align-items:center; gap:2px; background:#f8f8f8; border-radius:4px; padding:4px 4px 4px 8px; font-size:12.5px; color:var(--text-page); font-weight:500; }
+  .chip-x{ color:var(--text-faint); font-size:14px; margin-left:2px; }
+  .count{ margin-left:auto; font-size:13px; color:#989898; font-weight:500; white-space:nowrap; padding-right:8px; }
+
+  .table-wrap{ background:#fff; border:1px solid var(--border); border-radius:8px; overflow:hidden; box-shadow:0 1px 2px rgba(10,13,18,.05); }
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin-top:0; font-size:13.5px; background:#fff; }
+  thead tr:first-child th:first-child{ border-top-left-radius:8px; }
+  thead tr:first-child th:last-child{ border-top-right-radius:8px; }
+  tbody tr:last-child td:first-child{ border-bottom-left-radius:8px; }
+  tbody tr:last-child td:last-child{ border-bottom-right-radius:8px; }
+  th{ text-align:left; padding:12px; color:#636569; font-weight:400; background:#f8f8f8; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th.th-sorted{ color:var(--accent); }
+  td{ padding:12px; border-bottom:1px solid var(--border-soft); color:#36393e; font-weight:500; white-space:nowrap; }
+  tr:last-child td{ border-bottom:none; }
+  tr:hover td{ background:#fafbfc; }
+  #tbody td:first-child{ cursor:pointer; }
+  #tbody td:first-child:hover{ color:var(--blue); text-decoration:underline; }
+  #tbodyLists tr{ cursor:pointer; }
+
+  #tbodyGroups tr{ cursor:pointer; }
+  #tbodyGroups tr.is-current td{ background:var(--accent-icon-bg); }
+  #tbodyGroups tr.is-current:hover td{ background:var(--accent-icon-bg); }
+  .group-desc{ color:#36393e; }
+  .group-desc-sub{ display:block; font-size:12px; font-weight:400; color:var(--text-faint); margin-top:2px; }
+  .progress-cell{ display:flex; align-items:center; gap:10px; }
+  .progress-bar{ flex:1; height:6px; border-radius:100px; background:#ececec; overflow:hidden; }
+  .progress-fill{ height:100%; border-radius:100px; background:var(--accent); }
+  .progress-pct{ font-size:13px; color:#36393e; font-weight:600; width:34px; text-align:right; flex-shrink:0; }
+
+  .footer{ display:flex; gap:18px; padding:8px 18px; font-size:12px; color:#76787c; border-top:1px solid var(--border); background:#fafafa; }
+</style>
+</head>
+<body>
+
+<!-- Login screen: the prototype starts here; «Войти» opens the app, «Выйти» returns to it. -->
+<div class="login" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <svg width="35" height="38" viewBox="0 0 27 28" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="24.0135" height="26" stroke="#D91528" stroke-width="2"/>
+        <path d="M18.2064 20.4544H16.3821V14.8068H9.82815V20.4544H8.00391V7.66719H9.82815V13.4409H16.3821V7.66719H18.2064V20.4544Z" fill="#D91528"/>
+      </svg>
+      <span class="login-brand-name">HFLabs</span>
+    </div>
+    <!-- Single-product build: the form says which product you are signing in to. -->
+    <div class="login-title">Вход в продукт</div>
+    <div class="login-product">
+      <span class="login-product-logo" id="loginProductLogo" aria-hidden="true"></span>
+      <span class="login-product-name">Маскировщик</span>
+    </div>
+    <div class="login-form" id="loginForm">
+      <input class="login-input" id="loginUser" type="text" placeholder="Имя пользователя" aria-label="Имя пользователя" autocomplete="off">
+      <input class="login-input" id="loginPass" type="password" placeholder="Пароль" aria-label="Пароль" autocomplete="off">
+      <button class="login-submit" id="loginSubmit" type="button">Войти</button>
+    </div>
+    <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar">
+    <div class="domain">
+      <svg class="logo-mark" width="31" height="32" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="24.0135" height="26" stroke="#D91528" stroke-width="2"/>
+        <path d="M18.2064 20.4544H16.3821V14.8068H9.82815V20.4544H8.00391V7.66719H9.82815V13.4409H16.3821V7.66719H18.2064V20.4544Z" fill="#D91528"/>
+      </svg>
+      <div class="domain-name">
+        <span class="title">Данные</span>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav"></nav>
+
+    <!-- Account + support, pinned to the bottom of the navigation -->
+  <div class="sidebar-foot">
+    <div class="user-menu-wrap">
+      <div class="user-chip" id="userMenuBtn" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.4-4 4.2-6 7.5-6s6.1 2 7.5 6"/></svg>
+        <span class="user-chip-name">performer_consent</span>
+      </div>
+      <div class="user-menu" id="userMenu">
+        <div class="user-menu-caret">
+          <svg viewBox="0 0 16 8" width="16" height="8" fill="currentColor"><path d="M8 0l8 8H0z"/></svg>
+        </div>
+        <div class="user-menu-card">
+          <div class="user-menu-section-label">Роли</div>
+          <div class="user-menu-roles">
+            <span class="role-chip">Администратор Маскировщика</span>
+            <span class="role-chip">Исполнитель</span>
+          </div>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-logout" id="logoutBtn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h6"/></svg>
+            Выйти
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="help-icon" id="supportBtn" role="button" tabindex="0" title="Написать в поддержку" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9.2"/><path d="M9.4 9.3a2.6 2.6 0 1 1 3.7 2.4c-.9.5-1.4 1-1.4 2" /><circle cx="12" cy="16.7" r=".2" fill="currentColor" stroke-width="1.2"/></svg>
+    </div>
+  </div>
+  </aside>
+
+  <!-- ========== MAIN ========== -->
+  <main class="main">
+    <!-- Loading skeleton shown over the header and content after sign-in -->
+    <div class="skeleton is-hidden" id="mainSkeleton" aria-hidden="true">
+      <div class="sk-top">
+        <span class="sk" style="width:34px"></span><span class="sk" style="width:104px"></span><span class="sk" style="width:36px"></span><span class="sk" style="width:76px"></span><span class="sk" style="width:58px"></span><span class="sk" style="width:84px"></span>
+        <span class="sk-top-spacer"></span>
+        <span class="sk" style="width:18px;height:18px;border-radius:50%"></span><span class="sk" style="width:120px"></span>
+      </div>
+      <div class="sk-body">
+        <div class="sk-row">
+          <span class="sk" style="width:372px;height:36px"></span><span class="sk" style="width:330px;height:36px"></span>
+          <span class="sk-top-spacer"></span>
+          <span class="sk" style="width:116px;height:36px"></span><span class="sk" style="width:140px;height:36px"></span>
+        </div>
+        <div class="sk-row">
+          <span class="sk" style="width:34px;height:32px"></span><span class="sk" style="width:34px;height:32px"></span><span class="sk" style="width:34px;height:32px"></span>
+          <span class="sk" style="width:250px;height:32px"></span><span class="sk" style="width:300px;height:32px"></span><span class="sk" style="width:220px;height:32px"></span>
+        </div>
+        <div class="sk-table">
+        <div class="sk-tr"><span class="sk" style="width:22%"></span><span class="sk" style="width:26%"></span><span class="sk" style="width:30%"></span><span class="sk" style="width:34%"></span><span class="sk" style="width:38%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:62%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:70%"></span><span class="sk" style="width:58%"></span><span class="sk" style="width:64%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:78%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:52%"></span><span class="sk" style="width:66%"></span><span class="sk" style="width:80%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:56%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:60%"></span><span class="sk" style="width:74%"></span><span class="sk" style="width:58%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:70%"></span><span class="sk" style="width:40%"></span><span class="sk" style="width:76%"></span><span class="sk" style="width:50%"></span><span class="sk" style="width:72%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:84%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:46%"></span><span class="sk" style="width:62%"></span><span class="sk" style="width:54%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:60%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:68%"></span><span class="sk" style="width:56%"></span><span class="sk" style="width:76%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:74%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:58%"></span><span class="sk" style="width:70%"></span><span class="sk" style="width:60%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:52%"></span><span class="sk" style="width:40%"></span><span class="sk" style="width:64%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:68%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:80%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:50%"></span><span class="sk" style="width:72%"></span><span class="sk" style="width:56%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:66%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:72%"></span><span class="sk" style="width:60%"></span><span class="sk" style="width:82%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:58%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:56%"></span><span class="sk" style="width:66%"></span><span class="sk" style="width:62%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:76%"></span><span class="sk" style="width:40%"></span><span class="sk" style="width:62%"></span><span class="sk" style="width:54%"></span><span class="sk" style="width:70%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:64%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:74%"></span><span class="sk" style="width:58%"></span><span class="sk" style="width:52%"></span></div>
+        <div class="sk-tr"><span class="sk" style="width:72%"></span><span class="sk" style="width:44%"></span><span class="sk" style="width:48%"></span><span class="sk" style="width:68%"></span><span class="sk" style="width:66%"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar">
+      <div class="tabs-group" id="tabsB">
+        <div class="tab active">Активные</div>
+        <div class="tab">Архив</div>
+      </div>
+      <div class="tabs-group is-hidden" id="tabsN">
+        <div class="tab active">О прототипе</div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <!-- Page actions: live in the header's right corner. Each group belongs to one screen and is shown together with it. -->
+      <div class="page-actions" data-screen="screenB">
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Маскировка
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Screen B: Маскировки-style table (206:14495) -->
+      <div class="screen" id="screenB">
+        <div class="toolbar-row1">
+          <div class="search" style="width:400px">
+            <span>Поиск</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </div>
+        </div>
+
+        <div class="toolbar-row2">
+          <div class="icon-btn is-neutral" title="Настройки">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.8"/><path d="M19.4 13a7.6 7.6 0 000-2l2-1.5-2-3.4-2.3.9a7.7 7.7 0 00-1.7-1l-.4-2.4H9.9l-.4 2.4a7.7 7.7 0 00-1.7 1l-2.3-.9-2 3.4L5.5 11a7.6 7.6 0 000 2l-2 1.5 2 3.4 2.3-.9c.5.4 1.1.8 1.7 1l.4 2.4h4.5l.4-2.4c.6-.2 1.2-.6 1.7-1l2.3.9 2-3.4-2-1.5z"/></svg>
+          </div>
+          <div class="icon-btn is-active" title="Сортировка">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M6 14l6 6 6-6"/></svg>
+          </div>
+          <div class="icon-btn is-active" title="Фильтр">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+          </div>
+          <div class="count">#17&nbsp;&nbsp;150 из 150</div>
+          <div class="icon-btn is-toggle" title="Ещё фильтры">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M8 17h12M12 7a2 2 0 100-4 2 2 0 000 4zM8 17a2 2 0 104 0 2 2 0 00-4 0z"/></svg>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <thead>
+            <tr><th>Название маскирования</th><th>Источник</th><th>Примечание</th><th>Последний запуск</th><th>Автор</th></tr>
+          </thead>
+          <tbody id="tbodyMask"></tbody>
+        </table></div>
+      </div>
+
+      <!-- Screen N: annotation page («О прототипе»). Part of the placeholder rotation B → N. -->
+      <div class="screen is-hidden" id="screenN">
+        <div class="note">
+          <div class="note-head">
+            <h1 class="note-title">О прототипе</h1>
+            <p class="note-lead">Короткая памятка: что здесь условно и на что стоит обратить внимание.</p>
+          </div>
+
+          <section class="note-card">
+            <h2 class="note-card-title">Как читать прототип</h2>
+            <ul class="note-list">
+              <li class="note-item">
+                <span class="note-num">1</span>
+                <div class="note-body">
+                  <div class="note-item-title">Контент страниц условный <span class="note-tag is-mock">Заглушка</span></div>
+                  <p class="note-text">Содержимое, которое сменяется при переходе по страницам, не связано с выбранным продуктом и его страницей. Экраны просто чередуются; если контент подошёл к странице&nbsp;— это совпадение.</p>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">2</span>
+                <div class="note-body">
+                  <div class="note-item-title">Анимация смены контента настоящая <span class="note-tag is-real">Как в продукте</span></div>
+                  <p class="note-text">Переход между страницами будет выглядеть именно так, как вы видите здесь.</p>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <section class="note-card">
+            <h2 class="note-card-title">Что стоит посмотреть</h2>
+            <ul class="note-list">
+              <li class="note-item">
+                <span class="note-num">1</span>
+                <div class="note-body">
+                  <div class="note-item-title">Версия с одним продуктом</div>
+                  <p class="note-text">В этой версии установлен только Маскировщик. Меню приложений и выбора продукта после входа нет: в навигации слева&nbsp;— один продукт и его страницы.</p>
+                </div>
+              </li>
+              <li class="note-item">
+                <span class="note-num">2</span>
+                <div class="note-body">
+                  <div class="note-item-title">Навигация браузера <span class="note-tag is-plan">В планах</span></div>
+                  <p class="note-text">Глобально планируем опираться на навигацию браузера: сохранять каждый переход в истории и перемещаться по ним кнопками «вперёд» и «назад».</p>
+                </div>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>HFLabs License</span>
+      <span>Версия: v26.9.3</span>
+      <span>Ревизия: 4f9c2a71b3e8</span>
+      <span>Бранч/Тег: release/26.9</span>
+      <span>Время сборки: 28-09-2026 14:32:07</span>
+    </div>
+  </main>
+</div>
+
+
+<!-- Support drawer: opened by the «?» button in the header -->
+<aside class="support" id="supportDrawer" role="complementary" aria-labelledby="supportTitle" aria-hidden="true">
+  <div class="support-head">
+    <button class="support-close" id="supportClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 class="support-title" id="supportTitle">Написать в поддержку</h2>
+    <div class="support-meta">
+      <div>Кому:<span>support@example.com</span></div>
+      <div>Страница:<a id="supportPage">Маскировки</a></div>
+      <div>Адрес ноды:<span>10.0.18.11</span></div>
+    </div>
+  </div>
+  <div class="support-body">
+    <input class="support-input" id="supportSubject" type="text" placeholder="Тема обращения" aria-label="Тема обращения" autocomplete="off">
+    <textarea class="support-textarea" id="supportText" placeholder="Описание проблемы" aria-label="Описание проблемы"></textarea>
+    <div class="support-shots-title">Прикрепленные скриншоты</div>
+    <div class="support-shots" id="supportShots">
+      <div class="support-shot"><svg viewBox="0 0 160 92" preserveAspectRatio="none" fill="none"><rect width="160" height="92" fill="#fff"/><rect width="28" height="92" fill="#f4f5f7"/><rect x="4" y="6" width="12" height="3" rx="1.5" fill="#c9ced4"/><rect x="4" y="16" width="20" height="3" rx="1.5" fill="#d9dde1"/><rect x="4" y="23" width="20" height="4" rx="1.5" fill="#b9dbe1"/><rect x="4" y="31" width="16" height="3" rx="1.5" fill="#d9dde1"/><rect x="4" y="38" width="18" height="3" rx="1.5" fill="#d9dde1"/><rect x="28" width="132" height="10" fill="#fafafa"/><rect x="34" y="4" width="14" height="2.5" rx="1" fill="#0e7d8f"/><rect x="52" y="4" width="18" height="2.5" rx="1" fill="#c9ced4"/><rect x="74" y="4" width="12" height="2.5" rx="1" fill="#c9ced4"/><rect x="34" y="15" width="48" height="6" rx="1.5" fill="#eef0f2"/><rect x="86" y="15" width="36" height="6" rx="1.5" fill="#eef0f2"/><rect x="134" y="15" width="20" height="6" rx="1.5" fill="#0e7d8f"/><rect x="34" y="27" width="120" height="59" rx="2" fill="#fff" stroke="#e6e9ec"/><path d="M34 35h120M34 43h120M34 51h120M34 59h120M34 67h120M34 75h120" stroke="#eef0f2"/><g fill="#d5d9de"><rect x="38" y="30" width="22" height="2.5" rx="1"/><rect x="80" y="30" width="12" height="2.5" rx="1"/><rect x="104" y="30" width="16" height="2.5" rx="1"/><rect x="38" y="38" width="34" height="2.5" rx="1"/><rect x="80" y="38" width="14" height="2.5" rx="1"/><rect x="104" y="38" width="20" height="2.5" rx="1"/><rect x="38" y="46" width="28" height="2.5" rx="1"/><rect x="80" y="46" width="14" height="2.5" rx="1"/><rect x="104" y="46" width="26" height="2.5" rx="1"/><rect x="38" y="54" width="36" height="2.5" rx="1"/><rect x="80" y="54" width="14" height="2.5" rx="1"/><rect x="104" y="54" width="18" height="2.5" rx="1"/><rect x="38" y="62" width="30" height="2.5" rx="1"/><rect x="80" y="62" width="14" height="2.5" rx="1"/><rect x="104" y="62" width="24" height="2.5" rx="1"/><rect x="38" y="70" width="32" height="2.5" rx="1"/><rect x="80" y="70" width="14" height="2.5" rx="1"/><rect x="104" y="70" width="20" height="2.5" rx="1"/></g></svg><button class="support-shot-del" aria-label="Удалить скриншот"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <button class="support-shot-add" id="supportShotAdd"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
+    </div>
+  </div>
+  <div class="support-done">
+    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#1a9c5f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 12.3l2.800 2.800L16 9.5"/></svg>
+    <b>Обращение отправлено</b>
+    Мы ответим на почту, указанную в вашем профиле.
+  </div>
+  <div class="support-foot">
+    <button class="support-btn ghost" id="supportCancel">Отмена</button>
+    <button class="support-btn primary" id="supportSend">Отправить</button>
+  </div>
+</aside>
+
+<script>
+/* ---------------- ICONS (approximating Figma's filled icon set) ---------------- */
+const icons = {
+  // chevron-up
+  chev: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>`,
+  // eye-off — used for Маскировщик
+  maskirovshik: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.7429 5.09232C11.1494 5.03223 11.5686 5 12.0004 5C17.1054 5 20.4553 9.50484 21.5807 11.2868C21.7169 11.5025 21.785 11.6103 21.8231 11.7767C21.8518 11.9016 21.8517 12.0987 21.8231 12.2236C21.7849 12.3899 21.7164 12.4985 21.5792 12.7156C21.2793 13.1901 20.8222 13.8571 20.2165 14.5805M6.72432 6.71504C4.56225 8.1817 3.09445 10.2194 2.42111 11.2853C2.28428 11.5019 2.21587 11.6102 2.17774 11.7765C2.1491 11.9014 2.14909 12.0984 2.17771 12.2234C2.21583 12.3897 2.28393 12.4975 2.42013 12.7132C3.54554 14.4952 6.89541 19 12.0004 19C14.0588 19 15.8319 18.2676 17.2888 17.2766M3.00042 3L21.0004 21M9.8791 9.87868C9.3362 10.4216 9.00042 11.1716 9.00042 12C9.00042 13.6569 10.3436 15 12.0004 15C12.8288 15 13.5788 14.6642 14.1217 14.1213" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+};
+
+/* ---------------- DATA: nav config ---------------- */
+/* Single-product build: only Маскировщик is installed. Its page list comes
+   straight from the Figma file (node 205:14101 — the header there reads "Данные"). */
+const domainConfigs = {
+  maskirovshik: {
+    headerTitle: 'Данные',
+    groups: [
+      { key:'maskirovshik', title:'Маскировщик', icon: icons.maskirovshik, open:true,
+        pages:['Маскировки','Страница продукта','Источники','Ролевая модель'], active:'Маскировки' },
+    ]
+  },
+};
+
+const nav = document.getElementById('nav');
+
+let currentDomainKey = 'maskirovshik';
+
+function renderNav(domainKey, focusKey){
+  const config = domainConfigs[domainKey];
+  if(!config) return;
+  currentDomainKey = domainKey;
+  document.querySelector('.domain-name .title').textContent = config.headerTitle;
+  nav.innerHTML = '';
+
+  config.groups.forEach(g=>{
+    const isOpen = focusKey ? (g.key === focusKey) : g.open;
+    const activePage = focusKey ? (g.key === focusKey ? (g.active || g.pages[0]) : null) : (g.active || null);
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'nav-group' + (isOpen ? ' open':'') + (activePage ? ' active-product':'');
+    groupEl.dataset.key = g.key;
+
+    const pagesHtml = g.pages.map(p=>{
+      const activeCls = (activePage === p) ? ' active' : '';
+      const counter = g.counters && g.counters[p];
+      const badge = counter ? `<span class="badge-counter">${counter}</span>` : '';
+      return `<a class="nav-page${activeCls}" data-page="${p}"><span class="nav-page-text">${p}</span>${badge}</a>`;
+    }).join('');
+
+    groupEl.innerHTML = `
+      <button class="nav-product" aria-expanded="${isOpen}">
+        <span class="icon-chip">${g.icon}</span>
+        <span class="label-row">
+          <span class="label">${g.title}</span>
+          <span class="chev">${icons.chev}</span>
+        </span>
+      </button>
+      <div class="nav-sub-wrapper">
+        <div class="nav-sub-inner">
+          <div class="nav-sub">${pagesHtml}<div class="rail-indicator"></div><div class="rail-tick"></div></div>
+        </div>
+      </div>
+    `;
+    nav.appendChild(groupEl);
+  });
+
+  updateRailIndicators(false);
+}
+
+// Positions each group's accent rail segment over its currently active page.
+// animate=false skips the transition (used on first render / domain switch so it
+// doesn't slide in from the top); animate=true lets it glide between pages.
+function updateRailIndicators(animate){
+  document.querySelectorAll('.nav-group').forEach(groupEl=>{
+    const indicator = groupEl.querySelector('.rail-indicator');
+    const tick = groupEl.querySelector('.rail-tick');
+    if(!indicator) return;
+    const activePage = groupEl.querySelector('.nav-page.active');
+    if(!activePage){
+      indicator.style.opacity = 0;
+      if(tick) tick.style.opacity = 0;
+      return;
+    }
+    const top = activePage.offsetTop + 'px';
+
+    // The tick has no transition of its own — it just jumps straight to the
+    // active row's position, every time, animated or not.
+    if(tick){
+      tick.style.top = (activePage.offsetTop + 4) + 'px';
+      tick.style.opacity = 1;
+    }
+
+    if(!animate){
+      // Snap into place with no motion at all (first render / silent restore).
+      indicator.style.transition = 'none';
+      indicator.style.top = top;
+      indicator.style.transform = 'translateX(0) scaleX(1)';
+      indicator.style.opacity = 1;
+      void indicator.offsetWidth; // force reflow before restoring the transition
+      indicator.style.transition = '';
+      return;
+    }
+
+    // Jump to the new row instantly (no vertical slide), then fly the
+    // highlight in from the right edge so each selection reads as a
+    // fresh, directional "landing" rather than a line crawling down the list.
+    indicator.style.transition = 'none';
+    indicator.style.top = top;
+    indicator.style.transform = 'translateX(14px) scaleX(.9)';
+    indicator.style.opacity = 0;
+    void indicator.offsetWidth; // force reflow so the jump above isn't animated
+    requestAnimationFrame(()=>{
+      indicator.style.transition = '';
+      requestAnimationFrame(()=>{
+        indicator.style.transform = 'translateX(0) scaleX(1)';
+        indicator.style.opacity = 1;
+      });
+    });
+  });
+}
+
+renderNav('maskirovshik');
+
+// The login form shows the product's own icon — the same one as in the sidebar.
+document.getElementById('loginProductLogo').innerHTML = icons.maskirovshik;
+
+/* ---------------- USER ACCOUNT MENU (roles + logout) ---------------- */
+const userBtn = document.getElementById('userMenuBtn');
+const userMenu = document.getElementById('userMenu');
+
+function openUserMenu(){
+  userMenu.classList.add('open');
+  userBtn.setAttribute('aria-expanded', 'true');
+}
+function closeUserMenu(){
+  userMenu.classList.remove('open');
+  userBtn.setAttribute('aria-expanded', 'false');
+}
+
+userBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  userMenu.classList.contains('open') ? closeUserMenu() : openUserMenu();
+});
+
+document.addEventListener('click', (e)=>{
+  if(userMenu.classList.contains('open') && !userMenu.contains(e.target) && e.target !== userBtn && !userBtn.contains(e.target)){
+    closeUserMenu();
+  }
+});
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') closeUserMenu();
+});
+
+/* ---------------- LOGIN SCREEN ---------------- */
+const loginScreen = document.getElementById('loginScreen');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
+
+function showLogin(){
+  loginUser.value = '';
+  loginPass.value = '';
+  clearTimeout(loginLeaveTimer);
+  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving');
+  loginScreen.classList.remove('is-entering');
+  void loginScreen.offsetWidth;
+  loginScreen.classList.add('is-entering');
+  loginUser.focus();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  closeUserMenu();
+  showLogin();
+});
+
+// The prototype opens on the login screen.
+loginUser.focus();
+
+// Demo auth: «Войти» with both fields filled in lets the person into the
+// app; with a field left empty it shows the authorisation error instead.
+// Wired to a plain click / Enter instead of a <form> submit: previews that
+// render the file in a sandboxed frame block form submission entirely.
+// Skeleton placeholder over the header + content (the sidebar stays live)
+// for `ms` milliseconds, then it fades away to reveal the real screen.
+const mainSkeleton = document.getElementById('mainSkeleton');
+let skeletonTimers = [];
+function showSkeleton(ms){
+  skeletonTimers.forEach(clearTimeout);
+  mainSkeleton.classList.remove('is-hidden', 'is-leaving');
+  skeletonTimers = [
+    setTimeout(()=> mainSkeleton.classList.add('is-leaving'), ms),
+    setTimeout(()=>{ mainSkeleton.classList.add('is-hidden'); mainSkeleton.classList.remove('is-leaving'); }, ms + 460),
+  ];
+}
+
+// Leaves the login screen with a soft cross-fade into the app.
+let loginLeaveTimer = null;
+function enterApp(){
+  const app = document.querySelector('.app');
+  loginScreen.classList.remove('has-error', 'is-entering');
+  loginScreen.classList.add('is-leaving');
+  app.classList.remove('is-arriving');
+  void app.offsetWidth;
+  app.classList.add('is-arriving');
+  showSkeleton(2600);
+  clearTimeout(loginLeaveTimer);
+  loginLeaveTimer = setTimeout(()=>{
+    loginScreen.classList.add('is-hidden');
+    loginScreen.classList.remove('is-leaving');
+    app.classList.remove('is-arriving');
+  }, 620);
+}
+
+// Opens the product on its first page.
+function goToProduct(domainKey, productKey, animate){
+  renderNav(domainKey, productKey);
+  const targetId = 'screenB';
+  const sameScreen = document.querySelector('.screen:not(.is-hidden)').id === targetId;
+  setScreen(targetId);
+  if(animate && sameScreen) replayScreenEnter();
+}
+// Replays the page-content entrance (content + header tabs) on the screen
+// that is already visible — setScreen() only animates when the screen changes.
+function replayScreenEnter(){
+  const screen = document.querySelector('.screen:not(.is-hidden)');
+  const tabs = document.querySelector('.tabs-group:not(.is-hidden)');
+  const actions = document.querySelector('.page-actions:not(.is-hidden)');
+  [screen, tabs, actions].forEach(el=>{ if(el) el.classList.remove('is-entering'); });
+  void screen.offsetWidth;
+  [screen, tabs, actions].forEach(el=>{ if(el) el.classList.add('is-entering'); });
+  document.querySelector('.content').scrollTop = 0;
+}
+
+function tryLogin(){
+  if(loginUser.value.trim() && loginPass.value.trim()){
+    // Sign-in goes straight into Маскировщик → «Маскировки» in the sidebar,
+    // with the annotation page («О прототипе») as the first content screen.
+    // There is no product chooser: this build has a single product.
+    goToProduct('maskirovshik', 'maskirovshik');
+    setScreen('screenN');
+    enterApp();
+    return;
+  }
+  loginScreen.classList.add('has-error');
+  (loginUser.value.trim() ? loginPass : loginUser).focus();
+}
+document.getElementById('loginSubmit').addEventListener('click', tryLogin);
+[loginUser, loginPass].forEach(input=>{
+  input.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); tryLogin(); }
+  });
+});
+
+document.querySelectorAll('.tabs-group .tab, .local-tabs .tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    tab.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.seg-toggle-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    item.parentElement.querySelectorAll('.seg-toggle-item').forEach(t=>t.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+/* ---------------- SCREEN SWAP (alternates content + header tabs between two screens on each page click) ---------------- */
+function setScreen(targetId){
+  const current = document.querySelector('.screen:not(.is-hidden)');
+  if(current.id === targetId) return;
+  const currentTabs = document.querySelector('.tabs-group:not(.is-hidden)');
+  const other = document.getElementById(targetId);
+  const tabsIdMap = { screenB:'tabsB', screenN:'tabsN' };
+  const otherTabs = document.getElementById(tabsIdMap[targetId]);
+
+  current.classList.add('is-hidden');
+  other.classList.remove('is-hidden');
+  currentTabs.classList.add('is-hidden');
+  otherTabs.classList.remove('is-hidden');
+
+  // Header actions belong to a screen and switch together with it.
+  let otherActions = null;
+  document.querySelectorAll('.page-actions').forEach(el=>{
+    const mine = el.dataset.screen === targetId;
+    el.classList.toggle('is-hidden', !mine);
+    el.classList.remove('is-entering');
+    if(mine) otherActions = el;
+  });
+
+  other.classList.remove('is-entering');
+  otherTabs.classList.remove('is-entering');
+  void other.offsetWidth; // force reflow so the animation replays every time
+  other.classList.add('is-entering');
+  otherTabs.classList.add('is-entering');
+  if(otherActions) otherActions.classList.add('is-entering');
+
+  document.querySelector('.content').scrollTop = 0;
+}
+
+// «Маскировки» always shows its table (screenB). The other pages are
+// placeholders and alternate between two screens: N (the annotation page
+// «О прототипе») → B → N.
+function swapScreen(){
+  const current = document.querySelector('.screen:not(.is-hidden)');
+  setScreen(current.id === 'screenN' ? 'screenB' : 'screenN');
+}
+
+// Shortcut on the annotation page: jump straight to the place it talks about.
+document.getElementById('screenN').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.note-go');
+  if(!btn) return;
+  if(btn.dataset.go === 'login') showLogin();
+});
+
+/* ---------------- INTERACTIONS ---------------- */
+nav.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.nav-product');
+  if(btn){
+    const groupEl = btn.closest('.nav-group');
+    // The active product (the one whose page is currently open) can't be collapsed.
+    if(groupEl.classList.contains('active-product') && groupEl.classList.contains('open')) return;
+    const willOpen = !groupEl.classList.contains('open');
+    groupEl.classList.toggle('open', willOpen);
+    btn.setAttribute('aria-expanded', willOpen);
+    return;
+  }
+  const pageEl = e.target.closest('.nav-page');
+  if(pageEl){
+    document.querySelectorAll('.nav-page.active').forEach(el=>el.classList.remove('active'));
+    pageEl.classList.add('active');
+
+    // The accent ("active-product") highlight follows whichever product's page is selected.
+    document.querySelectorAll('.nav-group.active-product').forEach(el=>el.classList.remove('active-product'));
+    pageEl.closest('.nav-group').classList.add('active-product');
+
+    updateRailIndicators(true);
+
+    if(pageEl.dataset.page === 'Маскировки'){
+      setScreen('screenB');
+    } else {
+      swapScreen();
+    }
+  }
+});
+
+/* ---------------- TABLE DATA ---------------- */
+const maskRows = [
+  ['123','test_task_oracle','my first target connection1222','','admin_performer'],
+  ['123321','pgDemo','Oracle','','admin_performer'],
+  ['1234','Oracle','MSSQL 19 Удалить','','admin_system_main'],
+  ['1000CheckBug','MSSQL 19 Удалить','pgDemo','','admin_system_main'],
+  ['t970','pgDemo','pgDemo','','admin_system_main'],
+  ['J14','Oracle','pgDemo','','admin_system_main'],
+  ['J14-cache','MSSQL 19 Удалить','pgDemo','','admin_system_main'],
+  ['CheckEmptyTable','pgDemo','Oracle','','admin_system_main'],
+  ['CheckOtherStdMasks','Oracle','pgDemo','','admin_system_main'],
+  ['CheckOracleChangeNotes','MSSQL 19 Удалить','Применить, удалить','','admin_system_main'],
+];
+const tbodyMask = document.getElementById('tbodyMask');
+tbodyMask.innerHTML = maskRows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+
+/* ---------------- SUPPORT DRAWER («?») ---------------- */
+(function(){
+  const btn = document.getElementById('supportBtn');
+  const drawer = document.getElementById('supportDrawer');
+  const subject = document.getElementById('supportSubject');
+  const text = document.getElementById('supportText');
+  const shots = document.getElementById('supportShots');
+  const addBtn = document.getElementById('supportShotAdd');
+  const shotTemplate = shots.querySelector('.support-shot').cloneNode(true);
+  let closeTimer = null;
+
+  // «Страница» = wherever the person is right now in the sidebar.
+  function currentPageName(){
+    const active = document.querySelector('.nav-page.active .nav-page-text');
+    return active ? active.textContent : 'Маскировки';
+  }
+
+  function open(){
+    clearTimeout(closeTimer);
+    drawer.classList.remove('is-sent');
+    subject.classList.remove('is-invalid');
+    document.getElementById('supportPage').textContent = currentPageName();
+    document.body.classList.add('support-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    setTimeout(()=> subject.focus(), 60);
+  }
+  function close(){
+    document.body.classList.remove('support-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function reset(){
+    subject.value = ''; text.value = '';
+    shots.querySelectorAll('.support-shot').forEach(el=>el.remove());
+    shots.insertBefore(shotTemplate.cloneNode(true), addBtn);
+  }
+
+  btn.addEventListener('click', ()=> document.body.classList.contains('support-open') ? close() : open());
+  btn.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
+  document.getElementById('supportClose').addEventListener('click', close);
+  document.getElementById('supportCancel').addEventListener('click', ()=>{ close(); closeTimer = setTimeout(reset, 400); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && document.body.classList.contains('support-open')) close(); });
+  document.getElementById('supportPage').addEventListener('click', close);
+  // The page stays usable while the drawer is open — keep «Страница» in step
+  // with whatever the person navigates to.
+  document.getElementById('nav').addEventListener('click', ()=>{
+    setTimeout(()=>{ document.getElementById('supportPage').textContent = currentPageName(); }, 0);
+  });
+
+  // Demo attachments: «Добавить» attaches one more screenshot, × removes it.
+  addBtn.addEventListener('click', ()=> shots.insertBefore(shotTemplate.cloneNode(true), addBtn));
+  shots.addEventListener('click', (e)=>{
+    const del = e.target.closest('.support-shot-del');
+    if(del) del.closest('.support-shot').remove();
+  });
+
+  subject.addEventListener('input', ()=> subject.classList.remove('is-invalid'));
+  document.getElementById('supportSend').addEventListener('click', ()=>{
+    if(!subject.value.trim()){ subject.classList.add('is-invalid'); subject.focus(); return; }
+    drawer.classList.add('is-sent');
+    closeTimer = setTimeout(()=>{ close(); setTimeout(reset, 400); }, 1800);
+  });
+})();
+</script>
+
+</body>
+</html>
