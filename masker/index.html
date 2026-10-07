@@ -6,7 +6,7 @@
 <title>Маскировщик — Маскировки</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     /* ---- tokens taken from Figma (Навигация) ---- */
@@ -95,18 +95,20 @@
   }
   /* Single-product build: the title is a plain label — no product menu. */
 
-  /* ---- Login screen (shown after «Выйти») ---- */
+  /* ---- Login screen (shown after «Выйти») ----
+     Two-pane card: the product you sign in to on the left, the form on the right.
+     Corner brackets frame the card; the build info sits in a bar at the bottom. */
   .login{
     position:fixed; inset:0; z-index:2000; overflow:auto;
-    display:flex; align-items:center; justify-content:center; padding:24px;
+    display:flex; flex-direction:column;
     background:
-      radial-gradient(120% 70% at 50% -18%, rgba(217,21,40,.22) 0%, rgba(217,21,40,.08) 38%, rgba(217,21,40,0) 68%),   /* top glow: logo red (#d91528) */
-      radial-gradient(120% 70% at 50% 118%, rgba(14,125,143,.30) 0%, rgba(14,125,143,.11) 38%, rgba(14,125,143,0) 68%),   /* bottom glow: accent teal (#0e7d8f) */
-      #fcfdfd;
+      radial-gradient(70% 80% at 0% 0%, rgba(217,21,40,.20) 0%, rgba(217,21,40,.07) 40%, rgba(217,21,40,0) 72%),      /* top-left glow: logo red */
+      radial-gradient(75% 85% at 100% 100%, rgba(108,140,178,.42) 0%, rgba(108,140,178,.16) 42%, rgba(108,140,178,0) 74%),   /* bottom-right glow: cool blue-grey */
+      #eeeeef;
   }
   .login.is-hidden{ display:none; }
   .login.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
-  /* Soft hand-off into the app: the form lifts and dissolves while the
+  /* Soft hand-off into the app: the card lifts and dissolves while the
      app underneath settles into place. */
   .login{ transition:opacity .55s cubic-bezier(.22,.61,.36,1); }
   .login-card{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
@@ -118,37 +120,62 @@
     .login, .login-card{ transition:none; }
     .app.is-arriving{ animation:none; }
   }
-  /* The form sits in a bordered card with a soft shadow. */
-  .login-card{ box-sizing:border-box; width:480px; max-width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:6vh;
-    padding:44px 40px 24px; background:#fff; border:1px solid #e3e7ea; border-radius:12px;
-    box-shadow:0 18px 48px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.05); }
-  .login-brand{ display:flex; align-items:center; gap:12px; }
-  .login-brand-name{ font-size:34px; font-weight:600; letter-spacing:-.5px; line-height:1; color:#1b1e24; }
-  .login-title{ margin-top:26px; font-size:14px; line-height:20px; letter-spacing:.1px; color:#6b6f75; }
-  /* Product lockup: the product's own icon (same as in the sidebar, on the
-     active-product chip) next to its name — says which product you sign in to. */
-  .login-product{ margin-top:10px; display:flex; align-items:center; gap:12px; }
-  .login-product-logo{ width:44px; height:44px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    color:#1b1e24; background:#fff; box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08); }
-  .login-product-logo svg{ width:28px; height:28px; display:block; }
-  .login-product-name{ font-size:24px; line-height:28px; font-weight:600; letter-spacing:-.2px; color:#1b1e24; }
-  .login-form{ width:100%; margin-top:32px; display:flex; flex-direction:column; gap:16px; }
-  .login-input{ width:100%; height:37px; padding:0 8px; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #a7acb1; border-radius:3px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
-  .login-input::placeholder{ color:#7b8288; }
+  .login-stage{ flex:1 0 auto; display:flex; align-items:center; justify-content:center; padding:40px 32px; }
+  /* .login-card is the frame (it carries the corner brackets and the leave
+     animation); .login-panel inside it is the visible card. */
+  .login-card{ position:relative; box-sizing:border-box; width:852px; max-width:100%; }
+  .login-corner{ position:absolute; width:17px; height:17px; border:0 solid #1b1e24; pointer-events:none; }
+  .login-corner.tl{ top:-13px; left:-13px; border-top-width:1px; border-left-width:1px; border-top-left-radius:3px; }
+  .login-corner.tr{ top:-13px; right:-13px; border-top-width:1px; border-right-width:1px; border-top-right-radius:3px; }
+  .login-corner.bl{ bottom:-13px; left:-13px; border-bottom-width:1px; border-left-width:1px; border-bottom-left-radius:3px; }
+  .login-corner.br{ bottom:-13px; right:-13px; border-bottom-width:1px; border-right-width:1px; border-bottom-right-radius:3px; }
+  .login-panel{ position:relative; display:flex; min-height:316px; background:#fff; border-radius:8px; overflow:hidden;
+    box-shadow:0 22px 44px rgba(16,24,40,.13), 0 2px 6px rgba(16,24,40,.06); }
+  .login-panel::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background:#c9202b; z-index:1; }   /* red line along the top edge */
+  /* Left pane: which product you are signing in to. */
+  .login-about{ box-sizing:border-box; flex:0 0 47.8%; min-width:0; display:flex; flex-direction:column; align-items:flex-start; padding:45px 44px 44px; background:#fafafa; }
+  .login-product-logo{ width:67px; height:67px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    color:#1b1e24; background:#fff; box-shadow:0 0 0 1px #e1e4e8, 0 1px 2px rgba(10,13,18,.05); }
+  .login-product-logo svg{ width:32px; height:32px; display:block; }
+  .login-product-logo svg path{ stroke-width:1.7; }
+  .login-title{ margin-top:22px; font-family:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:11px; line-height:14px; letter-spacing:.14em; text-transform:uppercase; color:#4a4f56; }
+  .login-product-name{ margin-top:8px; font-size:40px; line-height:46px; font-weight:700; letter-spacing:-1.1px; color:#1b1e24; overflow-wrap:anywhere; }
+  /* HFLabs mark: the three parts of the name spaced out inside a red outline. */
+  .login-brand{ box-sizing:border-box; margin-top:auto; width:126px; height:23px; padding:0 7px; display:flex; align-items:center; justify-content:space-between;
+    border:1px solid #c9202b; color:#c9202b; font-size:12px; line-height:1; letter-spacing:.1px; }
+  /* Right pane: the form. */
+  .login-side{ box-sizing:border-box; flex:1; min-width:0; position:relative; display:flex; flex-direction:column; justify-content:center; padding:44px 44px 48px; }
+  .login-form{ width:100%; display:flex; flex-direction:column; }
+  .login-label{ margin-bottom:7px; font-size:12px; line-height:16px; font-weight:500; letter-spacing:.1px; color:#3f444b; }
+  .login-input + .login-label{ margin-top:18px; }
+  .login-input{ box-sizing:border-box; width:100%; height:44px; padding:0 12px; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #b9bdc2; border-radius:5px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
   .login-input:focus{ border-color:#387c8c; box-shadow:0 0 0 2px rgba(56,124,140,.18); }
   .login-submit{
-    all:unset; box-sizing:border-box; width:100%; height:44px; margin-top:4px;
+    all:unset; box-sizing:border-box; width:100%; height:48px; margin-top:24px;
     display:flex; align-items:center; justify-content:center; gap:10px;
-    background:#1b1e24; color:#fff; font-size:15px; font-weight:500; letter-spacing:.1px;
+    background:#1b1e24; color:#fff; font-size:15px; font-weight:700; letter-spacing:.1px;
     border-radius:4px; cursor:pointer; transition:background .15s var(--ease);
   }
   .login-submit:hover{ background:#2c3038; }
   .login-submit:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px #1b1e24; }
-  /* The error line always keeps its place under the button, so the card
-     does not change height when the message appears. */
-  .login-error{ visibility:hidden; width:100%; min-height:19px; margin-top:16px; text-align:center; font-size:14px; line-height:19px; letter-spacing:.1px; color:#d6232f; }
+  /* The error line sits in the space under the button, so the card does not
+     change height when the message appears. */
+  .login-error{ visibility:hidden; position:absolute; left:44px; right:44px; bottom:8px; min-height:32px; display:flex; align-items:center; justify-content:center; text-align:center; font-size:12px; line-height:16px; letter-spacing:.1px; color:#d6232f; }
   .login.has-error .login-error{ visibility:visible; }
-  @media (max-width:480px){ .login-card{ padding:32px 20px 20px; } .login-error{ min-height:38px; } }
+  /* Build info bar, the same one as at the bottom of the app. */
+  .login-foot{ flex-shrink:0; display:flex; flex-wrap:wrap; gap:4px 18px; padding:8px 18px; font-size:12px; color:#76787c; border-top:1px solid var(--border); background:#fafafa; }
+  @media (max-width:760px){
+    .login-stage{ padding:32px 28px; }
+    .login-panel{ flex-direction:column; }
+    .login-about{ flex-basis:auto; padding:28px 24px 24px; }
+    .login-product-logo{ width:52px; height:52px; border-radius:10px; }
+    .login-product-logo svg{ width:26px; height:26px; }
+    .login-title{ margin-top:16px; }
+    .login-product-name{ font-size:30px; line-height:36px; letter-spacing:-.7px; }
+    .login-brand{ margin-top:20px; }
+    .login-side{ padding:24px 24px 56px; }
+    .login-error{ left:24px; right:24px; bottom:10px; }
+  }
 
   /* ---- User account dropdown (roles + logout) ---- */
   .user-menu-wrap{ position:relative; }
@@ -1044,26 +1071,36 @@
 
 <!-- Login screen: the prototype starts here; «Войти» opens the app, «Выйти» returns to it. -->
 <div class="login" id="loginScreen">
-  <div class="login-card">
-    <div class="login-brand">
-      <svg width="35" height="38" viewBox="0 0 27 28" fill="none" aria-hidden="true">
-        <rect x="1" y="1" width="24.0135" height="26" stroke="#D91528" stroke-width="2"/>
-        <path d="M18.2064 20.4544H16.3821V14.8068H9.82815V20.4544H8.00391V7.66719H9.82815V13.4409H16.3821V7.66719H18.2064V20.4544Z" fill="#D91528"/>
-      </svg>
-      <span class="login-brand-name">HFLabs</span>
+  <div class="login-stage">
+    <div class="login-card">
+      <span class="login-corner tl"></span><span class="login-corner tr"></span><span class="login-corner bl"></span><span class="login-corner br"></span>
+      <div class="login-panel">
+        <!-- Single-product build: the card says which product you are signing in to. -->
+        <div class="login-about">
+          <span class="login-product-logo" id="loginProductLogo" aria-hidden="true"></span>
+          <div class="login-title">Вход в продукт</div>
+          <div class="login-product-name">Маскировщик</div>
+          <div class="login-brand" role="img" aria-label="HFLabs"><span>H</span><span>F</span><span>Labs</span></div>
+        </div>
+        <div class="login-side">
+          <div class="login-form" id="loginForm">
+            <label class="login-label" for="loginUser">Имя пользователя</label>
+            <input class="login-input" id="loginUser" type="text" autocomplete="off">
+            <label class="login-label" for="loginPass">Пароль</label>
+            <input class="login-input" id="loginPass" type="password" autocomplete="off">
+            <button class="login-submit" id="loginSubmit" type="button">Войти</button>
+          </div>
+          <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
+        </div>
+      </div>
     </div>
-    <!-- Single-product build: the form says which product you are signing in to. -->
-    <div class="login-title">Вход в продукт</div>
-    <div class="login-product">
-      <span class="login-product-logo" id="loginProductLogo" aria-hidden="true"></span>
-      <span class="login-product-name">Маскировщик</span>
-    </div>
-    <div class="login-form" id="loginForm">
-      <input class="login-input" id="loginUser" type="text" placeholder="Имя пользователя" aria-label="Имя пользователя" autocomplete="off">
-      <input class="login-input" id="loginPass" type="password" placeholder="Пароль" aria-label="Пароль" autocomplete="off">
-      <button class="login-submit" id="loginSubmit" type="button">Войти</button>
-    </div>
-    <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
+  </div>
+  <div class="login-foot">
+    <span>HFLabs License</span>
+    <span>Версия: v26.9.3</span>
+    <span>Ревизия: 4f9c2a71b3e8</span>
+    <span>Бранч/Тег: release/26.9</span>
+    <span>Время сборки: 28-09-2026 14:32:07</span>
   </div>
 </div>
 
