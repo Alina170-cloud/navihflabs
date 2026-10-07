@@ -638,7 +638,7 @@
   .skeleton.is-leaving{ opacity:0; pointer-events:none; }
   .sk{ border-radius:4px; background:linear-gradient(100deg, #eceef1 30%, #f6f7f9 50%, #eceef1 70%); background-size:300% 100%; animation:skShimmer 1.5s linear infinite; }
   @keyframes skShimmer{ from{ background-position:100% 0; } to{ background-position:-50% 0; } }
-  .sk-top{ height:48px; flex-shrink:0; display:flex; align-items:center; gap:26px; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
+  .sk-top{ height:40px; flex-shrink:0; display:flex; align-items:center; gap:26px; padding:0 18px; background:#fff; border-bottom:1px solid var(--border); }
   .sk-top .sk{ height:12px; }
   .sk-top-spacer{ flex:1; }
   .sk-body{ flex:1; min-height:0; overflow:hidden; padding:18px; display:flex; flex-direction:column; gap:14px; }
@@ -650,9 +650,9 @@
   @media (prefers-reduced-motion: reduce){ .sk{ animation:none; } .skeleton{ transition:none; } }
   .topbar{
     display:flex; align-items:center; padding:0 18px;
-    border-bottom:1px solid var(--border); height:48px; gap:26px; flex-shrink:0;   /* bottom edge lines up with the bottom of the logo mark */
+    border-bottom:1px solid var(--border); height:40px; gap:26px; flex-shrink:0;
   }
-  .tab{ font-size:14px; color:var(--text-soft); padding:15px 0; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s var(--ease), border-color .15s var(--ease); }
+  .tab{ font-size:14px; color:var(--text-soft); padding:11px 0; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s var(--ease), border-color .15s var(--ease); }
   .tab:hover{ color:var(--text-page); }
   .tab.active{ color:var(--accent); font-weight:600; border-bottom-color:var(--accent); }
   .topbar-spacer{ flex:1; }
