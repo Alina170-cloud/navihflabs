@@ -188,140 +188,114 @@
     letter-spacing:.5px;
   }
 
-  /* ---- Login screen (the prototype starts here; shown again after «Выйти») ----
-     A wide two-panel card: brand on the left, the form on the right, framed
-     by four corner marks, over a diagonal red → blue-grey wash. The page
-     footer with the build info sits at the bottom of the screen. */
+  /* ---- Login screen (shown after «Выйти») ----
+     Two-pane card: the product you sign in to (Единый клиент) on the left, the form on the right.
+     Corner brackets frame the card; the build info sits in a bar at the bottom. */
   .login{
     position:fixed; inset:0; z-index:2000; overflow:auto;
     display:flex; flex-direction:column;
     background:
-      radial-gradient(70% 80% at 0% 0%, rgba(217,21,40,.20) 0%, rgba(217,21,40,.07) 40%, rgba(217,21,40,0) 72%),
-      radial-gradient(70% 80% at 100% 100%, rgba(104,135,172,.46) 0%, rgba(104,135,172,.16) 42%, rgba(104,135,172,0) 74%),
-      #efeff0;
+      radial-gradient(70% 80% at 0% 0%, rgba(217,21,40,.20) 0%, rgba(217,21,40,.07) 40%, rgba(217,21,40,0) 72%),      /* top-left glow: logo red */
+      radial-gradient(75% 85% at 100% 100%, rgba(108,140,178,.42) 0%, rgba(108,140,178,.16) 42%, rgba(108,140,178,0) 74%),   /* bottom-right glow: cool blue-grey */
+      #eeeeef;
   }
   .login.is-hidden{ display:none; }
   .login.is-entering{ animation:tabsFadeIn var(--page-fade) both; }
-  .login-stage{ flex:1; display:flex; align-items:center; justify-content:center; padding:32px 24px; }
   /* Soft hand-off into the app: the card lifts and dissolves while the
      app underneath settles into place. */
   .login{ transition:opacity .55s cubic-bezier(.22,.61,.36,1); }
-  .login-frame{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
+  .login-card{ transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s cubic-bezier(.22,.61,.36,1); }
   .login.is-leaving{ opacity:0; pointer-events:none; }
-  .login.is-leaving .login-frame{ transform:translateY(-10px) scale(.985); opacity:0; }
+  .login.is-leaving .login-card{ transform:translateY(-10px) scale(.985); opacity:0; }
   .app.is-arriving{ animation:appArrive .6s cubic-bezier(.22,.61,.36,1) both; }
   @keyframes appArrive{ from{ opacity:.35; transform:scale(.992); } to{ opacity:1; transform:none; } }
   @media (prefers-reduced-motion: reduce){
-    .login, .login-frame{ transition:none; }
+    .login, .login-card{ transition:none; }
     .app.is-arriving{ animation:none; }
   }
-  /* Frame: the card plus four corner marks 14px outside it. */
-  .login-frame{ position:relative; width:948px; max-width:100%; padding:14px; margin-bottom:5vh; box-sizing:border-box; }
-  .login-corner{ position:absolute; width:18px; height:18px; border:0 solid #1b1e24; pointer-events:none; }
-  .login-corner.tl{ top:0; left:0; border-top-width:1px; border-left-width:1px; border-top-left-radius:4px; }
-  .login-corner.tr{ top:0; right:0; border-top-width:1px; border-right-width:1px; border-top-right-radius:4px; }
-  .login-corner.bl{ bottom:0; left:0; border-bottom-width:1px; border-left-width:1px; border-bottom-left-radius:4px; }
-  .login-corner.br{ bottom:0; right:0; border-bottom-width:1px; border-right-width:1px; border-bottom-right-radius:4px; }
-  .login-card{ display:grid; grid-template-columns:440fr 480fr; background:#fff; border-radius:8px; overflow:hidden;
-    border-top:2px solid #d91528;
-    box-shadow:0 24px 56px rgba(16,24,40,.14), 0 4px 12px rgba(16,24,40,.06); }
-  /* Left panel: brand. */
-  .login-aside{ background:#fafafa; padding:48px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; min-width:0; }
-  .login-title{ margin:18px 0 0; font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; line-height:16px; font-weight:400; letter-spacing:.14em; text-transform:uppercase; color:#3a3f47; }
-  .login-brand{ margin-top:12px; width:247px; max-width:100%; height:44px; box-sizing:border-box; padding:0 12px; display:flex; align-items:center; justify-content:space-between;
-    border:1.5px solid #d91528; color:#d91528; font-size:24px; line-height:1; font-weight:400; letter-spacing:.2px; }
-  /* Right panel: the form. */
-  .login-main{ position:relative; padding:48px; min-width:0; }
-  .login-form{ display:flex; flex-direction:column; }
-  .login-field{ display:flex; flex-direction:column; gap:6px; }
-  .login-field + .login-field{ margin-top:18px; }
-  .login-label{ font-size:14px; line-height:20px; font-weight:500; letter-spacing:.1px; color:#3a3f47; }
-  .login-input{ width:100%; height:48px; box-sizing:border-box; padding:0 12px; font:inherit; font-size:15px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #b5bac0; border-radius:6px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
+  .login-stage{ flex:1 0 auto; display:flex; align-items:center; justify-content:center; padding:40px 32px; }
+  /* .login-card is the frame (it carries the corner brackets and the leave
+     animation); .login-panel inside it is the visible card. */
+  .login-card{ position:relative; box-sizing:border-box; width:852px; max-width:100%; }
+  .login-corner{ position:absolute; width:17px; height:17px; border:0 solid #1b1e24; pointer-events:none; }
+  .login-corner.tl{ top:-13px; left:-13px; border-top-width:1px; border-left-width:1px; border-top-left-radius:3px; }
+  .login-corner.tr{ top:-13px; right:-13px; border-top-width:1px; border-right-width:1px; border-top-right-radius:3px; }
+  .login-corner.bl{ bottom:-13px; left:-13px; border-bottom-width:1px; border-left-width:1px; border-bottom-left-radius:3px; }
+  .login-corner.br{ bottom:-13px; right:-13px; border-bottom-width:1px; border-right-width:1px; border-bottom-right-radius:3px; }
+  .login-panel{ position:relative; display:flex; min-height:316px; background:#fff; border-radius:8px; overflow:hidden;
+    box-shadow:0 22px 44px rgba(16,24,40,.13), 0 2px 6px rgba(16,24,40,.06); }
+  .login-panel::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background:#c9202b; z-index:1; }   /* red line along the top edge */
+  /* Left pane: which product you are signing in to. */
+  .login-about{ box-sizing:border-box; flex:0 0 47.8%; min-width:0; display:flex; flex-direction:column; align-items:flex-start; padding:45px 44px 44px; background:#fafafa; }
+  .login-product-logo{ width:67px; height:67px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    color:#1b1e24; background:#fff; box-shadow:0 0 0 1px #e1e4e8, 0 1px 2px rgba(10,13,18,.05); }
+  .login-product-logo svg{ width:32px; height:32px; display:block; }
+  .login-title{ margin-top:22px; font-family:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:11px; line-height:14px; letter-spacing:.14em; text-transform:uppercase; color:#8b9198; }
+  .login-product-name{ margin-top:8px; font-size:40px; line-height:46px; font-weight:700; letter-spacing:-1.1px; color:#1b1e24; overflow-wrap:anywhere; }
+  /* HFLabs mark: the three parts of the name spaced out inside a red outline. */
+  .login-brand{ box-sizing:border-box; margin-top:auto; width:168px; height:31px; padding:0 10px; display:flex; align-items:center; justify-content:space-between;
+    border:1.5px solid #c9202b; color:#c9202b; font-size:16px; line-height:1; letter-spacing:.1px; }
+  /* Right pane: the form. */
+  .login-side{ box-sizing:border-box; flex:1; min-width:0; position:relative; display:flex; flex-direction:column; justify-content:center; padding:44px 44px 48px; }
+  .login-form{ width:100%; display:flex; flex-direction:column; }
+  .login-label{ margin-bottom:7px; font-size:12px; line-height:16px; font-weight:500; letter-spacing:.1px; color:#3f444b; }
+  .login-input + .login-label{ margin-top:18px; }
+  /* Password label row: the Caps Lock hint sits on the right of «Пароль». */
+  .login-label-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-top:18px; margin-bottom:7px; }
+  .login-label-row .login-label{ margin-bottom:0; }
+  .login-input{ box-sizing:border-box; width:100%; height:44px; padding:0 12px; font:inherit; font-size:14px; letter-spacing:.2px; color:var(--text-page); background:#fff; border:1px solid #b9bdc2; border-radius:5px; outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease); }
   .login-input:focus{ border-color:#387c8c; box-shadow:0 0 0 2px rgba(56,124,140,.18); }
   .login-submit{
-    all:unset; box-sizing:border-box; width:100%; height:52px; margin-top:26px;
+    all:unset; box-sizing:border-box; width:100%; height:48px; margin-top:24px;
     display:flex; align-items:center; justify-content:center; gap:10px;
-    background:#1b1e24; color:#fff; font-size:16px; font-weight:700; letter-spacing:.1px;
-    border-radius:6px; cursor:pointer; transition:background .15s var(--ease);
+    background:#1b1e24; color:#fff; font-size:15px; font-weight:700; letter-spacing:.1px;
+    border-radius:4px; cursor:pointer; transition:background .15s var(--ease);
   }
   .login-submit:hover{ background:#2c3038; }
+  /* Blocked while the authorisation error is shown, until a field changes. */
+  .login-submit:disabled, .login-submit:disabled:hover{ background:#c3c7cc; color:#f4f5f6; cursor:not-allowed; }
   .login-submit:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px #1b1e24; }
-  /* The error line has its own place under the button, inside the card's
-     bottom padding, so the card never changes height when it appears. */
-  .login-error{ position:absolute; left:48px; right:48px; bottom:15px; visibility:hidden; text-align:center; font-size:13px; line-height:18px; letter-spacing:.1px; color:#d6232f; }
-  .login.has-error .login-error{ visibility:visible; }
-  .login-footer{ flex-shrink:0; flex-wrap:wrap; row-gap:2px; }
+  /* Error banner above the fields: shown after a failed sign-in. */
+  .login-error{ display:none; align-items:flex-start; gap:10px; margin-bottom:18px; padding:10px 14px; border-radius:6px; background:#f9e8e9; color:#a3262b; font-size:13px; line-height:18px; letter-spacing:.1px; }
+  .login-error svg{ flex-shrink:0; width:18px; height:18px; margin-top:0; }
+  .login.has-error .login-error{ display:flex; }
+  /* Field in the error state: red border and a soft red ring. Set per field
+     (both fields, since the message covers the name and the password); clears
+     as soon as the person edits a field. */
+  .login-input.is-invalid, .login-input.is-invalid:focus{ border-color:#d6232f; box-shadow:0 0 0 3px rgba(214,35,47,.12); }
+  /* Password field with the show / hide toggle inside it. */
+  .login-pass{ position:relative; }
+  .login-pass .login-input{ padding-right:44px; }
+  .login-eye{ all:unset; position:absolute; top:0; right:4px; width:36px; height:44px; display:flex; align-items:center; justify-content:center; color:#6b7178; cursor:pointer; border-radius:4px; }
+  .login-eye:hover{ color:#1b1e24; }
+  .login-eye:focus-visible{ box-shadow:0 0 0 2px rgba(56,124,140,.35); }
+  .login-eye svg{ width:20px; height:20px; }
+  /* The icon shows the current state: crossed-out eye while the password is
+     hidden, open eye while it is shown. */
+  .login-eye .eye-on{ display:none; }
+  .login-eye[aria-pressed="true"] .eye-on{ display:block; }
+  .login-eye[aria-pressed="true"] .eye-off{ display:none; }
+  /* Caps Lock hint under the password. */
+  .login-caps{ display:none; align-items:center; gap:5px; font-size:12px; line-height:16px; letter-spacing:.1px; color:#8a5a12; }
+  .login-caps svg{ width:14px; height:14px; flex-shrink:0; }
+  .login-caps.is-on{ display:flex; }
+  /* Build info bar, the same one as at the bottom of the app. */
+  .login-foot{ flex-shrink:0; display:flex; flex-wrap:wrap; gap:4px 18px; padding:8px 18px; font-size:12px; color:#76787c; border-top:1px solid var(--border); background:#fafafa; }
   @media (max-width:760px){
-    .login-card{ grid-template-columns:1fr; }
-    .login-aside{ padding:28px 24px 24px; }
-    .login-title{ margin-top:0; }
-    .login-main{ padding:28px 24px 56px; }
-    .login-error{ left:24px; right:24px; bottom:12px; }
-  }
-
-  /* ---- Start chooser: a pop-up over the app right after sign-in, while
-     Единый клиент is still loading underneath. A click outside closes it. ---- */
-  .chooser-overlay{
-    position:fixed; inset:0; z-index:1500; overflow:auto;
-    display:flex; align-items:center; justify-content:center; padding:24px;
-    background:rgba(16,24,40,.32);
-    opacity:0; visibility:hidden; pointer-events:none;
-    transition:opacity .28s cubic-bezier(.22,.61,.36,1), visibility 0s linear .28s;
-  }
-  .chooser-overlay.open{ opacity:1; visibility:visible; pointer-events:auto; transition:opacity .28s cubic-bezier(.22,.61,.36,1), visibility 0s; }
-  .chooser{ width:760px; max-width:100%; margin-bottom:4vh; background:#fff; border-radius:12px;
-    box-shadow:0 24px 64px rgba(16,24,40,.22), 0 4px 12px rgba(16,24,40,.08), 0 0 0 1px rgba(16,24,40,.05);
-    transform:translateY(10px) scale(.985); opacity:0;
-    transition:transform .34s cubic-bezier(.22,.61,.36,1), opacity .26s cubic-bezier(.22,.61,.36,1); }
-  .chooser-overlay.open .chooser{ transform:none; opacity:1; }
-  .chooser-head{ padding:24px 28px 18px; border-bottom:1px solid var(--border-soft); }
-  .chooser-title{ font-size:20px; line-height:26px; font-weight:600; letter-spacing:-.1px; color:#1b1e24; }
-  .chooser-sub{ margin-top:4px; font-size:14px; line-height:20px; letter-spacing:.1px; color:#6b6f75; }
-  /* The apps-menu glyph shown inline in the hint — the same icon as the
-     button next to the domain title, so the person knows what to look for. */
-  .chooser-sub-icon{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; margin:-2px 0 -2px 6px; vertical-align:middle;
-    border-radius:4px; background:var(--page-hover); color:var(--text-page); }
-  .note-text .chooser-sub-icon{ margin-left:5px; margin-right:1px; }
-  .chooser-sub-icon svg{ width:14px; height:14px; display:block; }
-  .chooser-body{ display:grid; grid-template-columns:1fr 1fr 1fr; }
-  .chooser-col{ padding:14px 14px 18px; display:flex; flex-direction:column; gap:14px; min-width:0; }
-  .chooser-col + .chooser-col{ border-left:1px solid var(--border-soft); }
-  .chooser-group{ display:flex; flex-direction:column; gap:2px; }
-  .chooser-label{ padding:4px 10px 6px; font-size:11px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px; }
-  .chooser-item{
-    all:unset; box-sizing:border-box; display:flex; align-items:center; gap:10px; width:100%;
-    padding:5px 10px 5px 5px; border-radius:6px; cursor:pointer;
-    font-size:14px; line-height:18px; font-weight:500; letter-spacing:.2px; color:var(--text-page);
-    transition:background .15s var(--ease), color .15s var(--ease);
-  }
-  .chooser-item .chooser-icon{ width:34px; height:34px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:inherit; transition:background .15s var(--ease), box-shadow .15s var(--ease); }
-  .chooser-item .chooser-icon svg{ width:22px; height:22px; }
-  .chooser-item .chooser-name{ flex:1; min-width:0; }
-  .chooser-item .chooser-go{ color:var(--accent); opacity:0; transform:translateX(-4px); transition:opacity .15s var(--ease), transform .15s var(--ease); line-height:0; }
-  /* Hover and the selected row share one look. While the pointer is over a
-     row, only that row is highlighted; when it leaves, the highlight returns
-     to the selected row (hover is never stored). The hover look is a class
-     set on real pointer movement, so a pointer that merely happens to rest
-     where the pop-up appears does not steal the default highlight. */
-  .chooser-item.is-hover, .chooser-item.is-selected{ background:var(--l1-product-fill); color:var(--accent); }
-  .chooser-item.is-hover .chooser-icon, .chooser-item.is-selected .chooser-icon{ background:#fff; box-shadow:0 0 0 1px #dde1e5, 0 1px 2px rgba(10,13,18,.08); }
-  .chooser-item.is-hover .chooser-go, .chooser-item.is-selected .chooser-go{ opacity:1; transform:none; }
-  .chooser-body:has(.chooser-item.is-hover) .chooser-item.is-selected:not(.is-hover){ background:transparent; color:var(--text-page); }
-  .chooser-body:has(.chooser-item.is-hover) .chooser-item.is-selected:not(.is-hover) .chooser-icon{ background:transparent; box-shadow:none; }
-  .chooser-body:has(.chooser-item.is-hover) .chooser-item.is-selected:not(.is-hover) .chooser-go{ opacity:0; transform:translateX(-4px); }
-  .chooser-item:focus-visible{ box-shadow:0 0 0 2px rgba(14,125,143,.35); }
-  @media (max-width:680px){
-    .chooser-body{ grid-template-columns:1fr; }
-    .chooser-col + .chooser-col{ border-left:0; border-top:1px solid var(--border-soft); }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .chooser-overlay, .chooser-overlay.open, .chooser{ transition:none; }
+    .login-stage{ padding:32px 28px; }
+    .login-panel{ flex-direction:column; }
+    .login-about{ flex-basis:auto; padding:28px 24px 24px; }
+    .login-product-logo{ width:52px; height:52px; border-radius:10px; }
+    .login-product-logo svg{ width:26px; height:26px; }
+    .login-title{ margin-top:16px; }
+    .login-product-name{ font-size:30px; line-height:36px; letter-spacing:-.7px; }
+    .login-brand{ margin-top:20px; }
+    .login-side{ padding:24px 24px 32px; }
   }
 
   /* ---- User account dropdown (roles + logout) ---- */
   .user-menu-wrap{ position:relative; }
   .user-chip{ cursor:pointer; }
-  .user-chip[aria-expanded="true"]{ color:var(--text-page); }
   .user-menu{
     position:absolute;
     top:32px;
@@ -381,17 +355,21 @@
     box-sizing:border-box;
     display:flex;
     align-items:center;
+    justify-content:center;   /* label + icon centred, icon after the label */
     gap:8px;
     width:100%;
-    padding:8px 10px;
-    border-radius:6px;
+    height:36px;
+    padding:0 12px;
+    border-radius:4px;
     cursor:pointer;
     font-size:14px;
     font-weight:600;
     color:#d91528;
+    background:#fceaec;       /* red secondary — same as «Отклонить» */
     transition:background .15s var(--ease);
   }
-  .user-menu-logout:hover{ background:#fceaec; }
+  .user-menu-logout:hover{ background:#f8d9dd; }
+  .user-menu-logout:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px rgba(217,21,40,.35); }
 
   /* ---- Nav dims while the domain menu is open, so it doesn't fight for attention ---- */
   .nav{
@@ -455,9 +433,12 @@
   }
   .nav-product:hover::before{ opacity:1; }
   .nav-product:active::before{ opacity:1; background:#e5e9ec; }
+  /* One fill, not two: the active product has no row fill of its own (just the
+     accent colour and its icon on a white chip) — the fill belongs to the
+     active page under it, so the two plates no longer merge into one block. */
   .nav-group.active-product > .nav-product::before,
   .nav-group.active-product > .nav-product:hover::before,
-  .nav-group.active-product > .nav-product:active::before{ opacity:1; background:var(--l1-product-fill); }
+  .nav-group.active-product > .nav-product:active::before{ opacity:0; }
   .nav-group.active-product.open > .nav-product{ cursor:default; }
 
   .nav-product .icon-chip{
@@ -686,14 +667,17 @@
   .page-actions .btn{ padding:6px 12px; }
   .page-actions .icon-btn{ width:32px; height:30px; }
   @media (prefers-reduced-motion: reduce){ .page-actions.is-entering{ animation:none; } }
-  .header-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .header-actions{ display:flex; align-items:center; gap:4px; flex-shrink:0; margin-right:-5px; }   /* support icon sits close to the user; plates' padding provides the breathing room */
   /* A divider separates the page's own actions from the account, only while the page has actions. */
   .page-actions:not(.is-hidden) ~ .header-actions::before{ content:""; width:1px; height:24px; margin:0 14px 0 -12px; background:#e5e5e6; flex-shrink:0; }
   .header-divider{ width:1px; height:24px; background:#e5e5e6; flex-shrink:0; }
-  .user-chip{ display:flex; align-items:center; gap:8px; color:var(--text-soft); font-size:14px; cursor:pointer; }
+  /* User and support share the hover pattern of the domain title: a light
+     grey plate appears behind them and the text / icon turn black. */
+  .user-chip{ display:flex; align-items:center; gap:8px; height:30px; padding:0 8px; border-radius:6px; color:var(--text-soft); font-size:14px; cursor:pointer; transition:background .15s var(--ease), color .15s var(--ease); }
+  .user-chip:hover, .user-chip[aria-expanded="true"]{ background:var(--page-hover); color:var(--text-page); }
   .user-chip svg{ width:20px; height:20px; }
-  .help-icon{ color:var(--text-faint); cursor:pointer; display:flex; border-radius:50%; transition:color .15s var(--ease); }
-  .help-icon:hover, .help-icon[aria-expanded="true"]{ color:var(--text-page); }
+  .help-icon{ color:var(--text-faint); cursor:pointer; display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:6px; transition:background .15s var(--ease), color .15s var(--ease); }
+  .help-icon:hover, .help-icon[aria-expanded="true"]{ background:var(--page-hover); color:var(--text-page); }
 
   /* ---- Support drawer (opened by the «?» button) ---- */
   /* The drawer pushes the page: the app column narrows by the drawer's width
@@ -783,6 +767,11 @@
   /* ---- Sidebar scrolling: the page list scrolls on its own, the domain title stays put ---- */
   .sidebar{ overflow:visible; }
   .nav{ flex:1; min-height:0; overflow-y:auto; margin:0 -8px; padding:0 8px; width:auto; }
+
+  /* The apps-menu glyph shown inline in text, on a small grey plate. */
+  .apps-glyph{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; margin:-2px 1px -2px 5px; vertical-align:middle;
+    border-radius:4px; background:var(--page-hover); color:var(--text-page); }
+  .apps-glyph svg{ width:14px; height:14px; display:block; }
 
   /* ---- screenN: annotation page («О прототипе») — one of the placeholder
      screens that rotate when the person moves between sidebar pages ---- */
@@ -1197,49 +1186,50 @@
 <!-- Login screen: the prototype starts here; «Войти» opens the app, «Выйти» returns to it. -->
 <div class="login" id="loginScreen">
   <div class="login-stage">
-    <div class="login-frame">
-      <span class="login-corner tl"></span><span class="login-corner tr"></span>
-      <span class="login-corner bl"></span><span class="login-corner br"></span>
-      <div class="login-card">
-        <div class="login-aside">
-          <h1 class="login-title">Вход в систему</h1>
+    <div class="login-card">
+      <span class="login-corner tl"></span><span class="login-corner tr"></span><span class="login-corner bl"></span><span class="login-corner br"></span>
+      <div class="login-panel">
+        <!-- The card says which product you are signing in to. -->
+        <div class="login-about">
+          <span class="login-product-logo" id="loginProductLogo" aria-hidden="true"></span>
+          <div class="login-title">Вход в продукт</div>
+          <div class="login-product-name">Единый клиент</div>
           <div class="login-brand" role="img" aria-label="HFLabs"><span>H</span><span>F</span><span>Labs</span></div>
         </div>
-        <div class="login-main">
+        <div class="login-side">
           <div class="login-form" id="loginForm">
-            <div class="login-field">
-              <label class="login-label" for="loginUser">Имя пользователя</label>
-              <input class="login-input" id="loginUser" type="text" autocomplete="off">
+            <div class="login-error" id="loginError" role="alert">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v4.6"/><circle cx="10" cy="13.6" r=".4" fill="currentColor"/></svg>
+              <span>Неверное имя пользователя или пароль.</span>
             </div>
-            <div class="login-field">
+            <label class="login-label" for="loginUser">Имя пользователя</label>
+            <input class="login-input" id="loginUser" type="text" autocomplete="off">
+            <div class="login-label-row">
               <label class="login-label" for="loginPass">Пароль</label>
+              <div class="login-caps" id="loginCaps" role="status">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M8 2.5 3 8h2.8v3h4.4V8H13L8 2.5Z"/><path d="M5.8 13.5h4.4" stroke-linecap="round"/></svg>
+                Включён Caps Lock
+              </div>
+            </div>
+            <div class="login-pass">
               <input class="login-input" id="loginPass" type="password" autocomplete="off">
+              <button class="login-eye" id="loginEye" type="button" aria-pressed="false" aria-label="Показать пароль" title="Показать пароль">
+                <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.6c.5-.1.9-.1 1.4-.1 6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.4 3.2M6.6 6.7C3.9 8.4 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.5 4.5-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/></svg>
+              </button>
             </div>
             <button class="login-submit" id="loginSubmit" type="button">Войти</button>
           </div>
-          <div class="login-error" id="loginError" role="alert">Ошибка авторизации. Повторите ввод логина и пароля.</div>
         </div>
       </div>
     </div>
   </div>
-  <!-- Build info, same as the app footer -->
-  <div class="footer login-footer">
+  <div class="login-foot">
     <span>HFLabs License</span>
     <span>Версия: v26.9.3</span>
     <span>Ревизия: 4f9c2a71b3e8</span>
     <span>Бранч/Тег: release/26.9</span>
     <span>Время сборки: 28-09-2026 14:32:07</span>
-  </div>
-</div>
-
-<!-- Start chooser: pops up over the app after sign-in; a click outside closes it. -->
-<div class="chooser-overlay" id="chooserOverlay" aria-hidden="true">
-  <div class="chooser" id="startChooser" role="dialog" aria-modal="true" aria-labelledby="chooserTitle">
-    <div class="chooser-head">
-      <div class="chooser-title" id="chooserTitle">Куда перейти?</div>
-      <div class="chooser-sub">Выберите продукт. Сменить его можно в любой момент через меню приложений<span class="chooser-sub-icon" id="chooserSubIcon" role="img" aria-label="значок меню приложений"></span></div>
-    </div>
-    <div class="chooser-body" id="chooserBody"></div>
   </div>
 </div>
 
@@ -1360,7 +1350,7 @@
         <div class="user-menu-wrap">
           <div class="user-chip" id="userMenuBtn" aria-expanded="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.4-4 4.2-6 7.5-6s6.1 2 7.5 6"/></svg>
-            <span class="user-chip-name" title="ROLE_CONSENT_ADMINISTRATOR">ROLE_CONSENT_ADMINISTRATOR</span>
+            <span class="user-chip-name" title="CONSENT_ADMINISTRATOR">CONSENT_ADMINISTRATOR</span>
           </div>
           <div class="user-menu" id="userMenu">
             <div class="user-menu-caret">
@@ -1375,8 +1365,8 @@
               </div>
               <div class="user-menu-divider"></div>
               <button class="user-menu-logout" id="logoutBtn">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h6"/></svg>
                 Выйти
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h6"/></svg>
               </button>
             </div>
           </div>
@@ -1539,7 +1529,7 @@
                 <span class="note-num">1</span>
                 <div class="note-body">
                   <div class="note-item-title">Группировка продуктов в меню приложений</div>
-                  <p class="note-text">Откройте меню приложений&nbsp;— кликом по названию домена рядом с логотипом или по значку<span class="chooser-sub-icon js-apps-glyph" role="img" aria-label="значок меню приложений"></span>. Продукты в нём собраны в группы: «Управление», «Клиент» и «Данные».</p>
+                  <p class="note-text">Откройте меню приложений&nbsp;— кликом по названию домена рядом с логотипом или по значку<span class="apps-glyph js-apps-glyph" role="img" aria-label="значок меню приложений"></span>. Продукты в нём собраны в группы: «Управление», «Клиент», «Данные» и «Обезличивание».</p>
                   <div><button class="note-go" type="button" data-go="apps-menu">Открыть меню приложений <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
                 </div>
               </li>
@@ -2119,13 +2109,16 @@ const domainConfigs = {
     ]
   },
   maskirovshik: {
-    headerTitle: 'Данные',
+    headerTitle: 'Обезличивание',
     groups: [
       { key:'maskirovshik', title:'Маскировщик', icon: icons.maskirovshik, open:true,
         pages:['Маскировки','Страница продукта','Источники','Ролевая модель'], active:'Маскировки' },
     ]
   },
 };
+
+// Login card: the product icon (Единый клиент), same glyph as in the sidebar.
+document.getElementById('loginProductLogo').innerHTML = icons.client;
 
 const nav = document.getElementById('nav');
 
@@ -2244,7 +2237,7 @@ function closeDomainMenu(){
   domainBtn.setAttribute('aria-expanded', 'false');
 }
 
-// The domain title (Клиент / Данные / Управление) and the grid button next
+// The domain title (Клиент / Данные / Обезличивание / Управление) and the grid button next
 // to it are one trigger: a click on either opens the product menu.
 const domainTrigger = document.querySelector('.domain-name');
 const domainTitle = domainTrigger.querySelector('.title');
@@ -2306,8 +2299,8 @@ function showLogin(){
   loginUser.value = '';
   loginPass.value = '';
   clearTimeout(loginLeaveTimer);
-  closeChooser();
-  loginScreen.classList.remove('has-error', 'is-hidden', 'is-leaving');
+  loginScreen.classList.remove('is-hidden', 'is-leaving');
+  resetLoginForm();
   loginScreen.classList.remove('is-entering');
   void loginScreen.offsetWidth;
   loginScreen.classList.add('is-entering');
@@ -2357,64 +2350,11 @@ function enterApp(){
   }, 620);
 }
 
-// Start chooser: after a successful sign-in the app opens on Единый клиент
-// and this pop-up offers the other products (Управление, Клиент, Данные).
-const chooserBody = document.getElementById('chooserBody');
-const chooserLayout = [
-  [ { label:'Управление', domains:['vyshka'] } ],
-  [ { label:'Клиент', domains:['client'] } ],
-  [ { label:'Данные', domains:['maskirovshik','perekoder'] } ],
-];
-const chooserDefaultProduct = 'client'; // Единый клиент is preselected
-const chooserArrow = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-function renderChooser(){
-  chooserBody.innerHTML = chooserLayout.map(col=>{
-    const groups = col.map(group=>{
-      const items = group.domains.map(domainKey=>
-        domainConfigs[domainKey].groups.map(g=>
-          `<button class="chooser-item" type="button" data-domain="${domainKey}" data-product="${g.key}">
-            <span class="chooser-icon">${g.icon}</span>
-            <span class="chooser-name">${g.title}</span>
-            <span class="chooser-go">${chooserArrow}</span>
-          </button>`).join('')).join('');
-      return `<div class="chooser-group"><div class="chooser-label">${group.label}</div>${items}</div>`;
-    }).join('');
-    return `<div class="chooser-col">${groups}</div>`;
-  }).join('');
-}
-const chooserOverlay = document.getElementById('chooserOverlay');
 // Reuse the exact glyph of the apps-menu button wherever the text mentions it.
-document.querySelectorAll('#chooserSubIcon, .js-apps-glyph').forEach(el=>{
+document.querySelectorAll('.js-apps-glyph').forEach(el=>{
   el.appendChild(document.querySelector('#domainMenuBtn svg').cloneNode(true));
 });
-function showChooser(){
-  renderChooser();
-  chooserOverlay.classList.add('open');
-  chooserOverlay.setAttribute('aria-hidden', 'false');
-  const def = chooserBody.querySelector(`.chooser-item[data-product="${chooserDefaultProduct}"]`) || chooserBody.querySelector('.chooser-item');
-  if(def){ selectChooserItem(def); def.focus({ preventScroll:true }); }
-}
-// Exactly one row is selected at a time.
-function selectChooserItem(item){
-  chooserBody.querySelectorAll('.chooser-item.is-selected').forEach(el=>el.classList.remove('is-selected'));
-  item.classList.add('is-selected');
-}
-// Hover is only a transient highlight: on while the pointer moves over a row,
-// gone as soon as it leaves. The selection itself moves with the keyboard.
-function clearChooserHover(){
-  chooserBody.querySelectorAll('.chooser-item.is-hover').forEach(el=>el.classList.remove('is-hover'));
-}
-chooserBody.addEventListener('mousemove', (e)=>{
-  const item = e.target.closest('.chooser-item');
-  if(item && item.classList.contains('is-hover')) return;
-  clearChooserHover();
-  if(item) item.classList.add('is-hover');
-});
-chooserBody.addEventListener('mouseleave', clearChooserHover);
-chooserBody.addEventListener('focusin', (e)=>{
-  const item = e.target.closest('.chooser-item');
-  if(item) selectChooserItem(item);
-});
+
 // Opens a product on its first page (same routing as the apps menu).
 function goToProduct(domainKey, productKey, animate){
   renderNav(domainKey, productKey);
@@ -2434,57 +2374,72 @@ function replayScreenEnter(){
   [screen, tabs, actions].forEach(el=>{ if(el) el.classList.add('is-entering'); });
   document.querySelector('.content').scrollTop = 0;
 }
-function closeChooser(){
-  chooserOverlay.classList.remove('open');
-  chooserOverlay.setAttribute('aria-hidden', 'true');
-}
-chooserBody.addEventListener('click', (e)=>{
-  const item = e.target.closest('.chooser-item');
-  if(!item) return;
-  closeChooser();
-  // Единый клиент is already loading underneath — just reveal it. Any other
-  // product opens with its own loading skeleton.
-  if(item.dataset.product === chooserDefaultProduct) return;
-  goToProduct(item.dataset.domain, item.dataset.product);
-  showSkeleton(1400);
-});
-// A click on the dimmed area outside the card (or Esc) dismisses the pop-up
-// and leaves the person in Единый клиент.
-chooserOverlay.addEventListener('click', (e)=>{
-  if(e.target === chooserOverlay) closeChooser();
-});
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape' && chooserOverlay.classList.contains('open')) closeChooser();
-});
-chooserBody.addEventListener('keydown', (e)=>{
-  if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-  const items = Array.from(chooserBody.querySelectorAll('.chooser-item'));
-  const i = items.indexOf(document.activeElement);
-  if(i < 0) return;
-  e.preventDefault();
-  items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
-});
 
+const loginSubmitBtn = document.getElementById('loginSubmit');
+// Error state: banner on top, invalid fields outlined in red, the button
+// blocked until a field changes.
+function setLoginError(on){
+  loginScreen.classList.toggle('has-error', on);
+  loginSubmitBtn.disabled = on;
+  if(!on) [loginUser, loginPass].forEach(el=>el.classList.remove('is-invalid'));
+}
+function resetLoginForm(){
+  setLoginError(false);
+  setPasswordVisible(false);
+  loginCaps.classList.remove('is-on');
+}
 function tryLogin(){
+  if(loginSubmitBtn.disabled) return;   // Enter in a field while the error is shown
   if(loginUser.value.trim() && loginPass.value.trim()){
     // Sign-in always lands on Единый клиент → «Сущности» in the sidebar, with
-    // the annotation page («О прототипе») as the first content screen; the
-    // chooser pops up over it while the screen is still loading.
-    goToProduct('client', chooserDefaultProduct);
+    // the annotation page («О прототипе») as the first content screen.
+    // Products are switched from the apps menu next to the domain title.
+    goToProduct('client', 'client');
     setScreen('screenN');
     enterApp();
-    showChooser();
     return;
   }
-  loginScreen.classList.add('has-error');
+  // Failed attempt (in the prototype: a field left empty).
+  // «Неверное имя пользователя или пароль» — both fields are marked.
+  loginUser.classList.add('is-invalid');
+  loginPass.classList.add('is-invalid');
+  setLoginError(true);
   (loginUser.value.trim() ? loginPass : loginUser).focus();
 }
 document.getElementById('loginSubmit').addEventListener('click', tryLogin);
+// Editing either field clears the error state.
+[loginUser, loginPass].forEach(input=>{
+  input.addEventListener('input', ()=> setLoginError(false));
+});
 [loginUser, loginPass].forEach(input=>{
   input.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){ e.preventDefault(); tryLogin(); }
   });
 });
+
+// Show / hide the password.
+const loginEye = document.getElementById('loginEye');
+function setPasswordVisible(on){
+  loginPass.type = on ? 'text' : 'password';
+  loginEye.setAttribute('aria-pressed', on ? 'true' : 'false');
+  const label = on ? 'Скрыть пароль' : 'Показать пароль';
+  loginEye.setAttribute('aria-label', label);
+  loginEye.title = label;
+}
+loginEye.addEventListener('click', ()=>{
+  setPasswordVisible(loginPass.type === 'password');
+  loginPass.focus();
+});
+
+// Caps Lock hint while typing the password.
+const loginCaps = document.getElementById('loginCaps');
+function updateCaps(e){
+  if(typeof e.getModifierState !== 'function') return;
+  loginCaps.classList.toggle('is-on', e.getModifierState('CapsLock'));
+}
+loginPass.addEventListener('keydown', updateCaps);
+loginPass.addEventListener('keyup', updateCaps);
+loginPass.addEventListener('blur', ()=> loginCaps.classList.remove('is-on'));
 
 // Each domain deterministically shows one of the two content screens.
 const domainScreenMap = {
