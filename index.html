@@ -372,12 +372,20 @@
   .user-menu-logout:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px rgba(217,21,40,.35); }
 
   /* ---- Nav dims while the domain menu is open, so it doesn't fight for attention ---- */
+  /* Products and pages are hidden while the apps menu is open: a slow, soft
+     fade with a slight drift and blur, and an even gentler return. */
   .nav{
-    transition:opacity .25s var(--ease);
+    transition:opacity .5s cubic-bezier(.22,.61,.36,1), transform .5s cubic-bezier(.22,.61,.36,1), filter .5s cubic-bezier(.22,.61,.36,1);
   }
   .sidebar.menu-open .nav{
-    opacity:.35;
+    opacity:0;
+    transform:translateY(6px);
+    filter:blur(2px);
     pointer-events:none;
+    transition-duration:.38s;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .nav, .sidebar.menu-open .nav{ transition:opacity .2s linear; transform:none; filter:none; }
   }
 
   .nav{
@@ -496,8 +504,10 @@
   .nav-group.active-product > .nav-product .chev{
     color:var(--l1-product);
   }
+  /* The active product can't be collapsed, so it shows no chevron at all. */
+  .nav-group.active-product > .nav-product .chev,
   .nav-group.active-product > .nav-product:hover .chev,
-  .nav-group.active-product > .nav-product:focus-visible .chev{ opacity:1; }
+  .nav-group.active-product > .nav-product:focus-visible .chev{ opacity:0; }
 
   /* ---- Collapsible pages region (auto-height animation) ---- */
   .nav-sub-wrapper{
